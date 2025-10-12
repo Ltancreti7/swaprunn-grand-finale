@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SwapRunn - Deliver Faster. Swap Smarter.</title>
+    <meta name="description" content="Professional delivery and swap management platform for auto dealers and drivers. $499/mo unlimited runs." />
+    <meta name="author" content="SwapRunn" />
+    <link rel="icon" href="/swaprunn-logo-2025.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- SR_THEME v1.3 INSTALLED : SwapRunn Global Theme -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+    :root{
+      --sr-red:#DC2626; --sr-white:#FFFFFF; --sr-dark:#0B0F14;
+      --sr-card:rgba(255,255,255,.04); --sr-bd:rgba(255,255,255,.10);
+      --sr-radius:14px; --sr-shadow:0 8px 24px rgba(0,0,0,.25);
+    }
+
+    /* Typography */
+    html,body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--sr-white)}
+    .sr-h1,.sr-h2,.sr-h3,.sr-brand,.sr-tagline{font-family:"Inter Tight",Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .sr-h1{font-weight:900;letter-spacing:-.012em;font-size:clamp(40px,6vw,66px);line-height:1.08;margin:0 0 10px;text-align:center}
+    .sr-h2{font-weight:900;letter-spacing:-.01em;font-size:clamp(28px,3.6vw,40px);line-height:1.12;margin:.5rem 0 .25rem}
+    .sr-h3{font-weight:800;font-size:16px;letter-spacing:-.003em;margin:.35rem 0 .2rem}
+
+    /* CTA buttons */
+    .btn-primary,.sr-btn-primary{background:var(--sr-red);color:#fff;border:0;border-radius:var(--sr-radius);
+      height:56px;min-width:220px;padding:0 28px;font-weight:800;letter-spacing:-.01em;box-shadow:var(--sr-shadow)}
+    .btn-secondary,.sr-btn-secondary{background:#F3F4F6;color:#0A0A0A;border:0;border-radius:var(--sr-radius);
+      height:56px;min-width:220px;padding:0 28px;font-weight:800;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+    .btn-primary:hover,.sr-btn-primary:hover,.btn-secondary:hover,.sr-btn-secondary:hover{transform:translateY(-2px)}
+    .btn-primary:focus-visible,.sr-btn-primary:focus-visible,.btn-secondary:focus-visible,.sr-btn-secondary:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+    /* Red chips / labels (e.g., Fast onboarding / Live alerts / Same-day jobs) */
+    .sr-chips{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .sr-chip{padding:8px 14px;border-radius:999px;font:600 14px/1 Inter;color:var(--sr-red);
+      background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.16)}
+    .sr-label{color:var(--sr-red);text-transform:uppercase;letter-spacing:.18em;font-weight:800;font-size:12px}
+
+    /* Glass cards + forms */
+    .sr-card{background:var(--sr-card);border:1px solid var(--sr-bd);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.20)}
+    .sr-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:10px 12px;color:#fff}
+    .sr-form .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:720px){.sr-form .row{grid-template-columns:1fr}}
+
+    /* Steps (match homepage icons, 22×22, 2px stroke) */
+    .sr-steps{display:grid;gap:12px}
+    .sr-step{display:flex;flex-direction:column;align-items:center;text-align:center;min-height:120px}
+    .sr-step .sr-ico{width:22px;height:22px;margin:4px auto 8px;position:relative}
+    .sr-step .sr-ico,.sr-step .sr-ico::before,.sr-step .sr-ico::after{border-color:var(--sr-red)}
+    .sr-step.is-deal      .sr-ico{border:2px solid var(--sr-red);border-radius:4px}
+    .sr-step.is-request   .sr-ico{border:2px solid var(--sr-red);border-radius:50%}
+    .sr-step.is-confirmed .sr-ico{border:2px solid var(--sr-red);border-radius:50%}
+    .sr-step.is-confirmed .sr-ico::after{content:"";position:absolute;left:6px;top:9px;width:8px;height:4px;border-left:2px solid var(--sr-red);border-bottom:2px solid var(--sr-red);transform:rotate(-45deg)}
+    .sr-step.is-delivered .sr-ico{border:2px solid var(--sr-red);border-radius:50%}
+    .sr-step.is-delivered .sr-ico::after{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);width:2px;height:8px;background:var(--sr-red);border-radius:2px}
+
+    /* Kill stray old decor globally */
+    .bg-arrow,.chevron,.decor,[data-decor],.sr-slice,.sr-route-old,.hero-line{display:none !important}
+    </style>
+
+    <script>
+    /* SR_THEME v1.3 helpers — auto-tag common elements so pages inherit homepage vibe */
+    (function(){
+      const $=(s,sc=document)=>Array.from(sc.querySelectorAll(s));
+      const add=(el,cls)=>el && !el.classList.contains(cls) && el.classList.add(cls);
+
+      function tagHeadings(){ $('h1').forEach(h=>add(h,'sr-h1')); $('h2').forEach(h=>add(h,'sr-h2')); $('h3').forEach(h=>add(h,'sr-h3')); }
+
+      function tagButtons(){
+        const prim=['get started','apply now','submit application','start now','request demo'];
+        const sec =['become a dealer','learn more','contact us','view pricing','get started for free'];
+        $('a,button').forEach(el=>{
+          const t=(el.textContent||'').trim().toLowerCase();
+          if(prim.includes(t)) { add(el,'btn-primary'); add(el,'sr-btn-primary'); }
+          if(sec.includes(t))  { add(el,'btn-secondary'); add(el,'sr-btn-secondary'); }
+        });
+      }
+
+      function tagChips(){
+        const chipSet=new Set(['fast onboarding','live alerts','same-day jobs']);
+        $('*').forEach(el=>{
+          const t=(el.textContent||'').trim().toLowerCase();
+          if(chipSet.has(t)) add(el,'sr-chip');
+        });
+        // wrap any chip rows
+        const rows=new Set(); $('.sr-chip').forEach(ch=>rows.add(ch.parentElement)); rows.forEach(r=>add(r,'sr-chips'));
+      }
+
+      function tagCardsAndForms(){
+        // candidate panels → sr-card
+        $('[class*="card"], .panel, .glass, .box').forEach(el=>add(el,'sr-card'));
+        // inputs
+        $('input,textarea,select').forEach(el=>{
+          if(!['checkbox','radio'].includes(el.type)) add(el,'sr-input');
+        });
+        $('form').forEach(f=>add(f,'sr-form'));
+      }
+
+      function tagSteps(){
+        $('.sr-step').forEach(s=>{
+          const t=(s.innerText||'').toLowerCase();
+          if(t.includes('reach a deal')||t.includes('deal')) add(s,'is-deal');
+          if(t.includes('request')||t.includes('driver')) add(s,'is-request');
+          if(t.includes('confirmed')||t.includes('accept')) add(s,'is-confirmed');
+          if(t.includes('delivered')||t.includes('delivery')) add(s,'is-delivered');
+          // ensure an icon node exists
+          if(!s.querySelector('.sr-ico')){ const d=document.createElement('div'); d.className='sr-ico'; s.insertBefore(d,s.firstChild); }
+        });
+      }
+
+      function run(){ tagHeadings(); tagButtons(); tagChips(); tagCardsAndForms(); tagSteps(); }
+      if(document.readyState!=='loading') run(); else document.addEventListener('DOMContentLoaded', run);
+    })();
+    </script>
+    <!-- / SR_THEME v1.3 INSTALLED -->
+
+    <meta property="og:title" content="SwapRunn - Deliver Faster. Swap Smarter." />
+    <meta property="og:description" content="Professional delivery and swap management platform for auto dealers and drivers" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@swaprunn" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

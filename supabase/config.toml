@@ -1,0 +1,19 @@
+project_id = "qnxtxiqedohlqmgtsdnu"
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.payout]
+verify_jwt = false
+
+[functions.sms]
+verify_jwt = false
+
+[functions.stripe-billing]
+verify_jwt = false
+
+[functions.send-alert]
+verify_jwt = false
+
+[functions.calculate-distance]
+verify_jwt = false

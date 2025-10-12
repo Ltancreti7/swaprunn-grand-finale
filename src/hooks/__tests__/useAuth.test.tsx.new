@@ -1,0 +1,107 @@
+import React from 'react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { describe, expect, test, vi } from 'vitest';
+
+// First, define the mock factory - this needs to be before any imports or uses of the mocked module
+vi.mock('@/integrations/supabase/client', () => {
+  const auth = {
+    getSession: vi.fn(),
+    onAuthStateChange: vi.fn(),
+    signOut: vi.fn(),
+  };
+  const from = vi.fn();
+  return {
+    supabase: {
+      auth,
+      from,
+    },
+  };
+});
+
+// Then import the module that uses the mock
+import { AuthProvider, useAuth } from '../useAuth';
+// Import the mocked module to access the mock implementation
+import { supabase } from '@/integrations/supabase/client';
+
+describe('useAuth', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  test('restores session and fetches profile', async () => {
+    // Setup mock implementations for this test
+    supabase.auth.getSession.mockResolvedValue({ data: { session: { user: { id: 'user1' } } } });
+    supabase.from.mockReturnValue({ 
+      select: () => ({ 
+        eq: () => ({ 
+          single: async () => ({ data: { first_name: 'Luke' } }) 
+        }) 
+      }) 
+    });
+    supabase.auth.onAuthStateChange.mockImplementation(() => ({ 
+      data: { subscription: { unsubscribe: () => {} } } 
+    }));
+
+    function Child() {
+      const { loading, userProfile } = useAuth();
+      return (
+        <div>
+          <div>{loading ? 'loading' : 'ready'}</div>
+          <div data-testid="name">{(userProfile as any)?.first_name ?? 'no-name'}</div>
+        </div>
+      );
+    }
+
+    render(
+      <AuthProvider>
+        <Child />
+      </AuthProvider>
+    );
+
+    await waitFor(() => expect(screen.getByText('ready')).toBeInTheDocument());
+    expect(screen.getByTestId('name').textContent).toBe('Luke');
+    expect(supabase.auth.getSession).toHaveBeenCalled();
+    expect(supabase.from).toHaveBeenCalled();
+  });
+
+  test('signOut calls supabase and clears user', async () => {
+    // Setup mock implementations for this test
+    supabase.auth.signOut.mockResolvedValue({});
+    supabase.auth.getSession.mockResolvedValue({ data: { session: { user: { id: 'user2' } } } });
+    supabase.from.mockReturnValue({ 
+      select: () => ({ 
+        eq: () => ({ 
+          single: async () => ({ data: { first_name: 'Ann' } }) 
+        }) 
+      }) 
+    });
+    supabase.auth.onAuthStateChange.mockImplementation(() => ({ 
+      data: { subscription: { unsubscribe: () => {} } } 
+    }));
+
+    function Child() {
+      const { user, loading, signOut } = useAuth();
+      return (
+        <div>
+          <div>{loading ? 'loading' : user ? 'signed-in' : 'signed-out'}</div>
+          <button onClick={() => signOut()}>Sign out</button>
+        </div>
+      );
+    }
+
+    render(
+      <AuthProvider>
+        <Child />
+      </AuthProvider>
+    );
+
+    // wait for initial restore
+    await waitFor(() => expect(screen.getByText('signed-in')).toBeInTheDocument());
+
+    // click sign out
+    fireEvent.click(screen.getByText('Sign out'));
+
+    await waitFor(() => expect(supabase.auth.signOut).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByText('signed-out')).toBeInTheDocument());
+  });
+});
