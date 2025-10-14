@@ -91,22 +91,20 @@ const DealerDashboard = () => {
   // Enhanced real-time subscription with error recovery
   useEffect(() => {
     if (!userProfile?.dealer_id) return;
-    console.log('🔔 Setting up real-time subscriptions for dealer:', userProfile.dealer_id);
     const channel = supabase.channel(`dealer-jobs-${userProfile.dealer_id}-${Date.now()}`).on('postgres_changes', {
       event: 'UPDATE',
       schema: 'public',
       table: 'jobs',
       filter: `dealer_id=eq.${userProfile.dealer_id}`
     }, payload => {
-      console.log('✅ Job updated event received:', payload);
-      fetchJobs();
+      // Immediately refresh data when job status changes
       fetchActiveAssignments();
+      fetchDealerData();
     }).on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
       table: 'assignments'
     }, payload => {
-      console.log('✅ New assignment event received:', payload);
       toast({
         title: "Driver Assigned!",
         description: "A driver has accepted your job request.",
@@ -115,10 +113,7 @@ const DealerDashboard = () => {
       fetchJobs();
       fetchActiveAssignments();
     }).subscribe(status => {
-      console.log('📡 Subscription status:', status);
-      if (status === 'SUBSCRIBED') {
-        console.log('✅ Successfully subscribed to real-time updates');
-      } else if (status === 'CHANNEL_ERROR') {
+      if (status === 'CHANNEL_ERROR') {
         console.error('❌ Real-time subscription error');
         toast({
           title: "Connection Issue",
@@ -128,7 +123,6 @@ const DealerDashboard = () => {
       }
     });
     return () => {
-      console.log('🔌 Cleaning up real-time subscription');
       supabase.removeChannel(channel);
     };
   }, [userProfile?.dealer_id, toast]);
@@ -154,7 +148,6 @@ const DealerDashboard = () => {
   };
   const fetchActiveAssignments = async () => {
     if (!userProfile?.dealer_id) return;
-    console.log('📊 Fetching active assignments for dealer:', userProfile.dealer_id);
     try {
       const {
         data,
@@ -200,7 +193,6 @@ const DealerDashboard = () => {
         console.error('❌ Error fetching active assignments:', error);
         return;
       }
-      console.log(`✅ Fetched ${data?.length || 0} active assignments:`, data);
       setActiveAssignments(data || []);
     } catch (error) {
       console.error('❌ Error in fetchActiveAssignments:', error);
@@ -214,7 +206,6 @@ const DealerDashboard = () => {
         error
       } = await supabase.from('dealers').select('*').eq('id', userProfile.dealer_id).single();
       if (error) throw error;
-      console.log('🏢 Dealer data loaded:', data);
       setDealerData(data);
     } catch (error) {
       console.error('Error fetching dealer data:', error);

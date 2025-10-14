@@ -5,13 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 
-import Jobs from "./pages/Jobs";
 import DriverPersonalProfile from "./pages/DriverPersonalProfile";
 import DriverDashboard from "./pages/DriverDashboard";
 import Track from "./pages/Track";
 import History from "./pages/History";
-
-import Billing from "./pages/Billing";
 import DealerAuth from "./pages/DealerAuth";
 import DealerDashboard from "./pages/DealerDashboard";
 import DealerAdminDashboard from "./pages/DealerAdminDashboard";
