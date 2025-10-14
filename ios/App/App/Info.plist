@@ -49,5 +49,9 @@
 	<string>SwapRunn uses the camera to scan vehicle VIN numbers for accurate data entry.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>SwapRunn uses location services to calculate delivery distances and provide accurate routing.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SwapRunn may access your photo library to allow you to select images of vehicles or save scanned VIN information.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>SwapRunn uses location services to provide accurate delivery routing and distance calculations for vehicle swaps.</string>
 </dict>
 </plist>
