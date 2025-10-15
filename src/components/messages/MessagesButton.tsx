@@ -12,9 +12,9 @@ export function MessagesButton({ onClick, unreadCount }: MessagesButtonProps) {
       onClick={onClick}
       variant="ghost"
       size="icon"
-      className="relative h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white shadow-lg border border-white/10"
+      className="relative h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white shadow-lg border border-white/10 active:scale-95 transition-transform"
     >
-      <MessageCircle className="h-5 w-5 text-white" />
+      <MessageCircle className="h-6 w-6 text-white" />
       {unreadCount > 0 && (
         <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#E11900] text-xs font-bold text-white border-2 border-black">
           {unreadCount > 9 ? '9+' : unreadCount}

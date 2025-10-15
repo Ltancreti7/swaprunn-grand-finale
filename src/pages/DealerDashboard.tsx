@@ -242,7 +242,7 @@ const DealerDashboard = () => {
       backgroundAttachment: 'fixed'
     }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
-        <div className="relative z-10 container mx-auto px-6 py-24">
+        <div className="relative z-10 container mx-auto px-4 pt-20 pb-12">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-white/20 rounded w-1/3"></div>
             <div className="h-32 bg-white/10 rounded-2xl"></div>
@@ -267,8 +267,8 @@ const DealerDashboard = () => {
     }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
         
-        <div className="relative z-10 container mx-auto px-6 py-24">
-          <div className="space-y-8">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-20 pb-12">
+          <div className="space-y-6 sm:space-y-8">
             {/* Page Header */}
             <div className="text-center lg:text-left flex items-center justify-between">
               <div>

@@ -88,46 +88,46 @@ export function AppHeader() {
       transitionTimingFunction: 'ease-out',
       transitionProperty: 'transform, background-color, backdrop-filter, border-color, box-shadow',
     }}>
-      <div className="flex items-center justify-between h-24 px-6 py-4">
+      <div className="flex items-center justify-between h-16 px-4 py-2">
         {/* Left: Back Button or Hamburger Menu - Only show if user is logged in */}
-        <div className="flex items-center justify-center min-w-[50px] h-[50px]">
+        <div className="flex items-center justify-center min-w-[48px] h-[48px]">
           {userProfile ? (
             shouldShowBack ? (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleBack}
-                className="h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white shadow-lg border border-white/10"
+                className="h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white shadow-lg border border-white/10 active:scale-95 transition-transform"
                 aria-label="Go back to previous page"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-6 w-6" />
               </Button>
             ) : (
               <NavigationDrawer />
             )
           ) : (
-            <div className="w-11 h-11" /> // Placeholder for alignment
+            <div className="w-12 h-12" /> // Placeholder for alignment
           )}
         </div>
 
-        {/* Center: Logo */}
+        {/* Center: Logo - Mobile optimized */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <img 
             src="/swaprunn-logo-2025.png?v=20251001" 
             alt="SwapRunn" 
             className={cn(
               "w-auto transition-all duration-300 drop-shadow-lg", 
-              scrolled ? "h-20" : "h-24"
+              scrolled ? "h-8" : "h-10"
             )} 
           />
         </div>
 
         {/* Right: Messages Button - Only show if user is logged in */}
-        <div className="flex items-center justify-center min-w-[50px] h-[50px]">
+        <div className="flex items-center justify-center min-w-[48px] h-[48px]">
           {userProfile ? (
             <MessagesButton onClick={() => setShowMessages(true)} unreadCount={totalUnread} />
           ) : (
-            <div className="w-11 h-11" /> // Placeholder for alignment
+            <div className="w-12 h-12" /> // Placeholder for alignment
           )}
         </div>
       </div>

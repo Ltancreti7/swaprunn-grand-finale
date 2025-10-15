@@ -234,7 +234,7 @@ const DealerAuth = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
       
       {/* Content */}
-      <div className="relative z-10 container max-w-7xl mx-auto px-6 pt-28">
+      <div className="relative z-10 container max-w-7xl mx-auto px-4 sm:px-6 pt-28">
         <div className="text-center mb-4">
           <h1 className="font-bold text-white mb-2 my-0 text-5xl">
             Dealer <span className="text-[#E11900]">{isSignUp ? 'Sign Up' : 'Sign In'}</span>

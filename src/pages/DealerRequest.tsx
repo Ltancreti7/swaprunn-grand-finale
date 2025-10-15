@@ -475,7 +475,7 @@ const DealerRequest = () => {
         {/* Dark overlay - matching homepage theme */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
 
-        <div className="relative z-10 container max-w-5xl mx-auto px-6 pt-28 pb-12">
+        <div className="relative z-10 container max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-12">
           <div className="text-center mb-8">
             <h1 className="text-4xl lg:text-6xl font-black tracking-tight mb-4 leading-tight text-white">
               Request <span className="text-[#E11900]">Driver</span>
