@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLocation } from "react-router-dom";
 
 interface ElasticScrollContainerProps {
   children: React.ReactNode;
@@ -18,9 +19,13 @@ export function ElasticScrollContainer({
   const touchStartY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const location = useLocation();
+  
+  // Disable elastic scroll on homepage to prevent click interference
+  const isHomepage = location.pathname === '/';
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isMobile) return;
+    if (!isMobile || isHomepage) return;
     const container = containerRef.current;
     if (container && container.scrollTop === 0) {
       touchStartY.current = e.touches[0].clientY;
@@ -29,7 +34,7 @@ export function ElasticScrollContainer({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isMobile || touchStartY.current === 0) return;
+    if (!isMobile || isHomepage || touchStartY.current === 0) return;
     
     const container = containerRef.current;
     if (!container) return;
@@ -52,7 +57,7 @@ export function ElasticScrollContainer({
   };
 
   const handleTouchEnd = () => {
-    if (!isMobile) return;
+    if (!isMobile || isHomepage) return;
     
     if (pullDistance > 0) {
       setIsReleasing(true);
@@ -75,7 +80,7 @@ export function ElasticScrollContainer({
     };
   }, []);
 
-  if (!isMobile) {
+  if (!isMobile || isHomepage) {
     return <div className={className}>{children}</div>;
   }
 

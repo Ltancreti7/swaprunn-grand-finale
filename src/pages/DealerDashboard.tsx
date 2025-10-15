@@ -345,10 +345,10 @@ const DealerDashboard = () => {
                           </div>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                          <Link to="/dealer/request" className="w-full sm:w-auto">
+                          <Link to="/dealer/request-simple" className="w-full sm:w-auto">
                             <Button className="w-full sm:w-auto bg-[#E11900] hover:bg-[#E11900]/90 text-white h-12 px-8 rounded-2xl text-base font-semibold shadow-lg hover:shadow-xl transition-all">
                               <Plus className="h-5 w-5 mr-2" />
-                              Request New Driver
+                              Request Driver
                             </Button>
                           </Link>
                           <Button onClick={() => setIsEditProfileOpen(true)} variant="outline" className="w-full sm:w-auto h-12 px-8 rounded-2xl border-white/40 text-slate-950 bg-white hover:bg-white/90 text-base font-semibold shadow-lg hover:shadow-xl transition-all">

@@ -16,7 +16,8 @@ import mapBackgroundImage from "@/assets/map-background.jpg";
 import { useBiometricAuth } from "@/hooks/useBiometricAuth";
 
 const SAVED_EMAIL_KEY = 'swaprunn_saved_email';
-
+const SAVED_PASSWORD_KEY = 'swaprunn_saved_password';
+const REMEMBER_ME_KEY = 'swaprunn_remember_me';
 
 const DealerAuth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -38,12 +39,19 @@ const DealerAuth = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const isAdminSignup = urlParams.get('role') === 'admin';
 
-  // Load saved email on mount
+  // Load saved credentials on mount
   useEffect(() => {
     const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
+    const savedPassword = localStorage.getItem(SAVED_PASSWORD_KEY);
+    const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+    
     if (savedEmail) {
       setEmail(savedEmail);
     }
+    if (savedPassword && savedRememberMe) {
+      setPassword(savedPassword);
+    }
+    setRememberMe(savedRememberMe);
   }, []);
 
   // Try biometric login on mount if available
@@ -178,17 +186,26 @@ const DealerAuth = () => {
           );
         }
         
-        // Save email for next time
+        // Save credentials based on "Remember Me" preference
         localStorage.setItem(SAVED_EMAIL_KEY, email);
+        localStorage.setItem(REMEMBER_ME_KEY, rememberMe.toString());
         
-        // Save credentials to biometric storage if enabled
-        if (useBiometric && biometric.isAvailable && data.session) {
-          await biometric.saveCredentials(email, password);
-          toast({
-            title: "Face ID enabled",
-            description: "You can now use Face ID for faster login",
-            duration: 3000,
-          });
+        if (rememberMe) {
+          // Save password securely in localStorage for convenience
+          localStorage.setItem(SAVED_PASSWORD_KEY, password);
+          
+          // Also save to biometric storage if available
+          if (useBiometric && biometric.isAvailable) {
+            await biometric.saveCredentials(email, password);
+            toast({
+              title: "Credentials saved",
+              description: "Your login will be remembered for faster access",
+              duration: 3000,
+            });
+          }
+        } else {
+          // Clear saved password if remember me is unchecked
+          localStorage.removeItem(SAVED_PASSWORD_KEY);
         }
         
         toast({
@@ -217,7 +234,7 @@ const DealerAuth = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
       
       {/* Content */}
-      <div className="relative z-10 container max-w-7xl mx-auto px-6 pt-24">
+      <div className="relative z-10 container max-w-7xl mx-auto px-6 pt-28">
         <div className="text-center mb-4">
           <h1 className="font-bold text-white mb-2 my-0 text-5xl">
             Dealer <span className="text-[#E11900]">{isSignUp ? 'Sign Up' : 'Sign In'}</span>
@@ -349,19 +366,49 @@ const DealerAuth = () => {
               {/* Remember Me & Biometric Options - Only show for sign in */}
               {!isSignUp && (
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="remember" 
-                      checked={rememberMe}
-                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                      className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
-                    <Label 
-                      htmlFor="remember" 
-                      className="text-sm text-white/80 cursor-pointer font-medium"
-                    >
-                      Keep me signed in
-                    </Label>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="remember" 
+                        checked={rememberMe}
+                        onCheckedChange={(checked) => {
+                          setRememberMe(checked as boolean);
+                          if (!checked) {
+                            // Clear saved password immediately if unchecked
+                            localStorage.removeItem(SAVED_PASSWORD_KEY);
+                          }
+                        }}
+                        className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      />
+                      <Label 
+                        htmlFor="remember" 
+                        className="text-sm text-white/80 cursor-pointer font-medium"
+                      >
+                        Remember my login details
+                      </Label>
+                    </div>
+                    
+                    {/* Clear saved data button */}
+                    {(localStorage.getItem(SAVED_EMAIL_KEY) || localStorage.getItem(SAVED_PASSWORD_KEY)) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          localStorage.removeItem(SAVED_EMAIL_KEY);
+                          localStorage.removeItem(SAVED_PASSWORD_KEY);
+                          localStorage.removeItem(REMEMBER_ME_KEY);
+                          setEmail("");
+                          setPassword("");
+                          setRememberMe(false);
+                          toast({
+                            title: "Cleared",
+                            description: "Saved login details have been cleared",
+                          });
+                        }}
+                        className="text-xs text-white/50 hover:text-white/80 underline"
+                      >
+                        Clear saved data
+                      </button>
+                    )}
                   </div>
                   
                   {biometric.isAvailable && (
@@ -380,6 +427,12 @@ const DealerAuth = () => {
                         Enable {biometric.biometryType === 'face' ? 'Face ID' : 'Touch ID'}
                       </Label>
                     </div>
+                  )}
+                  
+                  {rememberMe && (
+                    <p className="text-xs text-white/50 italic">
+                      Your email and password will be saved for faster login next time
+                    </p>
                   )}
                 </div>
               )}

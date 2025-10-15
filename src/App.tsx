@@ -13,6 +13,7 @@ import DealerAuth from "./pages/DealerAuth";
 import DealerDashboard from "./pages/DealerDashboard";
 import DealerAdminDashboard from "./pages/DealerAdminDashboard";
 import DealerRequest from "./pages/DealerRequest";
+import SimpleDriverRequest from "./pages/SimpleDriverRequestNew";
 import DealerSettings from "./pages/DealerSettings";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import StaffSignup from "./pages/StaffSignup";
@@ -52,7 +53,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Header />
-              <ElasticScrollContainer className="min-h-screen">
+              <div className="min-h-screen">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
@@ -78,6 +79,11 @@ const App = () => (
           <Route path="/dealer/request" element={
             <ProtectedRoute requiredUserType="dealer">
               <DealerRequest />
+            </ProtectedRoute>
+          } />
+          <Route path="/dealer/request-simple" element={
+            <ProtectedRoute requiredUserType="dealer">
+              <SimpleDriverRequest />
             </ProtectedRoute>
           } />
           <Route path="/dealer/settings" element={
@@ -133,7 +139,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        </ElasticScrollContainer>
+        </div>
         </BrowserRouter>
       </TooltipProvider>
       </MobileApp>

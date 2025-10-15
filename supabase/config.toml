@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.record-swap-usage]
 verify_jwt = false
+
+[functions.google-maps-config]
+verify_jwt = false

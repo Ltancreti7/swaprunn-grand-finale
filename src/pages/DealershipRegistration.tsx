@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, Building2, Copy } from "lucide-react";
+import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import { generateDealershipCode } from "@/lib/dealershipCode";
 
@@ -113,7 +114,14 @@ const DealershipRegistration = () => {
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        // Handle specific error cases
+        if (authError.message.includes('already registered') || authError.message.includes('already been registered')) {
+          await logSubmission('failure', 'Email already in use');
+          throw new Error(`This email address is already registered. Please use the login page instead or contact support if you need help accessing your account.`);
+        }
+        throw authError;
+      }
       if (!authData.user) throw new Error("Failed to create user account");
 
       // Step 2: Get the dealer_id from the profile
@@ -143,7 +151,7 @@ const DealershipRegistration = () => {
           city: formData.city,
           state: formData.state,
           zip: formData.zip,
-          phone: formData.dealershipPhone,
+          phone: cleanPhoneNumber(formData.dealershipPhone),
           website: formData.website,
           email: formData.email,
           position: formData.jobTitle,
@@ -198,11 +206,31 @@ const DealershipRegistration = () => {
       
     } catch (error: any) {
       console.error("Registration error:", error);
-      toast({
-        title: "Registration Failed",
-        description: error.message || "An error occurred during registration.",
-        variant: "destructive"
-      });
+      
+      // Special handling for email already in use
+      if (error.message.includes('already registered')) {
+        toast({
+          title: "Email Already Registered",
+          description: "This email is already in use. Please sign in instead.",
+          variant: "destructive",
+          action: (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/dealer/auth')}
+              className="ml-2"
+            >
+              Go to Login
+            </Button>
+          )
+        });
+      } else {
+        toast({
+          title: "Registration Failed",
+          description: error.message || "An error occurred during registration.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -364,9 +392,10 @@ const DealershipRegistration = () => {
                     id="dealershipPhone"
                     type="tel"
                     value={formData.dealershipPhone}
-                    onChange={(e) => handleInputChange("dealershipPhone", e.target.value)}
-                    placeholder="Enter phone number…"
+                    onChange={(e) => handleInputChange("dealershipPhone", formatPhoneNumber(e.target.value))}
+                    placeholder="(802) 444-4444"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
+                    maxLength={14}
                   />
                 </div>
                 <div>
@@ -433,9 +462,10 @@ const DealershipRegistration = () => {
                     id="phone"
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="Enter phone number…"
+                    onChange={(e) => handleInputChange("phone", formatPhoneNumber(e.target.value))}
+                    placeholder="(802) 444-4444"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
+                    maxLength={14}
                   />
                 </div>
               </div>
@@ -475,34 +505,57 @@ const DealershipRegistration = () => {
             <CardHeader>
               <CardTitle className="text-white">Subscription Setup</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div>
-                <Label className="text-white mb-3 block">Plan Type</Label>
+                <Label className="text-white mb-4 block text-lg font-semibold">Choose Your Plan</Label>
                 <Tabs value={planType} onValueChange={(value) => setPlanType(value as "monthly" | "annual")} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-black/50 gap-2 p-2">
+                  <TabsList className="grid w-full grid-cols-2 bg-black/50 gap-3 p-3">
                     <TabsTrigger 
                       value="monthly" 
-                      className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white flex flex-col items-start py-2 px-3 h-auto min-h-[60px] rounded-xl"
+                      className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white flex flex-col items-center py-4 px-4 h-auto min-h-[100px] rounded-xl border border-white/10 data-[state=active]:border-[#E11900]"
                     >
-                      <span className="font-semibold text-sm sm:text-base">Monthly</span>
-                      <span className="text-[10px] sm:text-xs text-left mt-0.5 text-white/60 data-[state=active]:text-white/80 leading-tight">
-                        Pay monthly
+                      <span className="font-bold text-lg">Monthly</span>
+                      <span className="text-2xl font-black mt-1">$99</span>
+                      <span className="text-xs text-white/60 data-[state=active]:text-white/80 mt-1">
+                        per month
+                      </span>
+                      <span className="text-xs text-white/60 data-[state=active]:text-white/80">
+                        + $1.50 per delivery
                       </span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="annual" 
-                      className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white flex flex-col items-start py-2 px-3 h-auto min-h-[60px] rounded-xl"
+                      className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white flex flex-col items-center py-4 px-4 h-auto min-h-[100px] rounded-xl border border-white/10 data-[state=active]:border-[#E11900] relative"
                     >
-                      <span className="font-semibold text-sm sm:text-base">Annual</span>
-                      <span className="text-[10px] sm:text-xs text-left mt-0.5 text-white/60 data-[state=active]:text-white/80 leading-tight">
-                        Save 20%
+                      <div className="absolute -top-2 right-1 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                        SAVE 20%
+                      </div>
+                      <span className="font-bold text-lg">Annual</span>
+                      <span className="text-2xl font-black mt-1">$79</span>
+                      <span className="text-xs text-white/60 data-[state=active]:text-white/80 mt-1">
+                        per month
+                      </span>
+                      <span className="text-xs text-white/60 data-[state=active]:text-white/80">
+                        + $1.50 per delivery
                       </span>
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
-              <p className="text-sm text-white/60">
-                Payment setup will be completed after account creation. You can start with a 14-day free trial.
+              
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                <h4 className="text-white font-semibold mb-2">What's Included:</h4>
+                <ul className="text-sm text-white/80 space-y-1">
+                  <li>• Unlimited driver requests</li>
+                  <li>• Real-time tracking & updates</li>
+                  <li>• Customer communication tools</li>
+                  <li>• Staff management dashboard</li>
+                  <li>• 24/7 support</li>
+                </ul>
+              </div>
+              
+              <p className="text-sm text-white/60 text-center">
+                <strong>14-day free trial</strong> • No setup fees • Cancel anytime
               </p>
             </CardContent>
           </Card>
@@ -551,10 +604,23 @@ const DealershipRegistration = () => {
           <Button 
             type="submit"
             disabled={loading}
-            className="w-full bg-[#E11900] hover:bg-[#E11900]/90 text-white h-14 rounded-2xl text-lg font-bold"
+            className="w-full bg-[#E11900] hover:bg-[#E11900]/90 text-white h-14 rounded-2xl text-lg font-bold mb-4"
           >
             {loading ? "Creating Account..." : "Create Dealership Account"}
           </Button>
+          
+          <div className="text-center">
+            <p className="text-white/60 text-sm">
+              Already have an account?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/dealer/auth')}
+                className="text-[#E11900] hover:text-[#E11900]/80 underline font-medium"
+              >
+                Sign in here
+              </button>
+            </p>
+          </div>
         </form>
       </div>
     </div>

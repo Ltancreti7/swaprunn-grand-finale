@@ -463,26 +463,30 @@ const DealerRequest = () => {
       />
 
       <div
-        className="min-h-screen"
+        className="min-h-screen relative bg-black"
         style={{
           backgroundImage: `url(${mapBackgroundImage})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundPosition: "center top",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
         }}
       >
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
+        {/* Dark overlay - matching homepage theme */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
 
-        <div className="relative z-10 container max-w-7xl mx-auto px-6 pt-24 my-[3px] py-[2px]">
-          <div className="text-center mb-4">
-            <h1 className="font-bold text-white mb-2 my-0 text-5xl">
-              Request <span className="text-[#E11900] !important">Driver</span>
+        <div className="relative z-10 container max-w-5xl mx-auto px-6 pt-28 pb-12">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl lg:text-6xl font-black tracking-tight mb-4 leading-tight text-white">
+              Request <span className="text-[#E11900]">Driver</span>
               <span className="text-[#E11900]">.</span>
             </h1>
-            <p className="text-lg text-white/80 my-0">Submit your vehicle delivery request</p>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+              Submit your vehicle delivery request and get matched with professional drivers instantly
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* 1. Vehicle Information */}
             <Collapsible
               open={openSections.vehicle}
@@ -492,16 +496,16 @@ const DealerRequest = () => {
                   vehicle: open,
                 })
               }
-              className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)]"
+              className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
             >
-              <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors rounded-2xl group">
-                <h3 className="text-xl font-bold text-white">Vehicle Information</h3>
+              <CollapsibleTrigger className="w-full flex items-center justify-between p-6 hover:bg-white/5 transition-all duration-300 group">
+                <h3 className="text-2xl font-bold text-white">Vehicle Information</h3>
                 <ChevronDown
-                  className={`h-5 w-5 text-gray-400 group-hover:text-[#E11900] transition-all ${openSections.vehicle ? "rotate-180" : ""}`}
+                  className={`h-6 w-6 text-white/60 group-hover:text-[#E11900] transition-all duration-300 ${openSections.vehicle ? "rotate-180" : ""}`}
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent className="px-4 pb-4">
-                <div className="space-y-4 mt-2">
+              <CollapsibleContent className="px-6 pb-6">
+                <div className="space-y-6 pt-2">
                   {/* VIN Scanner Button */}
                   <VINScanner
                     onVINScanned={(vehicleInfo) => {
@@ -522,10 +526,10 @@ const DealerRequest = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Select value={year} onValueChange={setYear}>
-                      <SelectTrigger className="rounded-lg border-neutral-600 bg-neutral-700/50 text-white">
+                      <SelectTrigger className="h-12 rounded-xl border-white/20 bg-black/20 text-white hover:border-[#E11900]/50 focus:border-[#E11900] focus:ring-[#E11900]/20 transition-all duration-300">
                         <SelectValue placeholder="Year" />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border-border z-50">
+                      <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 z-50">
                         {years.map((yearOption) => (
                           <SelectItem key={yearOption} value={yearOption}>
                             {yearOption}
@@ -535,10 +539,10 @@ const DealerRequest = () => {
                     </Select>
 
                     <Select value={make} onValueChange={setMake}>
-                      <SelectTrigger className="rounded-lg border-neutral-600 bg-neutral-700/50 text-white">
+                      <SelectTrigger className="h-12 rounded-xl border-white/20 bg-black/20 text-white hover:border-[#E11900]/50 focus:border-[#E11900] focus:ring-[#E11900]/20 transition-all duration-300">
                         <SelectValue placeholder="Make" />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border-border z-50">
+                      <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 z-50">
                         {makes.map((makeOption) => (
                           <SelectItem key={makeOption} value={makeOption}>
                             {makeOption}
@@ -548,10 +552,10 @@ const DealerRequest = () => {
                     </Select>
 
                     <Select value={model} onValueChange={setModel} disabled={!make}>
-                      <SelectTrigger className="rounded-lg border-neutral-600 bg-neutral-700/50 text-white disabled:opacity-50">
+                      <SelectTrigger className="h-12 rounded-xl border-white/20 bg-black/20 text-white hover:border-[#E11900]/50 focus:border-[#E11900] focus:ring-[#E11900]/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
                         <SelectValue placeholder={make ? "Select model" : "Select make first"} />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border-border z-50">
+                      <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 z-50">
                         {availableModels.map((modelOption) => (
                           <SelectItem key={modelOption} value={modelOption}>
                             {modelOption}
@@ -566,33 +570,33 @@ const DealerRequest = () => {
                       onChange={(e) => setVin(e.target.value.toUpperCase())}
                       placeholder="VIN"
                       maxLength={17}
-                      className="rounded-lg border-neutral-600 bg-neutral-700/50 text-white placeholder:text-gray-400 uppercase font-mono"
+                      className="h-12 rounded-xl border-white/20 bg-black/20 text-white placeholder:text-white/50 hover:border-[#E11900]/50 focus:border-[#E11900] focus:ring-[#E11900]/20 transition-all duration-300 uppercase font-mono"
                     />
 
                     <div className="col-span-1 md:col-span-2">
-                      <Label className="text-white mb-2 block text-sm">Transmission</Label>
-                      <div className="flex gap-4">
-                        <label className="flex items-center space-x-2 cursor-pointer text-white">
+                      <Label className="text-white mb-4 block text-lg font-semibold">Transmission</Label>
+                      <div className="flex gap-6">
+                        <label className="flex items-center space-x-3 cursor-pointer text-white hover:text-[#E11900] transition-colors duration-300">
                           <input
                             type="radio"
                             name="transmission"
                             value="automatic"
                             checked={transmission === "automatic"}
                             onChange={(e) => setTransmission(e.target.value)}
-                            className="w-4 h-4 accent-[#E11900]"
+                            className="w-5 h-5 accent-[#E11900] focus:ring-[#E11900]/20"
                           />
-                          <span>Automatic</span>
+                          <span className="text-lg">Automatic</span>
                         </label>
-                        <label className="flex items-center space-x-2 cursor-pointer text-white">
+                        <label className="flex items-center space-x-3 cursor-pointer text-white hover:text-[#E11900] transition-colors duration-300">
                           <input
                             type="radio"
                             name="transmission"
                             value="manual"
                             checked={transmission === "manual"}
                             onChange={(e) => setTransmission(e.target.value)}
-                            className="w-4 h-4 accent-[#E11900]"
+                            className="w-5 h-5 accent-[#E11900] focus:ring-[#E11900]/20"
                           />
-                          <span>Manual</span>
+                          <span className="text-lg">Manual</span>
                         </label>
                       </div>
                     </div>
@@ -602,7 +606,7 @@ const DealerRequest = () => {
                       value={stockNumber}
                       onChange={(e) => setStockNumber(e.target.value)}
                       placeholder="Stock Number (Optional)"
-                      className="rounded-lg border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-400"
+                      className="h-12 rounded-xl border-white/20 bg-black/20 text-white placeholder:text-white/50 hover:border-[#E11900]/50 focus:border-[#E11900] focus:ring-[#E11900]/20 transition-all duration-300"
                     />
                   </div>
                 </div>
@@ -618,23 +622,23 @@ const DealerRequest = () => {
                   pickup: open,
                 })
               }
-              className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)]"
+              className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
             >
-              <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors rounded-2xl group">
-                <h3 className="text-xl font-bold text-white">Pickup & Delivery</h3>
+              <CollapsibleTrigger className="w-full flex items-center justify-between p-6 hover:bg-white/5 transition-all duration-300 group">
+                <h3 className="text-2xl font-bold text-white">Pickup & Delivery</h3>
                 <ChevronDown
-                  className={`h-5 w-5 text-gray-400 group-hover:text-[#E11900] transition-all ${openSections.pickup ? "rotate-180" : ""}`}
+                  className={`h-6 w-6 text-white/60 group-hover:text-[#E11900] transition-all duration-300 ${openSections.pickup ? "rotate-180" : ""}`}
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent className="px-4 pb-4">
-                <div className="space-y-4 mt-2">
+              <CollapsibleContent className="px-6 pb-6">
+                <div className="space-y-6 pt-2">
                   <div>
                     <Label className="text-white mb-2 block">Pickup Address (Default to Dealership)</Label>
                     <AddressInput
                       label=""
                       value={pickupAddress}
                       onChange={setPickupAddress}
-                      className="[&_input]:bg-neutral-700/50 [&_input]:border-neutral-600 [&_input]:text-white [&_input]:placeholder:text-gray-400"
+                      className="[&_input]:h-12 [&_input]:rounded-xl [&_input]:border-white/20 [&_input]:bg-black/20 [&_input]:text-white [&_input]:placeholder:text-white/50 [&_input]:hover:border-[#E11900]/50 [&_input]:focus:border-[#E11900] [&_input]:focus:ring-[#E11900]/20 [&_input]:transition-all [&_input]:duration-300"
                     />
                   </div>
 
@@ -677,21 +681,21 @@ const DealerRequest = () => {
                   customer: open,
                 })
               }
-              className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)]"
+              className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
             >
-              <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors rounded-2xl group">
-                <h3 className="text-xl font-bold text-white">Customer Information</h3>
+              <CollapsibleTrigger className="w-full flex items-center justify-between p-6 hover:bg-white/5 transition-all duration-300 group">
+                <h3 className="text-2xl font-bold text-white">Customer Information</h3>
                 <ChevronDown
-                  className={`h-5 w-5 text-gray-400 group-hover:text-[#E11900] transition-all ${openSections.customer ? "rotate-180" : ""}`}
+                  className={`h-6 w-6 text-white/60 group-hover:text-[#E11900] transition-all duration-300 ${openSections.customer ? "rotate-180" : ""}`}
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent className="px-4 pb-4">
+              <CollapsibleContent className="px-6 pb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                   <Input
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     placeholder="Customer Name *"
-                    className="bg-neutral-700/50 border-neutral-600 text-white placeholder:text-gray-400"
+                    className="h-12 rounded-xl border-white/20 bg-black/20 text-white placeholder:text-white/50 hover:border-[#E11900]/50 focus:border-[#E11900] focus:ring-[#E11900]/20 transition-all duration-300"
                     required
                   />
                   <Input
@@ -713,15 +717,15 @@ const DealerRequest = () => {
                   driver: open,
                 })
               }
-              className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)]"
+              className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
             >
-              <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors rounded-2xl group">
-                <h3 className="text-xl font-bold text-white">Driver Requirements</h3>
+              <CollapsibleTrigger className="w-full flex items-center justify-between p-6 hover:bg-white/5 transition-all duration-300 group">
+                <h3 className="text-2xl font-bold text-white">Driver Requirements</h3>
                 <ChevronDown
-                  className={`h-5 w-5 text-gray-400 group-hover:text-[#E11900] transition-all ${openSections.driver ? "rotate-180" : ""}`}
+                  className={`h-6 w-6 text-white/60 group-hover:text-[#E11900] transition-all duration-300 ${openSections.driver ? "rotate-180" : ""}`}
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent className="px-4 pb-4">
+              <CollapsibleContent className="px-6 pb-6">
                 <div className="space-y-6 mt-2">
                   <div>
                     <Label className="text-white mb-3 block">Number of Drivers</Label>
@@ -857,15 +861,15 @@ const DealerRequest = () => {
                   delivery: open,
                 })
               }
-              className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)]"
+              className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
             >
-              <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors rounded-2xl group">
-                <h3 className="text-xl font-bold text-white">Delivery Context</h3>
+              <CollapsibleTrigger className="w-full flex items-center justify-between p-6 hover:bg-white/5 transition-all duration-300 group">
+                <h3 className="text-2xl font-bold text-white">Delivery Context</h3>
                 <ChevronDown
-                  className={`h-5 w-5 text-gray-400 group-hover:text-[#E11900] transition-all ${openSections.delivery ? "rotate-180" : ""}`}
+                  className={`h-6 w-6 text-white/60 group-hover:text-[#E11900] transition-all duration-300 ${openSections.delivery ? "rotate-180" : ""}`}
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent className="px-4 pb-4">
+              <CollapsibleContent className="px-6 pb-6">
                 <div className="space-y-6 mt-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -999,22 +1003,22 @@ const DealerRequest = () => {
                   notes: open,
                 })
               }
-              className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)]"
+              className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
             >
-              <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors rounded-2xl group">
-                <h3 className="text-xl font-bold text-white">Additional Notes</h3>
+              <CollapsibleTrigger className="w-full flex items-center justify-between p-6 hover:bg-white/5 transition-all duration-300 group">
+                <h3 className="text-2xl font-bold text-white">Additional Notes</h3>
                 <ChevronDown
-                  className={`h-5 w-5 text-gray-400 group-hover:text-[#E11900] transition-all ${openSections.notes ? "rotate-180" : ""}`}
+                  className={`h-6 w-6 text-white/60 group-hover:text-[#E11900] transition-all duration-300 ${openSections.notes ? "rotate-180" : ""}`}
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent className="px-4 pb-4">
+              <CollapsibleContent className="px-6 pb-6">
                 ...
                 <div className="mt-2">
                   <Textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Special instructions, customer preferences, delivery notes..."
-                    className="min-h-[100px] bg-neutral-700/50 border-neutral-600 text-white placeholder:text-gray-400 resize-none"
+                    className="min-h-[100px] rounded-xl border-white/20 bg-black/20 text-white placeholder:text-white/50 hover:border-[#E11900]/50 focus:border-[#E11900] focus:ring-[#E11900]/20 transition-all duration-300 resize-none"
                     rows={4}
                   />
                 </div>

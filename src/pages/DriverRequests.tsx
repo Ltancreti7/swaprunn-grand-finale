@@ -157,7 +157,7 @@ const DriverRequests = () => {
         backgroundPosition: 'center'
       }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/38 to-black/65"></div>
-        <div className="relative z-10 max-w-4xl mx-auto pt-24 pb-12 px-6">
+        <div className="relative z-10 max-w-4xl mx-auto pt-28 pb-12 px-6">
           <div className="text-center py-8 text-white/70">
             {authLoading ? "Loading..." : "Loading requests..."}
           </div>
@@ -180,7 +180,7 @@ const DriverRequests = () => {
     }}>
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/38 to-black/65"></div>
       
-      <div className="relative z-10 max-w-4xl mx-auto pt-24 pb-12 px-6">
+      <div className="relative z-10 max-w-4xl mx-auto pt-28 pb-12 px-6">
         <h1 className="text-2xl font-bold text-white mb-6 text-center">Incoming Requests</h1>
 
         {requests.length === 0 ? (

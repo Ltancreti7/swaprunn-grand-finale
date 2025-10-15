@@ -1,15 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthHeader } from "@/components/AuthHeader";
 import SiteHeader from "@/components/SiteHeader";
 import { ArrowLeft } from "lucide-react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
+
+const SAVED_EMAIL_KEY = 'swaprunn_driver_saved_email';
+const SAVED_PASSWORD_KEY = 'swaprunn_driver_saved_password'; 
+const REMEMBER_ME_KEY = 'swaprunn_driver_remember_me';
 
 const DriverAuth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -17,16 +23,32 @@ const DriverAuth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Load saved credentials on mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
+    const savedPassword = localStorage.getItem(SAVED_PASSWORD_KEY);
+    const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+    
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+    if (savedPassword && savedRememberMe) {
+      setPassword(savedPassword);
+    }
+    setRememberMe(savedRememberMe);
+  }, []);
 
   const createDriverProfile = async () => {
     try {
       const { error } = await supabase.rpc('create_profile_for_current_user', {
         _user_type: 'driver',
         _name: fullName,
-        _phone: phoneNumber
+        _phone: cleanPhoneNumber(phoneNumber)
       });
 
       if (error) throw error;
@@ -68,7 +90,7 @@ const DriverAuth = () => {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
               full_name: fullName,
-              phone_number: phoneNumber,
+              phone_number: cleanPhoneNumber(phoneNumber),
               user_type: 'driver'
             }
           }
@@ -127,6 +149,16 @@ const DriverAuth = () => {
           );
         }
 
+        // Save credentials based on "Remember Me" preference
+        localStorage.setItem(SAVED_EMAIL_KEY, email);
+        localStorage.setItem(REMEMBER_ME_KEY, rememberMe.toString());
+        
+        if (rememberMe) {
+          localStorage.setItem(SAVED_PASSWORD_KEY, password);
+        } else {
+          localStorage.removeItem(SAVED_PASSWORD_KEY);
+        }
+
         toast({
           title: "Welcome back!",
           description: "Successfully logged in."
@@ -157,7 +189,7 @@ const DriverAuth = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
       
       {/* Content */}
-      <div className="relative z-10 container max-w-7xl mx-auto px-6 pt-24">
+      <div className="relative z-10 container max-w-7xl mx-auto px-6 pt-28">
         <div className="text-center mb-4">
           <h1 className="font-bold text-white mb-2 my-0 text-5xl">
             {isSignUp ? 'Join as' : 'Driver'} <span className="text-[#E11900]">{isSignUp ? 'Driver' : 'Login'}</span>
@@ -197,9 +229,10 @@ const DriverAuth = () => {
                       id="phoneNumber" 
                       type="tel" 
                       value={phoneNumber} 
-                      onChange={(e) => setPhoneNumber(e.target.value)} 
-                      placeholder="Enter your phone number" 
+                      onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))} 
+                      placeholder="(802) 444-4444" 
                       className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
+                      maxLength={14}
                       required 
                     />
                   </div>
@@ -236,6 +269,60 @@ const DriverAuth = () => {
                   minLength={isSignUp ? 6 : undefined} 
                 />
               </div>
+              
+              {/* Remember Me Option - Only show for sign in */}
+              {!isSignUp && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="remember-driver" 
+                        checked={rememberMe}
+                        onCheckedChange={(checked) => {
+                          setRememberMe(checked as boolean);
+                          if (!checked) {
+                            localStorage.removeItem(SAVED_PASSWORD_KEY);
+                          }
+                        }}
+                        className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      />
+                      <Label 
+                        htmlFor="remember-driver" 
+                        className="text-sm text-white/80 cursor-pointer font-medium"
+                      >
+                        Remember my login details
+                      </Label>
+                    </div>
+                    
+                    {(localStorage.getItem(SAVED_EMAIL_KEY) || localStorage.getItem(SAVED_PASSWORD_KEY)) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          localStorage.removeItem(SAVED_EMAIL_KEY);
+                          localStorage.removeItem(SAVED_PASSWORD_KEY);
+                          localStorage.removeItem(REMEMBER_ME_KEY);
+                          setEmail("");
+                          setPassword("");
+                          setRememberMe(false);
+                          toast({
+                            title: "Cleared",
+                            description: "Saved login details have been cleared",
+                          });
+                        }}
+                        className="text-xs text-white/50 hover:text-white/80 underline"
+                      >
+                        Clear saved data
+                      </button>
+                    )}
+                  </div>
+                  
+                  {rememberMe && (
+                    <p className="text-xs text-white/50 italic">
+                      Your email and password will be saved for faster login next time
+                    </p>
+                  )}
+                </div>
+              )}
               
               <Button 
                 type="submit" 

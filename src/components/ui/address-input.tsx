@@ -67,12 +67,21 @@ export const AddressInput: React.FC<AddressInputProps> = ({
   useEffect(() => {
     const initAutocomplete = async () => {
       try {
-        // Fetch API key from edge function
-        const response = await fetch('/functions/v1/google-maps-config');
-        const { apiKey } = await response.json();
+        let apiKey = "demo_key";
+        
+        // Try to fetch API key from edge function
+        try {
+          const response = await fetch('/functions/v1/google-maps-config');
+          if (response.ok) {
+            const data = await response.json();
+            apiKey = data.apiKey || "demo_key";
+          }
+        } catch (error) {
+          console.log('Using demo API key for development');
+        }
         
         const loader = new Loader({
-          apiKey: apiKey || "demo_key",
+          apiKey: apiKey,
           version: "weekly",
           libraries: ["places"]
         });

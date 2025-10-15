@@ -70,7 +70,7 @@ export function NavigationDrawer() {
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
-        className="h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all duration-200 active:scale-95"
+        className="h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all duration-200 active:scale-95 shadow-lg border border-white/10"
         aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
       >
         <div className="relative w-5 h-5">

@@ -12,7 +12,7 @@ export function MessagesButton({ onClick, unreadCount }: MessagesButtonProps) {
       onClick={onClick}
       variant="ghost"
       size="icon"
-      className="relative h-10 w-10 rounded-full hover:bg-white/10"
+      className="relative h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white shadow-lg border border-white/10"
     >
       <MessageCircle className="h-5 w-5 text-white" />
       {unreadCount > 0 && (

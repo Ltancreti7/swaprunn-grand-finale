@@ -32,13 +32,15 @@ export default function DriverDashboard() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [jobs, setJobs] = useState<JobData[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
+  const [upcomingJobs, setUpcomingJobs] = useState<any[]>([]);
+  const [upcomingLoading, setUpcomingLoading] = useState(true);
   const [earnings, setEarnings] = useState<EarningsData | null>(null);
   const [earningsLoading, setEarningsLoading] = useState(true);
   const { user, userProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Fetch jobs
+  // Fetch open jobs (available requests)
   const fetchJobs = async () => {
     setJobsLoading(true);
     try {
@@ -69,6 +71,46 @@ export default function DriverDashboard() {
       console.error('Error fetching jobs:', error);
     } finally {
       setJobsLoading(false);
+    }
+  };
+
+  // Fetch upcoming jobs (accepted but not started)
+  const fetchUpcomingJobs = async () => {
+    if (!userProfile?.driver_id) return;
+    
+    setUpcomingLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('assignments')
+        .select(`
+          id,
+          accepted_at,
+          started_at,
+          jobs!inner(
+            id,
+            type,
+            pickup_address,
+            delivery_address,
+            year,
+            make,
+            model,
+            customer_name,
+            distance_miles,
+            vin
+          )
+        `)
+        .eq('driver_id', userProfile.driver_id)
+        .is('started_at', null)
+        .not('accepted_at', 'is', null)
+        .order('accepted_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      setUpcomingJobs(data || []);
+    } catch (error) {
+      console.error('Error fetching upcoming jobs:', error);
+    } finally {
+      setUpcomingLoading(false);
     }
   };
 
@@ -107,9 +149,47 @@ export default function DriverDashboard() {
     if (userProfile?.user_type === 'driver') {
       fetchDriverData();
       fetchJobs();
+      fetchUpcomingJobs();
       fetchEarnings();
     }
   }, [userProfile]);
+
+  // Set up real-time subscriptions for job updates
+  useEffect(() => {
+    if (!userProfile?.driver_id) return;
+
+    // Subscribe to job changes (for open requests)
+    const jobsSubscription = supabase
+      .channel('driver-jobs')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'jobs' },
+        () => {
+          fetchJobs(); // Refresh open jobs when any job changes
+        }
+      )
+      .subscribe();
+
+    // Subscribe to assignment changes (for upcoming jobs)
+    const assignmentsSubscription = supabase
+      .channel('driver-assignments')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'assignments',
+          filter: `driver_id=eq.${userProfile.driver_id}`
+        },
+        () => {
+          fetchUpcomingJobs(); // Refresh upcoming jobs when assignments change
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(jobsSubscription);
+      supabase.removeChannel(assignmentsSubscription);
+    };
+  }, [userProfile?.driver_id]);
 
   async function checkAuth() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -206,7 +286,7 @@ export default function DriverDashboard() {
       }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
         
-        <div className="relative z-10 container mx-auto px-4 md:px-6 py-6 md:py-24 pb-safe pt-safe">
+        <div className="relative z-10 container mx-auto px-4 md:px-6 py-6 md:py-24 pb-safe pt-28">
           <div className="space-y-6 md:space-y-8">
             {/* Page Header */}
             <div className="text-center lg:text-left mb-8 pt-6 md:pt-0 space-y-4 md:space-y-6 flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -215,175 +295,256 @@ export default function DriverDashboard() {
                   Driver Dashboard
                 </h1>
                 <p className="text-lg md:text-2xl text-white font-medium leading-relaxed">
-                  Your Jobs, Earnings & Profile
+                  Your Requests, Deliveries & Profile
                 </p>
               </div>
             </div>
 
-            {/* Horizontal Navigation Tabs */}
+            {/* Horizontal Navigation Tabs - Matching Dealer Style */}
             <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="w-full">
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="jobs">Available Jobs</TabsTrigger>
-                <TabsTrigger value="earnings">Earnings</TabsTrigger>
-                <TabsTrigger value="documents">Documents</TabsTrigger>
+              <TabsList className="w-full grid grid-cols-4 bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/20 rounded-2xl h-auto p-2 gap-2 shadow-lg">
+                <TabsTrigger value="profile" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0">
+                  Profile
+                </TabsTrigger>
+                <TabsTrigger value="available" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0 relative">
+                  Requests
+                  {jobs.length > 0 && <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
+                      {jobs.length}
+                    </span>}
+                </TabsTrigger>
+                <TabsTrigger value="active" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0 relative">
+                  Upcoming
+                  {upcomingJobs.length > 0 && <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
+                      {upcomingJobs.length}
+                    </span>}
+                </TabsTrigger>
+                <TabsTrigger value="earnings" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0">
+                  Completed
+                </TabsTrigger>
               </TabsList>
 
-              {/* Profile Tab */}
-              <TabsContent value="profile" className="mt-6 md:mt-8 space-y-6 animate-fade-in px-4 md:px-0">
-                <Card className="bg-white/15 backdrop-blur-md border-2 border-white/30 shadow-2xl rounded-3xl">
-                  <CardContent className="p-6 md:p-10">
-                    <div className="flex flex-col items-center gap-6 md:gap-8 text-center">
-                      {/* Profile Photo */}
-                      <div className="relative">
-                        {driverData?.profile_photo_url ? (
-                          <img
-                            src={driverData.profile_photo_url}
-                            alt={driverData.name}
-                            className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white/30 shadow-2xl"
-                          />
-                        ) : (
-                          <div className="w-32 h-32 md:w-40 md:h-40 bg-[#E11900]/30 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/30">
-                            <span className="text-4xl md:text-5xl font-bold text-white">
-                              {driverData?.name ? getInitials(driverData.name) : 'DR'}
-                            </span>
-                          </div>
-                        )}
-                        <ProfilePhoto
-                          photoUrl={driverData?.profile_photo_url || ''}
-                          driverName={driverData?.name || ''}
-                          onPhotoUpdate={handlePhotoUpdate}
+              {/* Profile Tab - Matching Dealer Style */}
+              <TabsContent value="profile" className="mt-2 space-y-6 animate-fade-in">
+                <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
+                      <div className="flex-shrink-0">
+                        <ProfilePhoto 
+                          photoUrl={driverData?.profile_photo_url} 
+                          driverName={driverData?.name} 
+                          onPhotoUpdate={handlePhotoUpdate} 
                         />
                       </div>
-
-                      {/* Driver Info */}
-                      <div className="space-y-4 md:space-y-6 w-full">
-                        <h2 className="text-2xl md:text-4xl font-bold text-white">{driverData?.name}</h2>
-                        
-                        {/* Rating */}
-                        {driverData?.rating_avg && (
-                          <div className="flex items-center justify-center gap-2 text-white">
-                            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                            <span className="text-lg font-semibold">
-                              {driverData.rating_avg.toFixed(1)}
-                            </span>
-                            <span className="text-white/70">
-                              ({driverData.rating_count || 0} reviews)
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Contact Info */}
-                        <div className="space-y-3 md:space-y-4">
-                          <div className="flex items-center justify-center gap-3 md:gap-4 text-white text-base md:text-lg">
-                            <Mail className="h-5 w-5 md:h-6 md:w-6 text-white/80 flex-shrink-0" />
-                            <span className="font-medium break-all">{driverData?.email || user?.email}</span>
-                          </div>
-                          {driverData?.phone && (
-                            <div className="flex items-center justify-center gap-3 md:gap-4 text-white text-base md:text-lg">
-                              <Phone className="h-5 w-5 md:h-6 md:w-6 text-white/80 flex-shrink-0" />
-                              <span className="font-medium">{driverData.phone}</span>
-                            </div>
-                          )}
-                          {driverData?.max_miles && (
-                            <div className="flex items-center justify-center gap-3 md:gap-4 text-white text-base md:text-lg">
-                              <MapPin className="h-5 w-5 md:h-6 md:w-6 text-white/80 flex-shrink-0" />
-                              <span className="font-medium">Up to {driverData.max_miles} miles</span>
-                            </div>
-                          )}
-                          <div className="flex items-center justify-center gap-3 md:gap-4 text-white/80 pt-2 md:pt-4">
-                            <Calendar className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
-                            <span className="text-sm md:text-base">
-                              Member since {new Date(driverData?.created_at || '').toLocaleDateString()}
-                            </span>
+                      <div className="flex-1 w-full min-w-0 text-center md:text-left">
+                        <div className="flex flex-col md:flex-row items-center md:items-center gap-3 mb-8">
+                          <Star className="h-7 w-7 text-yellow-400 fill-current flex-shrink-0" />
+                          <div className="flex flex-col">
+                            <h1 className="text-3xl md:text-4xl font-bold text-white">{driverData?.name}</h1>
+                            {driverData?.rating_avg ? (
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-lg text-yellow-400 font-semibold">
+                                  {driverData.rating_avg.toFixed(1)}
+                                </span>
+                                <span className="text-sm text-white/70">
+                                  ({driverData.rating_count || 0} reviews)
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-white/50 mt-1">
+                                New Driver
+                              </span>
+                            )}
                           </div>
                         </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto mt-4">
-                        <Button 
-                          onClick={() => setIsEditingProfile(true)}
-                          className="w-full sm:w-auto bg-[#E11900] hover:bg-[#E11900]/90 text-white text-base md:text-lg px-6 md:px-8 h-12 md:h-14 rounded-2xl font-semibold shadow-xl"
-                        >
-                          Edit Profile
-                        </Button>
-                        <Button 
-                          onClick={() => signOut()} 
-                          variant="outline" 
-                          className="w-full sm:w-auto bg-transparent text-white border-2 border-white/30 hover:bg-white/15 text-base md:text-lg px-6 md:px-8 h-12 md:h-14 rounded-2xl font-semibold"
-                        >
-                          Sign Out
-                        </Button>
+                        <div className="space-y-4 mb-8">
+                          <div className="flex items-center justify-center md:justify-start gap-3 text-white/90">
+                            <Mail className="h-5 w-5 text-white/60 flex-shrink-0" />
+                            <span className="text-base break-all md:truncate">
+                              {driverData?.email || user?.email}
+                            </span>
+                          </div>
+                          {driverData?.phone && (
+                            <div className="flex items-center justify-center md:justify-start gap-3 text-white/90">
+                              <Phone className="h-5 w-5 text-white/60 flex-shrink-0" />
+                              <span className="text-base">{driverData.phone}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-center md:justify-start gap-3 text-white/90">
+                            <Calendar className="h-5 w-5 text-white/60 flex-shrink-0" />
+                            <span className="text-base">
+                              Driver since {new Date(driverData?.created_at || '').toLocaleDateString()}
+                            </span>
+                          </div>
+                          {driverData?.max_miles && (
+                            <div className="flex items-center justify-center md:justify-start gap-3 text-white/90">
+                              <MapPin className="h-5 w-5 text-white/60 flex-shrink-0" />
+                              <span className="text-base">
+                                Drives up to {driverData.max_miles} miles
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                          <Button 
+                            onClick={() => setIsEditingProfile(true)}
+                            className="w-full sm:w-auto bg-[#E11900] hover:bg-[#E11900]/90 text-white h-12 px-8 rounded-2xl text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                          >
+                            <User className="h-5 w-5 mr-2" />
+                            Edit Profile
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            className="w-full sm:w-auto bg-transparent border-white/25 text-white hover:bg-white/10 h-12 px-8 rounded-2xl text-base font-semibold"
+                            onClick={() => navigate('/driver/requests')}
+                          >
+                            View All Requests
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* Jobs Tab */}
-              <TabsContent value="jobs" className="mt-6 md:mt-8 animate-fade-in">
-                <Card className="bg-white/15 backdrop-blur-md border-2 border-white/30 shadow-2xl rounded-3xl">
-                  <CardContent className="p-6 md:p-10">
-                    {jobsLoading ? (
-                      <div className="text-center text-white py-8">Loading jobs...</div>
-                    ) : jobs.length === 0 ? (
-                      <div className="text-center text-white/70 py-8 text-lg">No available jobs at the moment</div>
-                    ) : (
-                      <div className="space-y-4">
-                        {jobs.map((job: any) => (
-                          <div key={job.id} className="bg-white/10 p-6 rounded-2xl border border-white/20">
-                            <h3 className="text-xl font-bold text-white mb-2">{job.make} {job.model}</h3>
-                            <p className="text-white/80">{job.pickup_address} → {job.delivery_address}</p>
-                            <p className="text-white/60 mt-2">{job.distance_miles} miles</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+              {/* Job Requests Tab */}
+              <TabsContent value="available" className="mt-2 space-y-6 animate-fade-in">
+                <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl">
+                  <CardContent className="p-6">
+                    <div className="text-center py-8">
+                      <h3 className="text-2xl font-bold text-white mb-4">Available Requests</h3>
+                      {jobsLoading ? (
+                        <div className="animate-pulse space-y-4">
+                          <div className="h-4 bg-white/20 rounded w-3/4 mx-auto"></div>
+                          <div className="h-4 bg-white/20 rounded w-1/2 mx-auto"></div>
+                        </div>
+                      ) : jobs.length > 0 ? (
+                        <div className="space-y-4">
+                          {jobs.slice(0, 3).map((job) => (
+                            <div key={job.id} className="bg-white/5 border border-white/10 rounded-xl p-4 text-left">
+                              <div className="flex justify-between items-start mb-2">
+                                <h4 className="text-white font-semibold">
+                                  {job.vehicleYear} {job.vehicleMake} {job.vehicleModel}
+                                </h4>
+                                <span className="text-[#E11900] font-bold">${job.pay || 'TBD'}</span>
+                              </div>
+                              <p className="text-white/70 text-sm mb-1">From: {job.pickup}</p>
+                              <p className="text-white/70 text-sm mb-2">To: {job.dropoff}</p>
+                              <div className="flex justify-between items-center">
+                                <span className="text-white/60 text-xs">{job.distanceMi} miles</span>
+                                <Button 
+                                  size="sm" 
+                                  className="bg-[#E11900] hover:bg-[#E11900]/90 text-white rounded-xl"
+                                >
+                                  View Details
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                          {jobs.length > 3 && (
+                            <Button 
+                              variant="outline"
+                              className="w-full bg-transparent border-white/25 text-white hover:bg-white/10 rounded-xl"
+                              onClick={() => navigate('/driver/requests')}
+                            >
+                              View All {jobs.length} Jobs
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-white/60">
+                          No delivery requests available right now. Check back later!
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* Earnings Tab */}
-              <TabsContent value="earnings" className="mt-6 md:mt-8 animate-fade-in">
-                <Card className="bg-white/15 backdrop-blur-md border-2 border-white/30 shadow-2xl rounded-3xl">
-                  <CardContent className="p-6 md:p-10">
-                    {earningsLoading ? (
-                      <div className="text-center text-white py-8">Loading earnings...</div>
-                    ) : (
-                      <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div className="text-center">
-                            <p className="text-white/70 mb-2">Today</p>
-                            <p className="text-3xl font-bold text-white">
-                              ${earnings?.today.toFixed(2) || '0.00'}
-                            </p>
+              {/* Upcoming Jobs Tab */}
+              <TabsContent value="active" className="mt-2 space-y-6 animate-fade-in">
+                <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl">
+                  <CardContent className="p-6">
+                    <div className="text-center py-8">
+                      <h3 className="text-2xl font-bold text-white mb-4">Upcoming Deliveries</h3>
+                      {upcomingLoading ? (
+                        <div className="animate-pulse space-y-4">
+                          <div className="h-4 bg-white/20 rounded w-3/4 mx-auto"></div>
+                          <div className="h-4 bg-white/20 rounded w-1/2 mx-auto"></div>
+                        </div>
+                      ) : upcomingJobs.length > 0 ? (
+                        <div className="space-y-4">
+                          {upcomingJobs.map((assignment) => (
+                            <div key={assignment.id} className="bg-white/5 border border-white/10 rounded-xl p-4 text-left">
+                              <div className="flex justify-between items-start mb-2">
+                                <h4 className="text-white font-semibold">
+                                  {assignment.jobs.year} {assignment.jobs.make} {assignment.jobs.model}
+                                </h4>
+                                <span className="text-green-400 font-bold text-sm">Accepted</span>
+                              </div>
+                              <p className="text-white/70 text-sm mb-1">From: {assignment.jobs.pickup_address}</p>
+                              <p className="text-white/70 text-sm mb-2">To: {assignment.jobs.delivery_address}</p>
+                              <div className="flex justify-between items-center">
+                                <span className="text-white/60 text-xs">
+                                  Accepted {new Date(assignment.accepted_at).toLocaleDateString()}
+                                </span>
+                                <Button 
+                                  size="sm" 
+                                  className="bg-[#E11900] hover:bg-[#E11900]/90 text-white rounded-xl"
+                                  onClick={() => navigate(`/driver/job/${assignment.jobs.id}`)}
+                                >
+                                  Start Drive
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-white/60">
+                          No upcoming deliveries scheduled. Accept a request to get started!
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Completed Jobs Tab */}
+              <TabsContent value="earnings" className="mt-2 space-y-6 animate-fade-in">
+                <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl">
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <h3 className="text-2xl font-bold text-white mb-6">Completed Deliveries</h3>
+                      {earningsLoading ? (
+                        <div className="animate-pulse space-y-4">
+                          <div className="h-8 bg-white/20 rounded w-1/2 mx-auto"></div>
+                          <div className="h-4 bg-white/20 rounded w-3/4 mx-auto"></div>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
+                              <h4 className="text-white/70 text-sm uppercase tracking-wide mb-2">Today</h4>
+                              <p className="text-3xl font-bold text-white">${earnings?.today || 0}</p>
+                              <p className="text-xs text-white/50 mt-1">Earnings</p>
+                            </div>
+                            <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
+                              <h4 className="text-white/70 text-sm uppercase tracking-wide mb-2">This Week</h4>
+                              <p className="text-3xl font-bold text-white">${earnings?.week || 0}</p>
+                              <p className="text-xs text-white/50 mt-1">Earnings</p>
+                            </div>
+                            <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
+                              <h4 className="text-white/70 text-sm uppercase tracking-wide mb-2">This Month</h4>
+                              <p className="text-3xl font-bold text-[#E11900]">${earnings?.month || 0}</p>
+                              <p className="text-xs text-white/50 mt-1">Total Earnings</p>
+                            </div>
                           </div>
-                          <div className="text-center">
-                            <p className="text-white/70 mb-2">This Week</p>
-                            <p className="text-3xl font-bold text-white">
-                              ${earnings?.week.toFixed(2) || '0.00'}
-                            </p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-white/70 mb-2">This Month</p>
-                            <p className="text-3xl font-bold text-white">
-                              ${earnings?.month.toFixed(2) || '0.00'}
-                            </p>
+                          
+                          <div className="text-center text-white/60 text-sm">
+                            <p>Your completed deliveries and earnings summary</p>
+                            <p className="text-xs mt-2">Most recent jobs appear first • All times are local</p>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Documents Tab */}
-              <TabsContent value="documents" className="mt-6 md:mt-8 animate-fade-in">
-                <Card className="bg-white/15 backdrop-blur-md border-2 border-white/30 shadow-2xl rounded-3xl">
-                  <CardContent className="p-6 md:p-10">
-                    <div className="text-center text-white/70 py-8 text-lg">
-                      Document management coming soon
+                      )}
                     </div>
                   </CardContent>
                 </Card>
