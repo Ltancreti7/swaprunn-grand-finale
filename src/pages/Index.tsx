@@ -1,131 +1,291 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Truck, ArrowRight, Users, Zap } from "lucide-react";
+import { Truck, ArrowRight, Shield } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+
 const Index = () => {
-  return <div className="min-h-screen relative bg-black" style={{
-    backgroundImage: `url(${mapBackgroundImage})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center top',
-    backgroundRepeat: 'no-repeat',
-    backgroundAttachment: 'fixed'
-  }}>
+  const { user, userProfile, loading } = useAuth();
+  const navigate = useNavigate();
+  const [showSignupDropdown, setShowSignupDropdown] = useState(false);
+
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (!loading && user && userProfile) {
+      console.log('User authenticated, redirecting to dashboard:', userProfile);
+      
+      switch (userProfile.user_type) {
+        case 'dealer':
+          navigate('/dealer/dashboard');
+          break;
+        case 'driver':
+          navigate('/driver/dashboard');
+          break;
+        case 'swap_coordinator':
+          navigate('/swap-coordinator/dashboard');
+          break;
+        default:
+          // If user type is unknown, stay on homepage but could add error handling
+          console.log('Unknown user type:', userProfile.user_type);
+      }
+    }
+  }, [user, userProfile, loading, navigate]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showSignupDropdown && !target.closest('.relative')) {
+        setShowSignupDropdown(false);
+      }
+    };
+
+    if (showSignupDropdown) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showSignupDropdown]);
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  // Only show homepage to non-authenticated users
+  return (
+    <>
+      {/* Top Header - Clean & Simple */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-white/10">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-36">
+            {/* Left - Logo */}
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/swaprunn-logo-2025.png?v=20251015" 
+                alt="SwapRunn" 
+                className="h-32 w-auto hover:opacity-80 transition-opacity" 
+              />
+            </Link>
+
+            {/* Right - Simple Navigation */}
+            <div className="flex items-center space-x-8">
+              <Link to="/drivers" className="text-white/70 hover:text-white transition-colors font-medium">
+                For Drivers
+              </Link>
+              <Link to="/dealership/register" className="text-white/70 hover:text-white transition-colors font-medium">
+                For Dealerships
+              </Link>
+              <Button asChild variant="ghost" className="text-white/90 hover:text-white hover:bg-white/10 font-medium">
+                <Link to="/dealer/auth">Sign In</Link>
+              </Button>
+              <Button asChild className="bg-[#E11900] hover:bg-[#B51400] text-white rounded-lg px-6 py-2 font-medium">
+                <Link to="/dealership/register">Get Started</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="min-h-screen relative bg-black" style={{
+      backgroundImage: `url(${mapBackgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center top',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed'
+    }}>
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
 
-      {/* Hero Section - Center Focused */}
-      <section className="relative z-10 lg:py-0 py-0">
-        <div className="container mx-auto px-6 text-center py-0 my-[26px]">
-          {/* Hero Content */}
-          <div className="max-w-4xl mx-auto mb-9 py-[110px]">
-            <h1 className="lg:text-7xl font-display font-black tracking-tight mb-6 text-white text-3xl">
-              Deliver Faster. <span className="text-[#E11900]">Swap Smarter.</span>
+      {/* Hero Section - Main Content */}
+      <section className="relative z-10 pt-40 pb-12">
+        <div className="container mx-auto px-6">
+          <div className="text-center">
+            <h1 className="text-5xl lg:text-7xl font-black tracking-tight mb-6 leading-tight text-white">
+              Deliver Faster.
+              <br />
+              <span className="text-[#E11900]">Swap Smarter.</span>
             </h1>
             
-            {/* CTA Buttons */}
-            <div className="flex flex-col items-center justify-center gap-4 mb-6 max-w-md mx-auto my-[54px]">
-              <Button asChild size="lg" className="bg-[#E11900] hover:bg-[#E11900]/90 text-white border-none h-12 w-full rounded-2xl">
-                <Link to="/dealer/auth">
-                  <Users className="mr-2 h-5 w-5" />
-                  Dealer Login
+            <p className="text-lg lg:text-xl text-white/90 mb-10 max-w-3xl mx-auto font-light">
+              Streamline off-site deliveries and inventory swaps with a tech-first platform built to revolutionize dealership logistics.
+            </p>
+
+            {/* Primary CTA */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button asChild size="lg" className="bg-[#E11900] hover:bg-[#B51400] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl">
+                <Link to="/how-it-works">
+                  See How It Works
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild size="lg" className="bg-[#E11900] hover:bg-[#E11900]/90 text-white border-none h-12 w-full rounded-2xl">
-                <Link to="/swap-coordinator/auth">
-                  <Truck className="mr-2 h-5 w-5" />
-                  Swap Inventory
+              <Button asChild variant="outline" size="lg" className="bg-white border-white text-black hover:bg-white/90 hover:text-black px-8 py-4 rounded-full text-lg font-semibold">
+                <Link to="#demo">
+                  Watch Demo
                 </Link>
               </Button>
-              <div className="w-full">
-                <Button asChild variant="outline" size="lg" className="bg-transparent text-white border-white/25 hover:bg-white/10 h-12 w-full rounded-2xl">
-                  <Link to="/drivers">
-                    <Truck className="mr-2 h-5 w-5" />
-                    Drive with SwapRunn
-                  </Link>
-                </Button>
-                <p className="text-white/60 text-sm mt-2 px-2 text-center">
-                  Streamline off-site deliveries and inventory swaps with a tech-first platform built to revolutionize dealership logistics.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - Prominent Section */}
+      <section className="relative z-10 py-6">
+        <div className="container mx-auto px-6">
+          <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-2xl p-6 lg:p-8 mb-12">
+            <h2 className="text-2xl lg:text-4xl font-bold text-white mb-4 text-center">
+              Simple. Fast. Reliable.
+            </h2>
+            <p className="text-lg text-white/80 max-w-3xl mx-auto mb-8 text-center">
+              SwapRunn connects dealerships with professional drivers for seamless vehicle delivery and logistics.
+            </p>
+
+            {/* Step Process */}
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="text-center group">
+                <div className="w-20 h-20 bg-gradient-to-br from-[#E11900] to-[#B51400] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-200">
+                  <span className="text-2xl font-bold text-white">1</span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Request a Driver</h3>
+                <p className="text-white/70 text-base leading-relaxed">
+                  Submit a delivery request through our simple form. Include vehicle details, pickup location, and customer delivery address.
                 </p>
               </div>
-              <Button asChild variant="outline" size="lg" className="bg-transparent text-white border-white/25 hover:bg-white/10 h-12 w-full rounded-2xl">
-                <Link to="/dealers">
-                  <Users className="mr-2 h-5 w-5" />
-                  Register your Dealership
-                </Link>
-              </Button>
-            </div>
 
-            {/* Tagline Steps */}
-            <div className="flex flex-row items-center justify-center gap-2 md:gap-6 max-w-3xl mb-4 mx-auto px-4">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-[#E11900]/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Users className="h-6 w-6 text-[#E11900]" />
+              <div className="text-center group">
+                <div className="w-20 h-20 bg-gradient-to-br from-[#E11900] to-[#B51400] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-200">
+                  <span className="text-2xl font-bold text-white">2</span>
                 </div>
-                <h3 className="text-base font-inter font-bold text-white mb-2">Sell</h3>
-                <p className="text-white/70 text-xs max-w-[180px]">Complete the sale with confidence</p>
+                <h3 className="text-2xl font-bold text-white mb-4">Driver Accepts</h3>
+                <p className="text-white/70 text-base leading-relaxed">
+                  Our network of vetted, insured drivers receive instant notifications. A qualified driver accepts your job within minutes.
+                </p>
               </div>
 
-              {/* Arrow 1 */}
-              <div className="hidden md:block">
-                <ArrowRight className="h-6 w-6 text-[#E11900]/60" />
-              </div>
-
-              <div className="text-center">
-                <div className="w-12 h-12 bg-[#E11900]/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Zap className="h-6 w-6 text-[#E11900]" />
+              <div className="text-center group">
+                <div className="w-20 h-20 bg-gradient-to-br from-[#E11900] to-[#B51400] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-200">
+                  <span className="text-2xl font-bold text-white">3</span>
                 </div>
-                <h3 className="text-base font-inter font-bold text-white mb-2">Tap</h3>
-                <p className="text-white/70 text-xs max-w-[180px]">Instant driver dispatch at your fingertips</p>
-              </div>
-
-              {/* Arrow 2 */}
-              <div className="hidden md:block">
-                <ArrowRight className="h-6 w-6 text-[#E11900]/60" />
-              </div>
-
-              <div className="text-center">
-                <div className="w-12 h-12 bg-[#E11900]/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Truck className="h-6 w-6 text-[#E11900]" />
-                </div>
-                <h3 className="text-base font-inter font-bold text-white mb-2">Deliver</h3>
-                <p className="text-white/70 text-xs max-w-[180px]">Vehicle delivered safely to customer</p>
+                <h3 className="text-2xl font-bold text-white mb-4">Delivered</h3>
+                <p className="text-white/70 text-base leading-relaxed">
+                  Track real-time progress as your driver picks up and delivers the vehicle. Customer receives their car on time, every time.
+                </p>
               </div>
             </div>
-            
-            {/* Value Proposition */}
-            
-            
-            {/* Trust Statistics */}
-            
+          </div>
+        </div>
+      </section>
 
+      {/* What We Do Section */}
+      <section className="relative z-10 py-16">
+        <div className="container mx-auto px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-black/60 backdrop-blur-lg border border-white/20 rounded-3xl p-12">
+              <h3 className="text-4xl font-bold text-white mb-12 text-center">Our Services</h3>
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="text-center group">
+                  <div className="w-20 h-20 bg-gradient-to-br from-[#E11900] to-[#B51400] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-200">
+                    <Truck className="w-10 h-10 text-white" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-white mb-4">Customer Deliveries</h4>
+                  <p className="text-white/80 text-lg leading-relaxed">
+                    Get vehicles to customers anywhere, anytime. No more lost sales due to delivery challenges. Perfect for sold vehicles and test drives.
+                  </p>
+                </div>
+                
+                <div className="text-center group">
+                  <div className="w-20 h-20 bg-gradient-to-br from-[#E11900] to-[#B51400] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-200">
+                    <ArrowRight className="w-10 h-10 text-white" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-white mb-4">Inventory Swaps</h4>
+                  <p className="text-white/80 text-lg leading-relaxed">
+                    Move inventory between locations efficiently. Optimize your lot space and selection by transferring vehicles where they're needed most.
+                  </p>
+                </div>
+                
+                <div className="text-center group">
+                  <div className="w-20 h-20 bg-gradient-to-br from-[#E11900] to-[#B51400] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-200">
+                    <Shield className="w-10 h-10 text-white" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-white mb-4">Service Pickups</h4>
+                  <p className="text-white/80 text-lg leading-relaxed">
+                    Convenient vehicle pickup and drop-off service for maintenance and repairs. Keep customers happy with white-glove service.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="relative z-10 py-20">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-gradient-to-r from-[#E11900]/20 to-[#B51400]/20 backdrop-blur-sm border border-[#E11900]/30 rounded-3xl p-12">
+              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+                Ready to Transform Your Delivery Process?
+              </h2>
+              <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
+                Join the dealerships already saving time and closing more sales with SwapRunn's professional delivery network.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <div className="text-center">
+                  <Button asChild size="lg" className="bg-[#E11900] hover:bg-[#B51400] text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl mb-2">
+                    <Link to="/dealership/register">
+                      Start Free Trial
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <p className="text-white/60 text-sm">Setup takes less than 5 minutes</p>
+                </div>
+                
+                <div className="text-center">
+                  <Button asChild variant="outline" size="lg" className="bg-white/10 border-white/30 text-white hover:bg-white/20 px-10 py-4 rounded-full text-lg font-bold">
+                    <Link to="/contact">
+                      Schedule Demo
+                    </Link>
+                  </Button>
+                  <p className="text-white/60 text-sm">See it in action first</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 py-9 border-t border-white/10">
+      <footer className="relative z-10 py-12 border-t border-white/10">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-4">
-              <img src="/swaprunn-logo-2025.png?v=20251001" alt="SwapRunn" className="h-8 w-auto" />
-              <span className="text-white/70">© SwapRunn <span className="text-white/40 text-xs ml-2">v2025-10-01</span></span>
+            <div className="text-center md:text-left">
+              <span className="text-white/60 text-lg font-medium">© 2025 SwapRunn</span>
+              <span className="text-white/30 text-sm ml-3">Dealership Logistics Platform</span>
             </div>
             
-            <div className="flex gap-6">
-              <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">
-                Privacy
+            <div className="flex gap-8">
+              <Link to="/privacy" className="text-white/60 hover:text-white transition-colors font-medium">
+                Privacy Policy
               </Link>
-              <Link to="/terms" className="text-white/70 hover:text-white transition-colors">
-                Terms
+              <Link to="/terms" className="text-white/60 hover:text-white transition-colors font-medium">
+                Terms of Service
               </Link>
-              <Link to="/contact" className="text-white/70 hover:text-white transition-colors">
-                Contact
+              <Link to="/contact" className="text-white/60 hover:text-white transition-colors font-medium">
+                Contact Us
               </Link>
             </div>
           </div>
         </div>
       </footer>
-    </div>;
+    </div>
+    </>
+  );
 };
 export default Index;
