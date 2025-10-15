@@ -63,8 +63,8 @@ const Index = () => {
     <>
       {/* Top Header - Clean & Simple */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-white/10">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between h-36">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-20 sm:h-24">
             {/* Left - Logo */}
             <Link to="/" className="flex items-center">
               <img 
@@ -104,29 +104,29 @@ const Index = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
 
       {/* Hero Section - Main Content */}
-      <section className="relative z-10 pt-40 pb-12">
-        <div className="container mx-auto px-6">
+      <section className="relative z-10 pt-28 sm:pt-40 pb-12">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center">
-            <h1 className="text-5xl lg:text-7xl font-black tracking-tight mb-6 leading-tight text-white">
+            <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tight mb-6 leading-tight text-white px-2">
               Deliver Faster.
               <br />
               <span className="text-[#E11900]">Swap Smarter.</span>
             </h1>
             
-            <p className="text-lg lg:text-xl text-white/90 mb-10 max-w-3xl mx-auto font-light">
+            <p className="text-base sm:text-lg lg:text-xl text-white/90 mb-10 max-w-3xl mx-auto font-light px-4">
               Streamline off-site deliveries and inventory swaps with a tech-first platform built to revolutionize dealership logistics.
             </p>
 
             {/* Primary CTA */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button asChild size="lg" className="bg-[#E11900] hover:bg-[#B51400] text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl">
-                <Link to="/how-it-works">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
+              <Button asChild size="lg" className="bg-[#E11900] hover:bg-[#B51400] text-white px-6 sm:px-8 py-4 rounded-full text-base sm:text-lg font-semibold shadow-xl w-full sm:w-auto min-h-[48px]">
+                <Link to="/how-it-works" className="flex items-center justify-center">
                   See How It Works
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="bg-white border-white text-black hover:bg-white/90 hover:text-black px-8 py-4 rounded-full text-lg font-semibold">
-                <Link to="#demo">
+              <Button asChild variant="outline" size="lg" className="bg-white border-white text-black hover:bg-white/90 hover:text-black px-6 sm:px-8 py-4 rounded-full text-base sm:text-lg font-semibold w-full sm:w-auto min-h-[48px]">
+                <Link to="#demo" className="flex items-center justify-center">
                   Watch Demo
                 </Link>
               </Button>
@@ -137,12 +137,12 @@ const Index = () => {
 
       {/* How It Works - Prominent Section */}
       <section className="relative z-10 py-6">
-        <div className="container mx-auto px-6">
-          <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-2xl p-6 lg:p-8 mb-12">
-            <h2 className="text-2xl lg:text-4xl font-bold text-white mb-4 text-center">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6 lg:p-8 mb-12">
+            <h2 className="text-xl sm:text-2xl lg:text-4xl font-bold text-white mb-4 text-center px-2">
               Simple. Fast. Reliable.
             </h2>
-            <p className="text-lg text-white/80 max-w-3xl mx-auto mb-8 text-center">
+            <p className="text-base sm:text-lg text-white/80 max-w-3xl mx-auto mb-8 text-center px-4">
               SwapRunn connects dealerships with professional drivers for seamless vehicle delivery and logistics.
             </p>
 

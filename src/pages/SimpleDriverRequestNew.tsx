@@ -10,14 +10,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddressInput, AddressData } from "@/components/ui/address-input";
-import { ArrowLeft, ArrowRight, Car, MapPin, User, Clock, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Car, MapPin, User, Clock, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/utils";
+import { useSwipeable } from 'react-swipeable';
+import { useMobileCapacitor } from "@/hooks/useMobileCapacitor";
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const SimpleDriverRequest = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { userProfile } = useAuth();
+  const { isNative } = useMobileCapacitor();
 
 
 
@@ -149,6 +153,45 @@ const SimpleDriverRequest = () => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  // Swipe handlers for mobile navigation
+  const handleSwipeLeft = async () => {
+    // Swipe left = next step
+    if (canProceedToNext() && currentStep < totalSteps) {
+      // Add haptic feedback on native platforms
+      if (isNative) {
+        try {
+          await Haptics.impact({ style: ImpactStyle.Light });
+        } catch (error) {
+          console.log('Haptics not available:', error);
+        }
+      }
+      nextStep();
+    }
+  };
+
+  const handleSwipeRight = async () => {
+    // Swipe right = previous step
+    if (currentStep > 1) {
+      // Add haptic feedback on native platforms
+      if (isNative) {
+        try {
+          await Haptics.impact({ style: ImpactStyle.Light });
+        } catch (error) {
+          console.log('Haptics not available:', error);
+        }
+      }
+      prevStep();
+    }
+  };
+
+  // Configure swipe gestures
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: handleSwipeLeft,
+    onSwipedRight: handleSwipeRight,
+    trackMouse: false, // Only track touch events
+    delta: 50, // Minimum swipe distance
+  });
 
   const handleSubmit = async () => {
     // Check if user profile is properly loaded
@@ -359,25 +402,32 @@ const SimpleDriverRequest = () => {
         </div>
 
         {/* Step Content Card */}
-        <Card className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl min-h-[450px] rounded-2xl">
+        <Card {...swipeHandlers} className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl min-h-[450px] rounded-2xl relative overflow-hidden">
+          {/* Swipe indicators */}
+          <div className="absolute top-1/2 left-2 transform -translate-y-1/2 opacity-20 pointer-events-none">
+            {currentStep > 1 && <ChevronLeft className="h-8 w-8 text-white" />}
+          </div>
+          <div className="absolute top-1/2 right-2 transform -translate-y-1/2 opacity-20 pointer-events-none">
+            {currentStep < totalSteps && canProceedToNext() && <ChevronRight className="h-8 w-8 text-white" />}
+          </div>
           <CardContent className="p-8">
             
             {/* Step 1: Vehicle Info */}
             {currentStep === 1 && (
               <div className="space-y-6">
                 <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-white mb-2">What vehicle needs delivery?</h2>
-                  <p className="text-white/70 text-lg">Tell us about the vehicle</p>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 break-words">What vehicle needs delivery?</h2>
+                  <p className="text-white/70 text-base sm:text-lg break-words">Tell us about the vehicle</p>
                 </div>
                 
-                <div className="space-y-4 max-w-md mx-auto">
+                <div className="space-y-4 max-w-md mx-auto w-full min-w-0">
                   <Select value={vehicleInfo.year} onValueChange={(value) => setVehicleInfo({...vehicleInfo, year: value})}>
-                    <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40">
+                    <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 w-full min-w-0">
                       <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
                       {years.map((year) => (
-                        <SelectItem key={year} value={year} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20">
+                        <SelectItem key={year} value={year} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20 break-words">
                           {year}
                         </SelectItem>
                       ))}
@@ -385,12 +435,12 @@ const SimpleDriverRequest = () => {
                   </Select>
 
                   <Select value={vehicleInfo.make} onValueChange={(value) => setVehicleInfo({...vehicleInfo, make: value})}>
-                    <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40">
+                    <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 w-full min-w-0">
                       <SelectValue placeholder="Select Make" />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
                       {makes.map((make) => (
-                        <SelectItem key={make} value={make} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20">
+                        <SelectItem key={make} value={make} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20 break-words">
                           {make}
                         </SelectItem>
                       ))}
@@ -402,12 +452,12 @@ const SimpleDriverRequest = () => {
                     onValueChange={(value) => setVehicleInfo({...vehicleInfo, model: value})}
                     disabled={!vehicleInfo.make}
                   >
-                    <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 disabled:opacity-50">
+                    <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 disabled:opacity-50 w-full min-w-0">
                       <SelectValue placeholder={vehicleInfo.make ? "Select Model" : "Select Make First"} />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
                       {availableModels.map((model) => (
-                        <SelectItem key={model} value={model} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20">
+                        <SelectItem key={model} value={model} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20 break-words">
                           {model}
                         </SelectItem>
                       ))}
@@ -419,7 +469,7 @@ const SimpleDriverRequest = () => {
                     placeholder="VIN (Optional)"
                     value={vehicleInfo.vin}
                     onChange={(e) => setVehicleInfo({...vehicleInfo, vin: e.target.value})}
-                    className="bg-black/30 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 h-14 text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200"
+                    className="bg-black/30 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 w-full min-w-0"
                   />
                 </div>
               </div>
@@ -539,6 +589,22 @@ const SimpleDriverRequest = () => {
             )}
 
           </CardContent>
+          
+          {/* Mobile Swipe Hint */}
+          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2 text-white/40 text-xs sm:hidden">
+            {currentStep > 1 && <span>← Swipe</span>}
+            <div className="flex gap-1">
+              {Array.from({ length: totalSteps }).map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                    index + 1 === currentStep ? 'bg-[#E11900]' : 'bg-white/20'
+                  }`}
+                />
+              ))}
+            </div>
+            {currentStep < totalSteps && canProceedToNext() && <span>Swipe →</span>}
+          </div>
         </Card>
 
         {/* Navigation Buttons */}

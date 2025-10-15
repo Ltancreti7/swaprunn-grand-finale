@@ -184,7 +184,7 @@ const DriverRequests = () => {
         <h1 className="text-2xl font-bold text-white mb-6 text-center">Incoming Requests</h1>
 
         {requests.length === 0 ? (
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="bg-white/20 border-white/30 backdrop-blur-sm shadow-lg">
             <CardContent className="p-6 text-center">
               <div className="text-white/70">No pending requests</div>
             </CardContent>
@@ -203,7 +203,7 @@ const DriverRequests = () => {
               const estimatedPay = Math.round(estimatedHours * 20); // $20/hour
               
               return (
-                <Card key={request.id} className="bg-white/10 border-white/20 backdrop-blur-sm border-l-4 border-primary">
+                <Card key={request.id} className="bg-white/20 border-white/30 backdrop-blur-sm border-l-4 border-primary shadow-lg">
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <div>
@@ -224,8 +224,8 @@ const DriverRequests = () => {
                   <CardContent className="space-y-4">
                     {/* Vehicle Information */}
                     <div>
-                      <h4 className="text-sm font-semibold text-white/90 mb-2">Vehicle Details</h4>
-                      <div className="bg-white/5 border border-white/10 p-3 rounded-lg">
+                      <h4 className="text-sm font-semibold text-white mb-2">Vehicle Details</h4>
+                      <div className="bg-white/15 border border-white/20 p-3 rounded-lg">
                         <p className="font-medium text-white">
                           {request.year} {request.make} {request.model} {request.customer_name && `- ${request.customer_name}`}
                         </p>
@@ -245,11 +245,11 @@ const DriverRequests = () => {
                     <div className="space-y-3">
                       <div>
                         <h4 className="text-sm font-semibold text-white/90 mb-1">Pickup Location</h4>
-                        <p className="text-sm text-white bg-white/5 border border-white/10 p-2 rounded">{request.pickup_address}</p>
+                                                <p className="text-sm text-white bg-white/15 border border-white/20 p-2 rounded">{request.pickup_address}</p>
                       </div>
                       <div>
-                        <h4 className="text-sm font-semibold text-white/90 mb-1">Delivery Location</h4>
-                        <p className="text-sm text-white bg-white/5 border border-white/10 p-2 rounded">{request.delivery_address}</p>
+                        <h5 className="text-xs font-medium text-white/80 mb-1">DELIVERY ADDRESS</h5>
+                        <p className="text-sm text-white bg-white/15 border border-white/20 p-2 rounded">{request.delivery_address}</p>
                       </div>
                     </div>
 
@@ -257,14 +257,14 @@ const DriverRequests = () => {
                     {request.notes && (
                       <div>
                         <h4 className="text-sm font-semibold text-white/90 mb-1">Special Instructions</h4>
-                        <p className="text-sm text-white bg-yellow-500/20 border border-yellow-500/30 p-2 rounded border-l-2">
+                        <p className="text-sm text-white bg-yellow-500/30 border border-yellow-500/40 p-2 rounded border-l-2">
                           {request.notes}
                         </p>
                       </div>
                     )}
 
                     {/* Payment and Distance */}
-                    <div className="bg-green-500/20 border border-green-500/30 p-3 rounded-lg">
+                    <div className="bg-green-500/30 border border-green-500/40 p-3 rounded-lg">
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-sm text-white/70">Round Trip Distance</p>
