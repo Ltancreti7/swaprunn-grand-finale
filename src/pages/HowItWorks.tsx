@@ -112,7 +112,7 @@ const HowItWorks = () => {
 
                 {/* Screenshot Mock */}
                 <div className="flex-1 max-w-md lg:max-w-lg">
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
+                  <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700/50 shadow-2xl rounded-2xl overflow-hidden">
                     <CardContent className="p-0">
                       <div className="aspect-[9/16] bg-gradient-to-b from-gray-900 to-black flex items-center justify-center relative">
                         {/* Mock iPhone Frame */}
@@ -266,7 +266,7 @@ const HowItWorks = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {/* Dashboard Screenshot */}
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-300">
+            <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700/50 shadow-2xl rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-300">
               <CardContent className="p-0">
                 <div className="relative">
                   <img 
@@ -284,7 +284,7 @@ const HowItWorks = () => {
             </Card>
 
             {/* Mobile App Screenshot Placeholder */}
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-300">
+            <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700/50 shadow-2xl rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-300">
               <CardContent className="p-0">
                 <div className="relative">
                   <div className="w-full h-48 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
@@ -304,7 +304,7 @@ const HowItWorks = () => {
             </Card>
 
             {/* Driver Workflow Screenshot Placeholder */}
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-300">
+            <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700/50 shadow-2xl rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-300">
               <CardContent className="p-0">
                 <div className="relative">
                   <div className="w-full h-48 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
@@ -326,7 +326,7 @@ const HowItWorks = () => {
 
           {/* Add Screenshots CTA */}
           <div className="text-center">
-            <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-lg rounded-2xl max-w-2xl mx-auto">
+            <Card className="bg-gray-900/60 backdrop-blur-sm border-gray-700/40 shadow-lg rounded-2xl max-w-2xl mx-auto">
               <CardContent className="p-6">
                 <div className="flex items-center justify-center gap-3 mb-4">
                   <Calendar className="h-6 w-6 text-[#E11900]" />
@@ -343,7 +343,7 @@ const HowItWorks = () => {
 
         {/* Coming Soon - Driver Side */}
         <div className="text-center mb-16">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl max-w-2xl mx-auto">
+          <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700/50 shadow-lg rounded-2xl max-w-2xl mx-auto">
             <CardContent className="p-8">
               <Clock className="h-16 w-16 text-[#E11900] mx-auto mb-4" />
               <h3 className="text-2xl font-bold text-white mb-4">Driver Experience Coming Soon</h3>
