@@ -83,7 +83,10 @@ const Index = () => {
                 For Dealerships
               </Link>
               <Button asChild variant="ghost" className="text-white/90 hover:text-white hover:bg-white/10 font-medium text-sm px-3 py-2">
-                <Link to="/dealer/auth">Sign In</Link>
+                <Link to="/dealer/auth">Dealership Sign In</Link>
+              </Button>
+              <Button asChild variant="outline" className="border-[#E11900] text-[#E11900] hover:bg-[#E11900] hover:text-white font-medium text-sm px-3 py-2 hidden sm:block">
+                <Link to="/driver/auth">Drive With SwapRunn</Link>
               </Button>
               <Button asChild className="bg-[#E11900] hover:bg-[#B51400] text-white rounded-lg px-4 sm:px-6 py-2 font-medium text-sm">
                 <Link to="/dealership/register">Get Started</Link>
@@ -130,6 +133,17 @@ const Index = () => {
                   Watch Demo
                 </Link>
               </Button>
+            </div>
+
+            {/* Driver CTA - Mobile Visible */}
+            <div className="mt-8 sm:hidden">
+              <Button asChild size="lg" className="bg-transparent border-2 border-[#E11900] text-[#E11900] hover:bg-[#E11900] hover:text-white px-8 py-4 rounded-full text-lg font-semibold w-full min-h-[48px]">
+                <Link to="/driver/auth" className="flex items-center justify-center">
+                  <Truck className="mr-2 h-5 w-5" />
+                  Drive With SwapRunn
+                </Link>
+              </Button>
+              <p className="text-white/60 text-sm mt-2 text-center">Earn money delivering vehicles</p>
             </div>
           </div>
         </div>
@@ -227,33 +241,64 @@ const Index = () => {
       {/* Call to Action Section */}
       <section className="relative z-10 py-20">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-gradient-to-r from-[#E11900]/20 to-[#B51400]/20 backdrop-blur-sm border border-[#E11900]/30 rounded-3xl p-12">
-              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-                Ready to Transform Your Delivery Process?
-              </h2>
-              <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-                Join the dealerships already saving time and closing more sales with SwapRunn's professional delivery network.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                <div className="text-center">
-                  <Button asChild size="lg" className="bg-[#E11900] hover:bg-[#B51400] text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl mb-2">
+          <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            {/* Dealership CTA */}
+            <div className="text-center">
+              <div className="bg-gradient-to-r from-[#E11900]/20 to-[#B51400]/20 backdrop-blur-sm border border-[#E11900]/30 rounded-3xl p-8 lg:p-10">
+                <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+                  Ready to Transform Your Delivery Process?
+                </h2>
+                <p className="text-lg text-white/90 mb-8">
+                  Join the dealerships already saving time and closing more sales with SwapRunn's professional delivery network.
+                </p>
+                
+                <div className="flex flex-col gap-4">
+                  <Button asChild size="lg" className="bg-[#E11900] hover:bg-[#B51400] text-white px-8 py-4 rounded-full text-lg font-bold shadow-xl">
                     <Link to="/dealership/register">
                       Start Free Trial
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
                   <p className="text-white/60 text-sm">Setup takes less than 5 minutes</p>
-                </div>
-                
-                <div className="text-center">
-                  <Button asChild variant="outline" size="lg" className="bg-white/10 border-white/30 text-white hover:bg-white/20 px-10 py-4 rounded-full text-lg font-bold">
+                  
+                  <Button asChild variant="outline" size="lg" className="bg-white/10 border-white/30 text-white hover:bg-white/20 px-8 py-4 rounded-full text-lg font-bold">
                     <Link to="/contact">
                       Schedule Demo
                     </Link>
                   </Button>
                   <p className="text-white/60 text-sm">See it in action first</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Driver CTA */}
+            <div className="text-center">
+              <div className="bg-gradient-to-r from-[#E11900]/15 to-[#B51400]/15 backdrop-blur-sm border border-[#E11900]/25 rounded-3xl p-8 lg:p-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-[#E11900] to-[#B51400] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Truck className="w-10 h-10 text-white" />
+                </div>
+                <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+                  Drive With SwapRunn
+                </h2>
+                <p className="text-lg text-white/90 mb-8">
+                  Earn competitive pay delivering vehicles for local dealerships. Flexible schedule, reliable income.
+                </p>
+                
+                <div className="flex flex-col gap-4">
+                  <Button asChild size="lg" className="bg-transparent border-2 border-[#E11900] text-[#E11900] hover:bg-[#E11900] hover:text-white px-8 py-4 rounded-full text-lg font-bold">
+                    <Link to="/driver/auth">
+                      Join as Driver
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <p className="text-white/60 text-sm">Start earning today</p>
+                  
+                  <Button asChild variant="ghost" size="lg" className="text-white/80 hover:text-white hover:bg-white/10 px-8 py-4 rounded-full text-lg font-bold">
+                    <Link to="/drivers">
+                      Learn More
+                    </Link>
+                  </Button>
+                  <p className="text-white/60 text-sm">See driver benefits</p>
                 </div>
               </div>
             </div>

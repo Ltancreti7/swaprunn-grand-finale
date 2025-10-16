@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +18,14 @@ import { NavigationDrawer } from "@/components/NavigationDrawer";
 import { MessagesButton } from "@/components/messages/MessagesButton";
 import { MessagesOverlay } from "@/components/messages/MessagesOverlay";
 import mapBackgroundImage from "@/assets/map-background.jpg";
+import { Job as SupabaseJob } from "@/services/supabaseService";
+
+// Extend the Job type to match what JobCard expects
+interface Job extends SupabaseJob {
+  pickup_address: string;
+  delivery_address: string;
+}
+
 interface DealerData {
   id: string;
   name: string;
@@ -68,7 +76,7 @@ interface ActiveAssignment {
   };
 }
 const DealerDashboard = () => {
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [dealerData, setDealerData] = useState<DealerData | null>(null);
   const [activeAssignments, setActiveAssignments] = useState<ActiveAssignment[]>([]);
@@ -87,13 +95,99 @@ const DealerDashboard = () => {
   const {
     toast
   } = useToast();
+
+  const fetchJobs = useCallback(async () => {
+    if (!userProfile?.dealer_id) return;
+    try {
+      const {
+        data,
+        error
+      } = await supabase.from('jobs').select(`
+          *,
+          assignments(*, drivers(name, email, phone, rating_avg, rating_count, available))
+        `).eq('dealer_id', userProfile.dealer_id).order('created_at', {
+        ascending: false
+      });
+      if (error) throw error;
+      setJobs(data || []);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [userProfile?.dealer_id]);
+  
+  const fetchActiveAssignments = useCallback(async () => {
+    if (!userProfile?.dealer_id) return;
+    try {
+      const {
+        data,
+        error
+      } = await supabase.from('assignments').select(`
+          id,
+          job_id,
+          driver_id,
+          accepted_at,
+          started_at,
+          jobs!inner (
+            id,
+            type,
+            pickup_address,
+            delivery_address,
+            year,
+            make,
+            model,
+            customer_name,
+            distance_miles,
+            created_at,
+            created_by,
+            dealer_id
+          ),
+          drivers!inner (
+            id,
+            name,
+            email,
+            phone,
+            rating_avg,
+            rating_count,
+            profile_photo_url,
+            available,
+            trust_score
+          )
+        `).eq('jobs.dealer_id', userProfile.dealer_id).eq('jobs.status', 'accepted').order('accepted_at', {
+        ascending: false
+      });
+      if (error) {
+        console.error('❌ Error fetching active assignments:', error);
+        return;
+      }
+      setActiveAssignments(data || []);
+    } catch (error) {
+      console.error('❌ Error in fetchActiveAssignments:', error);
+    }
+  }, [userProfile?.dealer_id]);
+  
+  const fetchDealerData = useCallback(async () => {
+    if (!userProfile?.dealer_id) return;
+    try {
+      const {
+        data,
+        error
+      } = await supabase.from('dealers').select('*').eq('id', userProfile.dealer_id).single();
+      if (error) throw error;
+      setDealerData(data);
+    } catch (error) {
+      console.error('Error fetching dealer data:', error);
+    }
+  }, [userProfile?.dealer_id]);
+
   useEffect(() => {
     if (userProfile?.user_type === 'dealer') {
       fetchJobs();
       fetchDealerData();
       fetchActiveAssignments();
     }
-  }, [userProfile]);
+  }, [userProfile, fetchJobs, fetchDealerData, fetchActiveAssignments]);
 
   // Enhanced real-time subscription with error recovery
   useEffect(() => {
@@ -132,29 +226,14 @@ const DealerDashboard = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userProfile?.dealer_id, toast]);
-  const fetchJobs = async () => {
+  }, [userProfile?.dealer_id, toast, fetchActiveAssignments, fetchDealerData, fetchJobs]);
+  
+  const handleRefreshJobs = useCallback(async () => {
+    await fetchJobs();
+    await fetchActiveAssignments();
+    
     if (!userProfile?.dealer_id) return;
-    try {
-      const {
-        data,
-        error
-      } = await supabase.from('jobs').select(`
-          *,
-          assignments(*, drivers(name, email, phone, rating_avg, rating_count, available))
-        `).eq('dealer_id', userProfile.dealer_id).order('created_at', {
-        ascending: false
-      });
-      if (error) throw error;
-      setJobs(data || []);
-    } catch (error) {
-      console.error('Error fetching jobs:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const fetchActiveAssignments = async () => {
-    if (!userProfile?.dealer_id) return;
+    
     try {
       const {
         data,
@@ -196,36 +275,22 @@ const DealerDashboard = () => {
         `).eq('jobs.dealer_id', userProfile.dealer_id).is('ended_at', null).not('accepted_at', 'is', null).order('accepted_at', {
         ascending: false
       });
+      
       if (error) {
         console.error('❌ Error fetching active assignments:', error);
         return;
       }
+      
       setActiveAssignments(data || []);
+      
+      toast({
+        title: "Jobs Refreshed",
+        description: "Checking for new job updates..."
+      });
     } catch (error) {
       console.error('❌ Error in fetchActiveAssignments:', error);
     }
-  };
-  const fetchDealerData = async () => {
-    if (!userProfile?.dealer_id) return;
-    try {
-      const {
-        data,
-        error
-      } = await supabase.from('dealers').select('*').eq('id', userProfile.dealer_id).single();
-      if (error) throw error;
-      setDealerData(data);
-    } catch (error) {
-      console.error('Error fetching dealer data:', error);
-    }
-  };
-  const handleRefreshJobs = async () => {
-    await fetchJobs();
-    await fetchActiveAssignments();
-    toast({
-      title: "Jobs Refreshed",
-      description: "Checking for new job updates..."
-    });
-  };
+  }, [userProfile?.dealer_id, fetchJobs, fetchActiveAssignments, toast]);
   const handlePhotoUpdate = (newUrl: string) => {
     if (dealerData) {
       setDealerData({
@@ -234,14 +299,16 @@ const DealerDashboard = () => {
       });
     }
   };
-  const handleDealerProfileUpdate = (updatedData: any) => {
+  const handleDealerProfileUpdate = (updatedData: Partial<DealerData>) => {
     setDealerData(prev => ({
       ...prev,
       ...updatedData
     }));
   };
+  
   if (loading) {
-    return <div className="min-h-screen relative bg-black" style={{
+    return (
+      <div className="min-h-screen relative bg-black" style={{
       backgroundImage: `url(${mapBackgroundImage})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center top',
@@ -256,11 +323,14 @@ const DealerDashboard = () => {
             <div className="h-64 bg-white/10 rounded-2xl"></div>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
   const openJobs = jobs.filter(job => job.status === 'open').length;
   const completedJobs = jobs.filter(job => job.status === 'completed').length;
-  return <>
+  
+  return (
+    <>
       <title>Dealer Dashboard | SwapRunn</title>
       <meta name="description" content="Manage your vehicle deliveries and track driver requests from your SwapRunn dealer dashboard." />
       <link rel="canonical" href="/dealer/dashboard" />
@@ -481,6 +551,8 @@ const DealerDashboard = () => {
         userType={userProfile?.user_type || 'dealer'}
         currentUserId={userProfile?.user_id || 'guest'}
       />
-    </>;
+    </>
+  );
 };
+
 export default DealerDashboard;

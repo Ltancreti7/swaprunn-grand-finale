@@ -136,7 +136,7 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg bg-background border">
+      <DialogContent className="sm:max-w-lg bg-background border z-[60] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Driver Profile</DialogTitle>
         </DialogHeader>
@@ -180,41 +180,47 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
             <div className="space-y-2">
               <Label htmlFor="day-off">Preferred Day Off</Label>
               <Select value={dayOff} onValueChange={setDayOff}>
-                <SelectTrigger className="bg-background border-border">
+                <SelectTrigger className="bg-background border-border hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                   <SelectValue placeholder="Select a day (optional)" />
                 </SelectTrigger>
-                <SelectContent className="bg-background border-border z-50">
-                  <SelectItem value="no-preference">No preference</SelectItem>
-                  <SelectItem value="monday">Monday</SelectItem>
-                  <SelectItem value="tuesday">Tuesday</SelectItem>
-                  <SelectItem value="wednesday">Wednesday</SelectItem>
-                  <SelectItem value="thursday">Thursday</SelectItem>
-                  <SelectItem value="friday">Friday</SelectItem>
-                  <SelectItem value="saturday">Saturday</SelectItem>
-                  <SelectItem value="sunday">Sunday</SelectItem>
+                <SelectContent className="bg-popover border-border shadow-lg z-[100] max-h-[300px] overflow-auto">
+                  <SelectItem value="no-preference" className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer">No preference</SelectItem>
+                  <SelectItem value="monday" className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer">Monday</SelectItem>
+                  <SelectItem value="tuesday" className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer">Tuesday</SelectItem>
+                  <SelectItem value="wednesday" className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer">Wednesday</SelectItem>
+                  <SelectItem value="thursday" className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer">Thursday</SelectItem>
+                  <SelectItem value="friday" className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer">Friday</SelectItem>
+                  <SelectItem value="saturday" className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer">Saturday</SelectItem>
+                  <SelectItem value="sunday" className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer">Sunday</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="max-miles">Maximum Miles Willing to Drive: {maxMiles} miles</Label>
-              <Slider
-                id="max-miles"
-                min={10}
-                max={200}
-                step={5}
-                value={[maxMiles]}
-                onValueChange={(value) => setMaxMiles(value[0])}
-                className="w-full"
-              />
+            <div className="space-y-3 py-2">
+              <Label htmlFor="max-miles" className="text-sm font-medium">
+                Maximum Miles Willing to Drive: <span className="font-bold text-primary">{maxMiles} miles</span>
+              </Label>
+              <div className="px-2">
+                <Slider
+                  id="max-miles"
+                  min={10}
+                  max={200}
+                  step={5}
+                  value={[maxMiles]}
+                  onValueChange={(value) => setMaxMiles(value[0])}
+                  className="w-full cursor-pointer"
+                />
+              </div>
               <p className="text-xs text-muted-foreground">
                 Set the maximum distance you're willing to drive for a job
               </p>
             </div>
 
-            <div className="flex items-center justify-between space-x-2">
-              <div className="space-y-0.5">
-                <Label htmlFor="city-ok">Comfortable with City Driving</Label>
+            <div className="flex items-center justify-between space-x-2 py-2">
+              <div className="space-y-0.5 flex-1">
+                <Label htmlFor="city-ok" className="cursor-pointer text-sm font-medium">
+                  Comfortable with City Driving
+                </Label>
                 <p className="text-xs text-muted-foreground">
                   Are you comfortable driving in city traffic?
                 </p>
@@ -223,12 +229,15 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
                 id="city-ok"
                 checked={cityOk}
                 onCheckedChange={setCityOk}
+                className="flex-shrink-0"
               />
             </div>
 
-            <div className="flex items-center justify-between space-x-2">
-              <div className="space-y-0.5">
-                <Label htmlFor="available">Available for Jobs</Label>
+            <div className="flex items-center justify-between space-x-2 py-2">
+              <div className="space-y-0.5 flex-1">
+                <Label htmlFor="available" className="cursor-pointer text-sm font-medium">
+                  Available for Jobs
+                </Label>
                 <p className="text-xs text-muted-foreground">
                   Turn this off when you're not available to accept new jobs
                 </p>
@@ -237,22 +246,25 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
                 id="available"
                 checked={available}
                 onCheckedChange={setAvailable}
+                className="flex-shrink-0"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 pt-4 border-t">
           <Button
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
+            className="min-w-[80px] cursor-pointer hover:bg-accent hover:text-accent-foreground"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={isLoading}
+            className="min-w-[120px] cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {isLoading ? "Saving..." : "Save Changes"}
           </Button>

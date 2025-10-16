@@ -114,11 +114,14 @@ const DriverRequests = () => {
       } else {
         throw new Error('Failed to accept job');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error accepting request:', error);
       
       // Handle specific error cases
-      if (error.message === 'JOB_ALREADY_TAKEN' || error?.code === '23505' || error?.message?.includes('duplicate key')) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorCode = (error as { code?: string })?.code;
+      
+      if (errorMessage === 'JOB_ALREADY_TAKEN' || errorCode === '23505' || errorMessage?.includes('duplicate key')) {
         toast({
           title: "Job already taken",
           description: "Another driver has already accepted this job.",
@@ -203,7 +206,7 @@ const DriverRequests = () => {
               const estimatedPay = Math.round(estimatedHours * 20); // $20/hour
               
               return (
-                <Card key={request.id} className="bg-white/20 border-white/30 backdrop-blur-sm border-l-4 border-primary shadow-lg">
+                <Card key={request.id} className="bg-white/20 backdrop-blur-sm border-l-4 border-primary shadow-lg">
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <div>

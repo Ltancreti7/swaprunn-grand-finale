@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import mapBackgroundImage from "@/assets/map-background.jpg";
+import BackButton from "@/components/BackButton";
 
 const PasswordResetRequest = () => {
   const [email, setEmail] = useState("");
@@ -53,6 +54,7 @@ const PasswordResetRequest = () => {
         backgroundPosition: "center",
       }}
     >
+      <BackButton />
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0" />
 
       <div className="relative z-10 container max-w-7xl mx-auto px-4 sm:px-6 pt-28">

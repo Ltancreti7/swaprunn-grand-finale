@@ -13,6 +13,38 @@ const BackButton = () => {
   }
 
   const handleBack = () => {
+    // Smart navigation based on current page
+    const currentPath = location.pathname;
+    
+    // Auth pages should go back to home
+    if (currentPath.includes('/auth') || 
+        currentPath.includes('/dealer/auth') || 
+        currentPath.includes('/driver/auth') || 
+        currentPath.includes('/swap-coordinator/auth')) {
+      navigate('/');
+      return;
+    }
+    
+    // Registration pages should go back to dealers overview
+    if (currentPath.includes('/registration') || currentPath.includes('/dealership/register')) {
+      navigate('/dealers');
+      return;
+    }
+    
+    // Password reset should go back to appropriate auth page
+    if (currentPath.includes('/auth/reset')) {
+      const referrer = document.referrer;
+      if (referrer.includes('dealer')) {
+        navigate('/dealer/auth');
+      } else if (referrer.includes('driver')) {
+        navigate('/driver/auth');
+      } else {
+        navigate('/');
+      }
+      return;
+    }
+    
+    // Default behavior: try browser back, fallback to home
     if (window.history.length > 1) {
       navigate(-1);
     } else {

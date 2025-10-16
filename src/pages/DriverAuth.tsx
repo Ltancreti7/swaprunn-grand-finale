@@ -12,6 +12,7 @@ import { AuthHeader } from "@/components/AuthHeader";
 import SiteHeader from "@/components/SiteHeader";
 import { ArrowLeft } from "lucide-react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
+import BackButton from "@/components/BackButton";
 
 const SAVED_EMAIL_KEY = 'swaprunn_driver_saved_email';
 const SAVED_PASSWORD_KEY = 'swaprunn_driver_saved_password'; 
@@ -186,6 +187,9 @@ const DriverAuth = () => {
           backgroundPosition: 'center'
         }}
       >
+        {/* Back Button */}
+        <BackButton />
+        
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
       

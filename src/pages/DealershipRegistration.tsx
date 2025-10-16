@@ -13,6 +13,7 @@ import { CheckCircle, Building2, Copy } from "lucide-react";
 import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import { generateDealershipCode } from "@/lib/dealershipCode";
+import BackButton from "@/components/BackButton";
 
 const DealershipRegistration = () => {
   const navigate = useNavigate();
@@ -204,11 +205,12 @@ const DealershipRegistration = () => {
 
       setShowSuccess(true);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Registration error:", error);
       
+      const errorMessage = error instanceof Error ? error.message : String(error);
       // Special handling for email already in use
-      if (error.message.includes('already registered')) {
+      if (errorMessage.includes('already registered')) {
         toast({
           title: "Email Already Registered",
           description: "This email is already in use. Please sign in instead.",
@@ -227,7 +229,7 @@ const DealershipRegistration = () => {
       } else {
         toast({
           title: "Registration Failed",
-          description: error.message || "An error occurred during registration.",
+          description: errorMessage || "An error occurred during registration.",
           variant: "destructive"
         });
       }
@@ -314,6 +316,7 @@ const DealershipRegistration = () => {
 
   return (
     <div className="min-h-screen bg-black text-white py-12 px-6">
+      <BackButton />
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <Logo size="auth" />

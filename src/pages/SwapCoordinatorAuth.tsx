@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import mapBackgroundImage from "@/assets/map-background.jpg";
+import BackButton from "@/components/BackButton";
 
 export default function SwapCoordinatorAuth() {
   const navigate = useNavigate();
@@ -86,6 +87,9 @@ export default function SwapCoordinatorAuth() {
         backgroundPosition: 'center'
       }}
     >
+      {/* Back Button */}
+      <BackButton />
+      
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
       

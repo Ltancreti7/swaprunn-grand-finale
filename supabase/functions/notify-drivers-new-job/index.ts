@@ -34,41 +34,48 @@ serve(async (req) => {
     const jobData: NewJobNotification = await req.json();
     console.log('Processing new job notification:', jobData);
 
-    // Get all active drivers' push subscriptions
-    const { data: drivers, error: driversError } = await supabase
-      .from('drivers')
-      .select('id, name')
-      .eq('available', true);
+    // Get the job details including dealer_id
+    const { data: job, error: jobError } = await supabase
+      .from('jobs')
+      .select('dealer_id')
+      .eq('id', jobData.job_id)
+      .single();
 
-    if (driversError) {
-      console.error('Error fetching drivers:', driversError);
-      throw driversError;
-    }
-
-    if (!drivers || drivers.length === 0) {
-      console.log('No available drivers found');
+    if (jobError || !job) {
+      console.error('Error fetching job details:', jobError);
       return new Response(
-        JSON.stringify({ success: true, sent: 0, message: 'No available drivers' }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Job not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Get driver user IDs from profiles
-    const { data: profiles, error: profilesError } = await supabase
+    // Get drivers from the same dealership that are available
+    const { data: driverProfiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('user_id, driver_id')
+      .select(`
+        user_id,
+        driver_id,
+        drivers!inner(id, name, available)
+      `)
       .eq('user_type', 'driver')
-      .in('driver_id', drivers.map(d => d.id));
+      .eq('dealer_id', job.dealer_id)
+      .eq('drivers.available', true);
 
-    if (profilesError || !profiles || profiles.length === 0) {
+    if (profilesError) {
       console.error('Error fetching driver profiles:', profilesError);
+      throw profilesError;
+    }
+
+    if (!driverProfiles || driverProfiles.length === 0) {
+      console.log('No available drivers found for dealership:', job.dealer_id);
       return new Response(
-        JSON.stringify({ success: true, sent: 0, message: 'No driver profiles found' }),
+        JSON.stringify({ success: true, sent: 0, message: 'No available drivers from this dealership' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userIds = profiles.map(p => p.user_id);
+    const drivers = driverProfiles.map(p => p.drivers).filter(Boolean);
+    const userIds = driverProfiles.map(p => p.user_id);
 
     // Get push subscriptions for these drivers
     const { data: subscriptions, error: subsError } = await supabase
@@ -141,7 +148,7 @@ serve(async (req) => {
       successCount = results.filter(Boolean).length;
     }
 
-    // Also send SMS notifications to drivers (if they have preferences enabled)
+    // Also send SMS notifications to drivers from the same dealership (if they have preferences enabled)
     let smsCount = 0;
     for (const driver of drivers) {
       // Get driver details including phone
@@ -181,7 +188,7 @@ serve(async (req) => {
         success: (successCount + smsCount) > 0
       });
 
-    console.log(`Notifications sent: ${successCount} push, ${smsCount} SMS to ${drivers.length} drivers`);
+    console.log(`Notifications sent to dealership drivers: ${successCount} push, ${smsCount} SMS to ${drivers.length} drivers from dealership ${job.dealer_id}`);
 
     return new Response(
       JSON.stringify({ 

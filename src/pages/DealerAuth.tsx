@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { AuthHeader } from "@/components/AuthHeader";
 import { Crown, ArrowLeft, Fingerprint } from "lucide-react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { useBiometricAuth } from "@/hooks/useBiometricAuth";
+import BackButton from "@/components/BackButton";
 
 const SAVED_EMAIL_KEY = 'swaprunn_saved_email';
 const SAVED_PASSWORD_KEY = 'swaprunn_saved_password';
@@ -54,14 +55,7 @@ const DealerAuth = () => {
     setRememberMe(savedRememberMe);
   }, []);
 
-  // Try biometric login on mount if available
-  useEffect(() => {
-    if (!isSignUp && biometric.isAvailable) {
-      attemptBiometricLogin();
-    }
-  }, [biometric.isAvailable, isSignUp]);
-
-  const attemptBiometricLogin = async () => {
+  const attemptBiometricLogin = useCallback(async () => {
     try {
       const credentials = await biometric.getCredentials();
       if (!credentials) return;
@@ -88,11 +82,17 @@ const DealerAuth = () => {
         title: "Welcome back!",
         description: "Signed in with Face ID"
       });
-      navigate('/dealer/dashboard');
     } catch (error) {
-      console.log('Biometric login not available');
+      console.error('Biometric login error:', error);
     }
-  };
+  }, [biometric, toast]);
+
+  // Try biometric login on mount if available
+  useEffect(() => {
+    if (!isSignUp && biometric.isAvailable) {
+      attemptBiometricLogin();
+    }
+  }, [biometric.isAvailable, isSignUp, attemptBiometricLogin]);
 
   const createDealerProfile = async () => {
     try {
@@ -231,6 +231,9 @@ const DealerAuth = () => {
     backgroundSize: 'cover',
     backgroundPosition: 'center'
   }}>
+      {/* Back Button */}
+      <BackButton />
+      
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
       
