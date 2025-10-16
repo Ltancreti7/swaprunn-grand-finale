@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Camera, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Camera, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -95,6 +95,45 @@ export function DealerProfilePhoto({
     }
   };
 
+  const handleRemovePhoto = async () => {
+    if (!user || !userProfile?.dealer_id) return;
+
+    setUploading(true);
+    try {
+      // Update dealer record to remove photo URL
+      const { error: updateError } = await supabase
+        .from('dealers')
+        .update({ profile_photo_url: null })
+        .eq('id', userProfile.dealer_id);
+
+      if (updateError) throw updateError;
+
+      // Try to delete the file from storage (optional, won't fail if file doesn't exist)
+      const fileName = `${user.id}/profile.jpg`;
+      await supabase.storage
+        .from('dealer-photos')
+        .remove([fileName]);
+
+      onPhotoUpdate?.('');
+      setPreviewUrl(null);
+      setShowPositionControls(false);
+      
+      toast({
+        title: "Photo removed",
+        description: "Your profile photo has been removed successfully"
+      });
+    } catch (error) {
+      console.error('Error removing photo:', error);
+      toast({
+        title: "Remove failed",
+        description: "Failed to remove your profile photo. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const adjustPosition = (direction: 'up' | 'down' | 'left' | 'right') => {
     setImagePosition(prev => {
       const step = 10;
@@ -167,17 +206,35 @@ export function DealerProfilePhoto({
         </div>
       )}
       
-      {/* Camera overlay button */}
-      <button 
-        onClick={() => {
-          if (displayUrl) setShowPositionControls(true);
-          fileInputRef.current?.click();
-        }} 
-        disabled={uploading} 
-        className="absolute bottom-2 right-2 w-14 h-14 bg-[#E11900] hover:bg-[#E11900]/90 disabled:bg-[#E11900]/70 rounded-full flex items-center justify-center transition-colors shadow-lg"
-      >
-        {uploading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Camera className="w-7 h-7 text-white" />}
-      </button>
+      {/* Camera and Remove buttons */}
+      <div className="absolute bottom-2 right-2 flex gap-2">
+        {/* Remove photo button - only show if there's a photo */}
+        {displayUrl && (
+          <button 
+            onClick={handleRemovePhoto}
+            disabled={uploading} 
+            className="w-8 h-8 bg-red-600 hover:bg-red-700 disabled:bg-red-600/70 rounded-full flex items-center justify-center transition-colors shadow-lg"
+          >
+            {uploading ? (
+              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Trash2 className="w-3 h-3 text-white" />
+            )}
+          </button>
+        )}
+        
+        {/* Camera button */}
+        <button 
+          onClick={() => {
+            if (displayUrl) setShowPositionControls(true);
+            fileInputRef.current?.click();
+          }} 
+          disabled={uploading} 
+          className="w-10 h-10 bg-[#E11900] hover:bg-[#E11900]/90 disabled:bg-[#E11900]/70 rounded-full flex items-center justify-center transition-colors shadow-lg"
+        >
+          {uploading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Camera className="w-4 h-4 text-white" />}
+        </button>
+      </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
     </div>;

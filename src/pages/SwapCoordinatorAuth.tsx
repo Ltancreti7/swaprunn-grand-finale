@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { AuthHeader } from "@/components/AuthHeader";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 
 export default function SwapCoordinatorAuth() {
@@ -70,8 +69,9 @@ export default function SwapCoordinatorAuth() {
         toast.success("Account created! Redirecting...");
         navigate("/swap-coordinator/dashboard");
       }
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -170,6 +170,19 @@ export default function SwapCoordinatorAuth() {
                   minLength={isLogin ? undefined : 6}
                 />
               </div>
+
+              {isLogin && (
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="px-0 text-sm text-white/80 hover:text-white"
+                    onClick={() => navigate("/auth/reset")}
+                  >
+                    Forgot password?
+                  </Button>
+                </div>
+              )}
 
               <Button
                 type="submit"

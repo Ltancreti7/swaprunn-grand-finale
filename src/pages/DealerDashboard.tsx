@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Truck, RefreshCw, Plus, Clock, User, Building2, Star, MapPin, Mail, Calendar } from "lucide-react";
+import { Truck, RefreshCw, Plus, Clock, User, Building2, Star, MapPin, Mail, Calendar, ArrowLeft } from "lucide-react";
 import { MobilePullToRefresh } from "@/components/ui/mobile-pull-to-refresh";
 import { useToast } from "@/hooks/use-toast";
 import { EditDealerProfile } from "@/components/dealer/EditDealerProfile";
@@ -14,6 +14,9 @@ import { DealerProfilePhoto } from "@/components/dealer/DealerProfilePhoto";
 import { JobStatsCard } from "@/components/dealer/JobStatsCard";
 import { JobCard } from "@/components/dealer/JobCard";
 import { AssignmentCard } from "@/components/dealer/AssignmentCard";
+import { NavigationDrawer } from "@/components/NavigationDrawer";
+import { MessagesButton } from "@/components/messages/MessagesButton";
+import { MessagesOverlay } from "@/components/messages/MessagesOverlay";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 interface DealerData {
   id: string;
@@ -71,12 +74,16 @@ const DealerDashboard = () => {
   const [activeAssignments, setActiveAssignments] = useState<ActiveAssignment[]>([]);
   const [newAssignmentsCount, setNewAssignmentsCount] = useState(0);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
   const {
     user,
     userProfile,
     signOut
   } = useAuth();
   const navigate = useNavigate();
+  const {
+    totalUnread
+  } = useUnreadMessages();
   const {
     toast
   } = useToast();
@@ -267,91 +274,117 @@ const DealerDashboard = () => {
     }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
         
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-20 pb-12">
-          <div className="space-y-6 sm:space-y-8">
+        {/* Navigation Header */}
+        <header className="fixed top-2 left-0 right-0 z-[60] bg-black/50 backdrop-blur-xl border-b border-white/10 shadow-lg">
+          <div className="flex items-center justify-between h-16 px-4 py-2">
+            {/* Left: Hamburger Menu */}
+            <div className="flex items-center justify-center min-w-[40px] h-[40px]">
+              <NavigationDrawer />
+            </div>
+
+            {/* Center: Logo */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <img 
+                src="/swaprunn-logo-2025.png?v=20251001" 
+                alt="SwapRunn" 
+                className="h-16 w-auto transition-all duration-300 drop-shadow-lg" 
+              />
+            </div>
+
+            {/* Right: Messages Button */}
+            <div className="flex items-center justify-center min-w-[40px] h-[40px]">
+              <MessagesButton onClick={() => setShowMessages(true)} unreadCount={totalUnread} />
+            </div>
+          </div>
+        </header>
+        
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-12">
+          <div className="space-y-4 sm:space-y-6 lg:space-y-8">
             {/* Page Header */}
-            <div className="text-center lg:text-left flex items-center justify-between">
+            <div className="text-center flex items-center justify-center">
               <div>
-                <h1 className="text-5xl font-display font-black tracking-tight text-white mb-4">Dealer Portal</h1>
-                <p className="text-xl text-white/80 font-light">Manage your deliveries and track driver assignments</p>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-black tracking-tight text-white mb-2 sm:mb-4">Dealer Portal</h1>
+                <p className="text-base sm:text-lg lg:text-xl text-white/80 font-light px-4">Manage your deliveries and track driver assignments</p>
               </div>
             </div>
 
             {/* Horizontal Navigation Tabs */}
             <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="w-full grid grid-cols-4 bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/20 rounded-2xl h-auto p-2 gap-2 shadow-lg">
-                <TabsTrigger value="profile" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0">
+              <TabsList className="w-full grid grid-cols-4 bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/20 rounded-xl sm:rounded-2xl h-auto p-1 sm:p-2 gap-1 sm:gap-2 shadow-lg">
+                <TabsTrigger value="profile" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-2 sm:py-3 border-0">
                   Profile
                 </TabsTrigger>
-                <TabsTrigger value="pending" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0 relative">
+                <TabsTrigger value="pending" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-2 sm:py-3 border-0 relative">
                   Pending
-                  {openJobs > 0 && <span className="absolute -top-1 -right-1 bg-[#E11900] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
+                  {openJobs > 0 && <span className="absolute -top-1 -right-1 bg-[#E11900] text-white text-xs font-bold rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center shadow-lg text-[10px] sm:text-xs">
                       {openJobs}
                     </span>}
                 </TabsTrigger>
-                <TabsTrigger value="assigned" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0 relative" onClick={() => setNewAssignmentsCount(0)}>
+                <TabsTrigger value="assigned" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-2 sm:py-3 border-0 relative" onClick={() => setNewAssignmentsCount(0)}>
                   Assigned
-                  {newAssignmentsCount > 0 && <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
+                  {newAssignmentsCount > 0 && <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center shadow-lg animate-pulse text-[10px] sm:text-xs">
                       {newAssignmentsCount}
                     </span>}
                 </TabsTrigger>
-                <TabsTrigger value="done" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0">
+                <TabsTrigger value="done" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-2 sm:py-3 border-0">
                   Done
                 </TabsTrigger>
               </TabsList>
 
               {/* Profile Tab */}
-              <TabsContent value="profile" className="mt-2 space-y-6 animate-fade-in">
-                <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
+              <TabsContent value="profile" className="mt-2 space-y-4 sm:space-y-6 animate-fade-in">
+                {/* Request Button - Moved above profile card */}
+                <Link to="/dealer/request-simple" className="w-full">
+                  <Button className="w-full bg-[#E11900] hover:bg-[#E11900]/90 text-white h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all">
+                    <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                    Request Driver
+                  </Button>
+                </Link>
+
+                <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-xl sm:rounded-2xl">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col items-center gap-6 sm:gap-8 md:flex-row md:items-start md:gap-12">
                       <div className="flex-shrink-0">
                         <DealerProfilePhoto photoUrl={dealerData?.profile_photo_url} dealerName={dealerData?.name} onPhotoUpdate={handlePhotoUpdate} />
                       </div>
                       <div className="flex-1 w-full min-w-0 text-center md:text-left">
-                        <div className="flex flex-col md:flex-row items-center md:items-center gap-3 mb-8">
-                          <Star className="h-7 w-7 text-yellow-400 fill-current flex-shrink-0" />
-                          <div className="flex flex-col">
-                            <h1 className="text-3xl md:text-4xl font-bold text-white">{dealerData?.name}</h1>
+                        <div className="flex flex-col items-center gap-3 mb-6 sm:mb-8 md:flex-row md:items-center">
+                          <Star className="h-6 w-6 sm:h-7 sm:w-7 text-yellow-400 fill-current flex-shrink-0" />
+                          <div className="flex flex-col text-center md:text-left">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">{dealerData?.name}</h1>
                             {dealerData?.store ? (
-                              <span className="text-sm text-white/70 mt-1">
+                              <span className="text-xs sm:text-sm text-white/70 mt-1">
                                 {dealerData.store}
                               </span>
                             ) : (
                               <button
                                 onClick={() => setIsEditProfileOpen(true)}
-                                className="text-sm text-white/50 hover:text-[#E11900] mt-1 underline"
+                                className="text-xs sm:text-sm text-white/50 hover:text-[#E11900] mt-1 underline"
                               >
                                 Add your dealership
                               </button>
                             )}
-                            {dealerData?.position && <span className="text-lg md:text-xl text-white/90 font-medium mt-2">
+                            {dealerData?.position && <span className="text-base sm:text-lg md:text-xl text-white/90 font-medium mt-2">
                                 {dealerData.position}
                               </span>}
                           </div>
                         </div>
-                        <div className="space-y-4 mb-8">
+                        <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                           <div className="flex items-center justify-center md:justify-start gap-3 text-white/90">
-                            <Mail className="h-5 w-5 text-white/60 flex-shrink-0" />
-                            <span className="text-base break-all md:truncate">
+                            <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-white/60 flex-shrink-0" />
+                            <span className="text-sm sm:text-base break-all md:truncate">
                               {dealerData?.email || user?.email}
                             </span>
                           </div>
                           <div className="flex items-center justify-center md:justify-start gap-3 text-white/90">
-                            <Calendar className="h-5 w-5 text-white/60 flex-shrink-0" />
-                            <span className="text-base">
+                            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-white/60 flex-shrink-0" />
+                            <span className="text-sm sm:text-base">
                               Member since {new Date(dealerData?.created_at || '').toLocaleDateString()}
                             </span>
                           </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                          <Link to="/dealer/request-simple" className="w-full sm:w-auto">
-                            <Button className="w-full sm:w-auto bg-[#E11900] hover:bg-[#E11900]/90 text-white h-12 px-8 rounded-2xl text-base font-semibold shadow-lg hover:shadow-xl transition-all">
-                              <Plus className="h-5 w-5 mr-2" />
-                              Request Driver
-                            </Button>
-                          </Link>
-                          <Button onClick={() => setIsEditProfileOpen(true)} variant="outline" className="w-full sm:w-auto h-12 px-8 rounded-2xl border-white/40 text-slate-950 bg-white hover:bg-white/90 text-base font-semibold shadow-lg hover:shadow-xl transition-all">
+                        <div className="flex justify-center md:justify-start">
+                          <Button onClick={() => setIsEditProfileOpen(true)} variant="outline" className="w-full sm:w-auto h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl border-white/40 text-slate-950 bg-white hover:bg-white/90 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all">
                             Edit Personal Info
                           </Button>
                         </div>
@@ -366,46 +399,46 @@ const DealerDashboard = () => {
               </TabsContent>
 
               {/* Pending Tab */}
-              <TabsContent value="pending" className="mt-2 space-y-6 animate-fade-in">
-                <h3 className="text-3xl font-bold text-white mb-2">Pending Drives</h3>
+              <TabsContent value="pending" className="mt-2 space-y-4 sm:space-y-6 animate-fade-in">
+                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2 px-2 sm:px-0">Pending Drives</h3>
                 
-                {openJobs > 0 ? <div className="grid gap-4">
+                {openJobs > 0 ? <div className="grid gap-3 sm:gap-4">
                     {jobs.filter(job => job.status === 'open').map(job => <JobCard key={job.id} job={job} onCancel={fetchJobs} />)}
-                  </div> : <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-lg rounded-2xl">
-                    <CardContent className="p-12 text-center">
-                      <Truck className="h-20 w-20 text-white/30 mx-auto mb-6" />
-                      <h4 className="text-2xl font-semibold text-white mb-3">No Pending Drives</h4>
-                      <p className="text-white/60 text-lg">Create a new delivery request to get started.</p>
+                  </div> : <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-lg rounded-xl sm:rounded-2xl">
+                    <CardContent className="p-8 sm:p-12 text-center">
+                      <Truck className="h-16 w-16 sm:h-20 sm:w-20 text-white/30 mx-auto mb-4 sm:mb-6" />
+                      <h4 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-3">No Pending Drives</h4>
+                      <p className="text-white/60 text-base sm:text-lg">Create a new delivery request to get started.</p>
                     </CardContent>
                   </Card>}
               </TabsContent>
 
               {/* Assigned Tab */}
-              <TabsContent value="assigned" className="mt-2 space-y-6 animate-fade-in">
-                <h3 className="text-3xl font-bold text-white mb-2 px-[16px]">Active Assignments</h3>
+              <TabsContent value="assigned" className="mt-2 space-y-4 sm:space-y-6 animate-fade-in">
+                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2 px-2 sm:px-4">Active Assignments</h3>
                 
-                {activeAssignments.length > 0 ? <div className="space-y-6">
+                {activeAssignments.length > 0 ? <div className="space-y-4 sm:space-y-6">
                     {activeAssignments.map(assignment => <AssignmentCard key={assignment.id} assignment={assignment} currentUserId={userProfile?.user_id || ''} />)}
-                  </div> : <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-lg rounded-2xl">
-                    <CardContent className="p-12 text-center">
-                      <User className="h-20 w-20 text-white/30 mx-auto mb-6" />
-                      <h4 className="text-2xl font-semibold text-white mb-3">No Assigned Jobs</h4>
-                      <p className="text-white/60 text-lg">No drivers are currently assigned to jobs.</p>
+                  </div> : <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-lg rounded-xl sm:rounded-2xl">
+                    <CardContent className="p-8 sm:p-12 text-center">
+                      <User className="h-16 w-16 sm:h-20 sm:w-20 text-white/30 mx-auto mb-4 sm:mb-6" />
+                      <h4 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-3">No Assigned Jobs</h4>
+                      <p className="text-white/60 text-base sm:text-lg">No drivers are currently assigned to jobs.</p>
                     </CardContent>
                   </Card>}
               </TabsContent>
 
               {/* Done Tab */}
-              <TabsContent value="done" className="mt-2 space-y-6 animate-fade-in">
-                <h3 className="text-3xl font-bold text-white mb-2">Complete</h3>
+              <TabsContent value="done" className="mt-2 space-y-4 sm:space-y-6 animate-fade-in">
+                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2 px-2 sm:px-0">Complete</h3>
                 
-                {completedJobs > 0 ? <div className="grid gap-4">
+                {completedJobs > 0 ? <div className="grid gap-3 sm:gap-4">
                     {jobs.filter(job => job.status === 'completed').map(job => <JobCard key={job.id} job={job} />)}
-                  </div> : <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-lg rounded-2xl">
-                    <CardContent className="p-12 text-center">
-                      <Clock className="h-20 w-20 text-white/30 mx-auto mb-6" />
-                      <h4 className="text-2xl font-semibold text-white mb-3">No Completed Jobs</h4>
-                      <p className="text-white/60 text-lg">Your completed jobs will appear here.</p>
+                  </div> : <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-lg rounded-xl sm:rounded-2xl">
+                    <CardContent className="p-8 sm:p-12 text-center">
+                      <Clock className="h-16 w-16 sm:h-20 sm:w-20 text-white/30 mx-auto mb-4 sm:mb-6" />
+                      <h4 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-3">No Completed Jobs</h4>
+                      <p className="text-white/60 text-base sm:text-lg">Your completed jobs will appear here.</p>
                     </CardContent>
                   </Card>}
               </TabsContent>
@@ -414,22 +447,22 @@ const DealerDashboard = () => {
         </div>
         
         {/* Footer */}
-        <footer className="relative z-10 py-12 border-t border-white/10">
-          <div className="container mx-auto px-6">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              <div className="flex items-center gap-4">
-                <img src="/swaprunn-logo-2025.png?v=20251001" alt="SwapRunn" className="h-8 w-auto" />
-                <span className="text-white/70">© SwapRunn</span>
+        <footer className="relative z-10 py-8 sm:py-12 border-t border-white/10">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="flex flex-col items-center gap-4 sm:gap-6 md:flex-row md:justify-between">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <img src="/swaprunn-logo-2025.png?v=20251001" alt="SwapRunn" className="h-6 sm:h-8 w-auto" />
+                <span className="text-white/70 text-sm sm:text-base">© SwapRunn</span>
               </div>
               
-              <div className="flex gap-6">
-                <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">
+              <div className="flex gap-4 sm:gap-6">
+                <Link to="/privacy" className="text-white/70 hover:text-white transition-colors text-sm sm:text-base">
                   Privacy
                 </Link>
-                <Link to="/terms" className="text-white/70 hover:text-white transition-colors">
+                <Link to="/terms" className="text-white/70 hover:text-white transition-colors text-sm sm:text-base">
                   Terms
                 </Link>
-                <Link to="/about" className="text-white/70 hover:text-white transition-colors">
+                <Link to="/about" className="text-white/70 hover:text-white transition-colors text-sm sm:text-base">
                   Contact
                 </Link>
               </div>
@@ -440,6 +473,14 @@ const DealerDashboard = () => {
       
       {/* Edit Profile Modal */}
       {dealerData && <EditDealerProfile isOpen={isEditProfileOpen} onClose={() => setIsEditProfileOpen(false)} dealerData={dealerData} onUpdate={handleDealerProfileUpdate} />}
+      
+      {/* Messages Overlay */}
+      <MessagesOverlay 
+        isOpen={showMessages} 
+        onClose={() => setShowMessages(false)} 
+        userType={userProfile?.user_type || 'dealer'}
+        currentUserId={userProfile?.user_id || 'guest'}
+      />
     </>;
 };
 export default DealerDashboard;

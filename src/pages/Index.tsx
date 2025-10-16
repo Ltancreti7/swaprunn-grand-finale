@@ -70,22 +70,22 @@ const Index = () => {
               <img 
                 src="/swaprunn-logo-2025.png?v=20251015" 
                 alt="SwapRunn" 
-                className="h-32 w-auto hover:opacity-80 transition-opacity" 
+                className="h-12 sm:h-14 w-auto hover:opacity-80 transition-opacity" 
               />
             </Link>
 
             {/* Right - Simple Navigation */}
-            <div className="flex items-center space-x-8">
-              <Link to="/drivers" className="text-white/70 hover:text-white transition-colors font-medium">
+            <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-8">
+              <Link to="/drivers" className="hidden sm:block text-white/70 hover:text-white transition-colors font-medium text-sm lg:text-base">
                 For Drivers
               </Link>
-              <Link to="/dealership/register" className="text-white/70 hover:text-white transition-colors font-medium">
+              <Link to="/dealership/register" className="hidden md:block text-white/70 hover:text-white transition-colors font-medium text-sm lg:text-base">
                 For Dealerships
               </Link>
-              <Button asChild variant="ghost" className="text-white/90 hover:text-white hover:bg-white/10 font-medium">
+              <Button asChild variant="ghost" className="text-white/90 hover:text-white hover:bg-white/10 font-medium text-sm px-3 py-2">
                 <Link to="/dealer/auth">Sign In</Link>
               </Button>
-              <Button asChild className="bg-[#E11900] hover:bg-[#B51400] text-white rounded-lg px-6 py-2 font-medium">
+              <Button asChild className="bg-[#E11900] hover:bg-[#B51400] text-white rounded-lg px-4 sm:px-6 py-2 font-medium text-sm">
                 <Link to="/dealership/register">Get Started</Link>
               </Button>
             </div>

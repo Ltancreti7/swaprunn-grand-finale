@@ -165,10 +165,11 @@ const DriverAuth = () => {
         });
         navigate('/driver/dashboard');
       }
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Please try again.';
       toast({
         title: "Authentication failed",
-        description: error.message,
+        description: message,
         variant: "destructive"
       });
     } finally {
@@ -321,6 +322,17 @@ const DriverAuth = () => {
                       Your email and password will be saved for faster login next time
                     </p>
                   )}
+
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="px-0 text-sm text-white/80 hover:text-white"
+                      onClick={() => navigate("/auth/reset")}
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
                 </div>
               )}
               

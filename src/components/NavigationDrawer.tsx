@@ -70,21 +70,21 @@ export function NavigationDrawer() {
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
-        className="h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all duration-200 active:scale-95 shadow-lg border border-white/10"
+        className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all duration-200 active:scale-95 shadow-lg border border-white/10"
         aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
       >
-        <div className="relative w-6 h-6">
+        <div className="relative w-5 h-5">
           {/* Animated hamburger to X */}
           <span className={cn(
-            "absolute left-0 w-6 h-0.5 bg-white transition-all duration-300 ease-out",
+            "absolute left-0 w-5 h-0.5 bg-white transition-all duration-300 ease-out",
             isOpen ? "top-1/2 rotate-45 -translate-y-1/2" : "top-1"
           )} />
           <span className={cn(
-            "absolute left-0 top-1/2 w-6 h-0.5 bg-white transition-all duration-300 ease-out -translate-y-1/2",
+            "absolute left-0 top-1/2 w-5 h-0.5 bg-white transition-all duration-300 ease-out -translate-y-1/2",
             isOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"
           )} />
           <span className={cn(
-            "absolute left-0 w-6 h-0.5 bg-white transition-all duration-300 ease-out",
+            "absolute left-0 w-5 h-0.5 bg-white transition-all duration-300 ease-out",
             isOpen ? "top-1/2 -rotate-45 -translate-y-1/2" : "bottom-1"
           )} />
         </div>

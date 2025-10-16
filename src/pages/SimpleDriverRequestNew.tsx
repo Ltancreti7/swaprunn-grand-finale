@@ -402,15 +402,15 @@ const SimpleDriverRequest = () => {
         </div>
 
         {/* Step Content Card */}
-        <Card {...swipeHandlers} className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl min-h-[450px] rounded-2xl relative overflow-hidden">
+        <Card {...swipeHandlers} className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl min-h-[400px] sm:min-h-[450px] rounded-2xl relative overflow-hidden">
           {/* Swipe indicators */}
           <div className="absolute top-1/2 left-2 transform -translate-y-1/2 opacity-20 pointer-events-none">
-            {currentStep > 1 && <ChevronLeft className="h-8 w-8 text-white" />}
+            {currentStep > 1 && <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8 text-white" />}
           </div>
           <div className="absolute top-1/2 right-2 transform -translate-y-1/2 opacity-20 pointer-events-none">
-            {currentStep < totalSteps && canProceedToNext() && <ChevronRight className="h-8 w-8 text-white" />}
+            {currentStep < totalSteps && canProceedToNext() && <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8 text-white" />}
           </div>
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
             
             {/* Step 1: Vehicle Info */}
             {currentStep === 1 && (

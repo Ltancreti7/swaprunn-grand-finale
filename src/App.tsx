@@ -32,6 +32,9 @@ import BillingSettings from "./pages/BillingSettings";
 import DealersOverview from "./pages/DealersOverview";
 import SwapCoordinatorAuth from "./pages/SwapCoordinatorAuth";
 import SwapCoordinatorDashboard from "./pages/SwapCoordinatorDashboard";
+import PasswordResetRequest from "./pages/PasswordResetRequest";
+import PasswordUpdate from "./pages/PasswordUpdate";
+import DealerPortal from "./pages/DealerPortal";
 
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -91,11 +94,18 @@ const App = () => (
               <DealerSettings />
             </ProtectedRoute>
           } />
+          <Route path="/dealer/portal" element={
+            <ProtectedRoute requiredUserType="dealer">
+              <DealerPortal />
+            </ProtectedRoute>
+          } />
           <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
           <Route path="/staff/signup" element={<StaffSignup />} />
           
           <Route path="/driver/auth" element={<DriverAuth />} />
           <Route path="/driver-auth" element={<DriverAuth />} /> {/* Legacy alias */}
+          <Route path="/auth/reset" element={<PasswordResetRequest />} />
+          <Route path="/auth/password-update" element={<PasswordUpdate />} />
           <Route path="/driver/requests" element={
             <ProtectedRoute requiredUserType="driver">
               <DriverRequests />

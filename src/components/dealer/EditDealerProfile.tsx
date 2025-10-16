@@ -10,6 +10,7 @@ import { z } from "zod";
 
 const editDealerProfileSchema = z.object({
   name: z.string().min(1, "Name cannot be empty").max(100, "Name too long").optional(),
+  email: z.string().email("Invalid email address").optional(),
   phone: z.string().min(10, "Phone number must be at least 10 digits").max(15, "Phone number too long").optional(),
   position: z.string().min(1, "Position cannot be empty").max(100, "Position too long").optional(),
   store: z.string().max(200, "Store name too long").optional(),
@@ -18,6 +19,7 @@ const editDealerProfileSchema = z.object({
 interface DealerData {
   id: string;
   name: string;
+  email?: string;
   phone?: string;
   position?: string;
   store?: string;
@@ -32,6 +34,7 @@ interface EditDealerProfileProps {
 
 export const EditDealerProfile = ({ isOpen, onClose, dealerData, onUpdate }: EditDealerProfileProps) => {
   const [name, setName] = useState(dealerData.name || '');
+  const [email, setEmail] = useState(dealerData.email || '');
   const [phone, setPhone] = useState(dealerData.phone || '');
   const [position, setPosition] = useState(dealerData.position || '');
   const [store, setStore] = useState(dealerData.store || '');
@@ -45,6 +48,7 @@ export const EditDealerProfile = ({ isOpen, onClose, dealerData, onUpdate }: Edi
       // Validate input
       const validation = editDealerProfileSchema.safeParse({
         name: name.trim() || undefined,
+        email: email.trim() || undefined,
         phone: phone.trim() || undefined,
         position: position.trim() || undefined,
         store: store.trim() || undefined,
@@ -65,6 +69,7 @@ export const EditDealerProfile = ({ isOpen, onClose, dealerData, onUpdate }: Edi
         .from('dealers')
         .update({
           name: name.trim() || null,
+          email: email.trim() || null,
           position: position.trim() || null,
           store: store.trim() || null,
         })
@@ -80,6 +85,7 @@ export const EditDealerProfile = ({ isOpen, onClose, dealerData, onUpdate }: Edi
       // Update local state
       onUpdate({
         name: name.trim() || undefined,
+        email: email.trim() || undefined,
         position: position.trim() || undefined,
         store: store.trim() || undefined,
       });
@@ -137,14 +143,29 @@ export const EditDealerProfile = ({ isOpen, onClose, dealerData, onUpdate }: Edi
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="position">Position/Role</Label>
             <Select value={position} onValueChange={setPosition}>
               <SelectTrigger>
                 <SelectValue placeholder="Select your position" />
               </SelectTrigger>
               <SelectContent className="bg-background border">
-                <SelectItem value="Client advisor">Client advisor</SelectItem>
-                <SelectItem value="Manager">Manager</SelectItem>
+                <SelectItem value="Sale Manager">Sale Manager</SelectItem>
+                <SelectItem value="Client Advisor">Client Advisor</SelectItem>
+                <SelectItem value="Sales Consultant">Sales Consultant</SelectItem>
+                <SelectItem value="Parts">Parts</SelectItem>
+                <SelectItem value="Service Writer">Service Writer</SelectItem>
+                <SelectItem value="Service Manager">Service Manager</SelectItem>
               </SelectContent>
             </Select>
           </div>

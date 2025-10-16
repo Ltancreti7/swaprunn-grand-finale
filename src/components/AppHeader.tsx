@@ -21,7 +21,7 @@ export function AppHeader() {
 
   // Determine if we should hide the header (but keep hooks consistent)
   const shouldHideHeader = location.pathname === '/' || 
-    ['/drivers', '/how-it-works', '/dealership/register'].includes(location.pathname);
+    ['/drivers', '/how-it-works', '/dealership/register', '/dealer/dashboard', '/driver/dashboard', '/swap-coordinator/dashboard'].includes(location.pathname);
 
   // Top-level routes where back button should be hidden
   const topLevelRoutes = ['/', '/drivers', '/dealer/dashboard', '/driver/dashboard'];
@@ -83,7 +83,7 @@ export function AppHeader() {
   if (shouldHideHeader) {
     return null;
   }
-  return <header className={cn("fixed top-0 left-0 right-0 z-[60] border-b transition-all", scrolled ? "bg-[#1A1A1A]/95 backdrop-blur-lg border-white/20 shadow-2xl" : "bg-black/50 backdrop-blur-xl border-white/10 shadow-lg", !isVisible && "-translate-y-full", showBounce && "animate-header-bounce")} style={{
+  return <header className={cn("fixed top-2 left-0 right-0 z-[60] border-b transition-all", scrolled ? "bg-[#1A1A1A]/95 backdrop-blur-lg border-white/20 shadow-2xl" : "bg-black/50 backdrop-blur-xl border-white/10 shadow-lg", !isVisible && "-translate-y-full", showBounce && "animate-header-bounce")} style={{
       transitionDuration: '0.35s',
       transitionTimingFunction: 'ease-out',
       transitionProperty: 'transform, background-color, backdrop-filter, border-color, box-shadow',

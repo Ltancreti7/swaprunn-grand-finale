@@ -1,31 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import SiteHeader from '@/components/SiteHeader';
 import { Mail, Check, X, Users } from 'lucide-react';
 import mapBackgroundImage from '@/assets/map-background.jpg';
+import type { Database } from '@/integrations/supabase/types';
+
+type StaffInvitationRow = Database['public']['Tables']['staff_invitations']['Row'];
+
+interface StaffInvitation extends StaffInvitationRow {
+  dealers: {
+    name: string;
+    store: string | null;
+  };
+}
+
+interface AcceptStaffInvitationResponse {
+  success: boolean;
+  dealer_id?: string | null;
+  error?: string | null;
+}
+
+const ALLOWED_PROFILE_TYPES = new Set(['dealer']);
 
 function AcceptInvitation() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [invitation, setInvitation] = useState<any>(null);
+  const { user, userProfile, profileLoading, signOut } = useAuth();
+  const [invitation, setInvitation] = useState<StaffInvitation | null>(null);
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (token) {
-      fetchInvitation();
-    }
-  }, [token]);
-
-  const fetchInvitation = async () => {
+  const fetchInvitation = useCallback(async () => {
     if (!token) return;
 
     try {
@@ -47,7 +57,7 @@ function AcceptInvitation() {
           setError('Failed to load invitation details.');
         }
       } else {
-        setInvitation(data);
+        setInvitation(data as StaffInvitation);
       }
     } catch (error) {
       console.error('Error fetching invitation:', error);
@@ -55,10 +65,77 @@ function AcceptInvitation() {
     } finally {
       setLoading(false);
     }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      fetchInvitation();
+    }
+  }, [fetchInvitation, token]);
+
+  const profileRole = userProfile?.user_type ?? null;
+  const dealerIdFromProfile = userProfile?.dealer_id ?? null;
+  const roleMismatch = Boolean(profileRole && !ALLOWED_PROFILE_TYPES.has(profileRole));
+  const dealerMismatch = Boolean(
+    invitation &&
+    dealerIdFromProfile &&
+    dealerIdFromProfile !== invitation.dealer_id
+  );
+
+  const eligibilityBlockReason = useMemo(() => {
+    if (!invitation) return null;
+    if (roleMismatch && profileRole) {
+      return `This account is registered as ${profileRole}. Staff invitations can only be accepted with a dealer or staff account.`;
+    }
+    if (dealerMismatch && invitation.dealers?.name) {
+      return `This account is already linked to a different dealership and cannot join ${invitation.dealers.name}.`;
+    }
+    if (dealerMismatch) {
+      return 'This account is already linked to a different dealership.';
+    }
+    return null;
+  }, [dealerMismatch, invitation, profileRole, roleMismatch]);
+
+  const isLoggedIn = Boolean(user);
+  const emailMatches = Boolean(user && invitation && user.email === invitation.email);
+  const canAccept = Boolean(
+    emailMatches &&
+    !profileLoading &&
+    !eligibilityBlockReason
+  );
+
+  const handleSwitchAccount = async () => {
+    await signOut();
+    navigate('/dealer/auth');
   };
 
   const handleAcceptInvitation = async () => {
-    if (!token || !user) return;
+    if (!token || !user || !invitation) {
+      toast({
+        title: 'Cannot accept invitation',
+        description: 'Please open the invitation link again and sign in.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (profileLoading) {
+      toast({
+        title: 'Profile still loading',
+        description: 'Please wait a moment and try again.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!canAccept) {
+      toast({
+        title: 'Cannot accept invitation',
+        description: eligibilityBlockReason || 'Please use the account that received this invitation.',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     setAccepting(true);
     try {
@@ -68,7 +145,12 @@ function AcceptInvitation() {
 
       if (error) throw error;
 
-      if ((data as any)?.success) {
+      const response =
+        data && typeof data === 'object' && !Array.isArray(data)
+          ? (data as unknown as AcceptStaffInvitationResponse)
+          : null;
+
+      if (response?.success) {
         toast({
           title: "Invitation accepted!",
           description: "Welcome to the team. Redirecting to dashboard...",
@@ -79,11 +161,21 @@ function AcceptInvitation() {
           navigate('/dealer/dashboard');
         }, 2000);
       } else {
-        setError((data as any)?.error || 'Failed to accept invitation');
+        const message = response?.error || 'Failed to accept invitation';
+        toast({
+          title: 'Unable to accept invitation',
+          description: message,
+          variant: 'destructive'
+        });
       }
-    } catch (error: any) {
-      console.error('Error accepting invitation:', error);
-      setError(error.message || 'Failed to accept invitation');
+    } catch (caughtError) {
+      console.error('Error accepting invitation:', caughtError);
+      const message = caughtError instanceof Error ? caughtError.message : 'Failed to accept invitation';
+      toast({
+        title: 'Unable to accept invitation',
+        description: message,
+        variant: 'destructive'
+      });
     } finally {
       setAccepting(false);
     }
@@ -173,7 +265,7 @@ function AcceptInvitation() {
                 </div>
               </div>
 
-              {!user ? (
+              {!isLoggedIn ? (
                 <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                   <div className="flex items-start gap-3">
                     <Mail className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
@@ -182,7 +274,7 @@ function AcceptInvitation() {
                     </p>
                   </div>
                 </div>
-              ) : user.email !== invitation.email ? (
+              ) : !emailMatches ? (
                 <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
                   <div className="flex items-start gap-3">
                     <X className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
@@ -190,20 +282,45 @@ function AcceptInvitation() {
                       You must be signed in with the email address {invitation.email} to accept this invitation.
                     </p>
                   </div>
+                  <Button
+                    variant="secondary"
+                    onClick={handleSwitchAccount}
+                    className="mt-3 bg-white/10 text-white hover:bg-white/20"
+                  >
+                    Switch accounts
+                  </Button>
+                </div>
+              ) : !profileLoading && eligibilityBlockReason ? (
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <X className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-red-200 text-sm">
+                      {eligibilityBlockReason}
+                    </p>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    onClick={handleSwitchAccount}
+                    className="mt-3 bg-white/10 text-white hover:bg-white/20"
+                  >
+                    Use a different account
+                  </Button>
                 </div>
               ) : null}
 
               <div className="space-y-3">
-                {user && user.email === invitation.email ? (
+                {emailMatches ? (
                   <button 
                     onClick={handleAcceptInvitation} 
-                    disabled={accepting}
+                    disabled={accepting || !canAccept}
                     className="w-full bg-[#DC2626] text-white py-3 rounded-full font-semibold transition hover:bg-[#b91c1c] active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <Check className="h-4 w-4" />
-                    {accepting ? 'Accepting...' : 'Accept Invitation'}
+                    {accepting ? 'Accepting...' : canAccept ? 'Accept Invitation' : 'Cannot accept invitation'}
                   </button>
-                ) : (
+                ) : null}
+
+                {!isLoggedIn && (
                   <button 
                     onClick={() => navigate('/dealer/auth')}
                     className="w-full bg-[#DC2626] text-white py-3 rounded-full font-semibold transition hover:bg-[#b91c1c] active:scale-95 shadow-lg"

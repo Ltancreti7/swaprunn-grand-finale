@@ -215,10 +215,11 @@ const DealerAuth = () => {
 
         navigate('/dealer/dashboard');
       }
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Please try again.';
       toast({
         title: "Authentication failed",
-        description: error.message,
+        description: message,
         variant: "destructive"
       });
     } finally {
@@ -310,7 +311,10 @@ const DealerAuth = () => {
                     <Label htmlFor="role" className="text-white text-sm font-medium">
                       Your Role
                     </Label>
-                    <Select value={role} onValueChange={(value: any) => setRole(value)}>
+                    <Select
+                      value={role}
+                      onValueChange={(value: "salesperson" | "manager" | "owner") => setRole(value)}
+                    >
                       <SelectTrigger className="h-12 bg-white border-gray-300 text-gray-900 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20">
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
@@ -434,6 +438,17 @@ const DealerAuth = () => {
                       Your email and password will be saved for faster login next time
                     </p>
                   )}
+
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="px-0 text-sm text-white/80 hover:text-white"
+                      onClick={() => navigate("/auth/reset")}
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
                 </div>
               )}
               
