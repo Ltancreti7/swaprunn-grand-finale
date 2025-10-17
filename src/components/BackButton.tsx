@@ -16,6 +16,12 @@ const BackButton = () => {
     // Smart navigation based on current page
     const currentPath = location.pathname;
     
+    // Dealer request should go back to dealer dashboard
+    if (currentPath.includes('/dealer/request')) {
+      navigate('/dealer/dashboard');
+      return;
+    }
+    
     // Auth pages should go back to home
     if (currentPath.includes('/auth') || 
         currentPath.includes('/dealer/auth') || 
