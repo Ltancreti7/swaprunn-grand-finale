@@ -157,7 +157,7 @@ const SimpleDriverRequest = () => {
     switch (currentStep) {
       case 1: {
         const mainVehicleValid = vehicleInfo.year && vehicleInfo.make && vehicleInfo.model;
-        const tradeVehicleValid = !hasTradeIn || (tradeVehicleInfo.year && tradeVehicleInfo.make && tradeVehicleInfo.model);
+        const tradeVehicleValid = !hasTradeIn || (tradeVehicleInfo.year && tradeVehicleInfo.make && tradeVehicleInfo.model && tradeVehicleInfo.transmission);
         return mainVehicleValid && tradeVehicleValid;
       }
       case 2:
@@ -252,10 +252,29 @@ const SimpleDriverRequest = () => {
       return;
     }
 
+    if (!pickupAddress.street || !pickupAddress.city) {
+      toast({
+        title: "Missing Pickup Address", 
+        description: "Pickup address is not properly configured. Please contact support.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!customerInfo.name || !customerInfo.phone) {
       toast({
         title: "Missing Customer Info",
         description: "Please provide customer name and phone number.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate trade vehicle info if trade is enabled
+    if (hasTradeIn && (!tradeVehicleInfo.year || !tradeVehicleInfo.make || !tradeVehicleInfo.model || !tradeVehicleInfo.transmission)) {
+      toast({
+        title: "Missing Trade Vehicle Info",
+        description: "Please fill in all trade vehicle details including transmission type.",
         variant: "destructive"
       });
       return;
@@ -272,7 +291,7 @@ const SimpleDriverRequest = () => {
         year: parseInt(vehicleInfo.year),
         make: vehicleInfo.make,
         model: vehicleInfo.model,
-        vin: vehicleInfo.vin,
+        vin: vehicleInfo.vin || null,
         customer_name: customerInfo.name,
         customer_phone: cleanPhoneNumber(customerInfo.phone),
         timeframe: timeframe,
@@ -280,12 +299,13 @@ const SimpleDriverRequest = () => {
         status: 'open',
         requires_two: false,
         distance_miles: 25,
+        dealer_id: userProfile.dealer_id, // Add the dealer_id
         // Include trade vehicle data if applicable
-        ...(hasTradeIn && {
+        ...(hasTradeIn && tradeVehicleInfo.year && tradeVehicleInfo.make && tradeVehicleInfo.model && {
           trade_year: parseInt(tradeVehicleInfo.year),
           trade_make: tradeVehicleInfo.make,
           trade_model: tradeVehicleInfo.model,
-          trade_vin: tradeVehicleInfo.vin,
+          trade_vin: tradeVehicleInfo.vin || null,
           trade_transmission: tradeVehicleInfo.transmission
         })
       };
@@ -317,6 +337,11 @@ const SimpleDriverRequest = () => {
           errorMessage = "Please check all fields are filled correctly.";
         } else if (error.message.includes('network')) {
           errorMessage = "Network error. Please check your connection.";
+        } else if (error.message.includes('null value')) {
+          errorMessage = "Missing required information. Please check all fields.";
+        } else {
+          // Include the actual error message for debugging
+          errorMessage = `${errorMessage} (${error.message})`;
         }
       }
       
