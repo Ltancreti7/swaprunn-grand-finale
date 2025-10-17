@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MessageCircle, Camera, Plus, User, ClipboardList, CheckCircle, Settings } from "lucide-react";
+import { MessageCircle, Plus, User, ClipboardList, CheckCircle, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Logo from "@/components/Logo";
+import { DealerProfilePhoto } from "@/components/dealer/DealerProfilePhoto";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 
 const tabs = [
@@ -13,8 +17,61 @@ const tabs = [
   { label: "Done", icon: CheckCircle },
 ];
 
+interface DealerData {
+  id: string;
+  name: string;
+  email: string;
+  profile_photo_url?: string;
+  dealership_name?: string;
+}
+
 export default function DealerPortal() {
   const navigate = useNavigate();
+  const { userProfile } = useAuth();
+  const [dealerData, setDealerData] = useState<DealerData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDealerData = useCallback(async () => {
+    if (!userProfile?.dealer_id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("dealers")
+        .select("*")
+        .eq("id", userProfile.dealer_id)
+        .single();
+
+      if (error) throw error;
+      setDealerData(data);
+    } catch (error) {
+      console.error("Error fetching dealer data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [userProfile?.dealer_id]);
+
+  useEffect(() => {
+    fetchDealerData();
+  }, [fetchDealerData]);
+
+  const handlePhotoUpdate = (newUrl: string) => {
+    setDealerData(prev => prev ? { ...prev, profile_photo_url: newUrl } : null);
+  };
+
+  if (loading) {
+    return (
+      <div
+        className="min-h-screen bg-black text-white flex items-center justify-center"
+        style={{
+          backgroundImage: `url(${mapBackgroundImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -75,19 +132,12 @@ export default function DealerPortal() {
           {/* Profile Card */}
           <Card className="border-white/10 bg-white/5 text-white">
             <CardContent className="flex flex-col items-center gap-4 py-8">
-              <div className="relative h-28 w-28">
-                <img
-                  src="/luke-tancreti.jpg"
-                  alt="Luke Tancreti"
-                  className="h-28 w-28 rounded-full object-cover"
+              <div className="scale-[0.6] transform-gpu">
+                <DealerProfilePhoto 
+                  photoUrl={dealerData?.profile_photo_url} 
+                  dealerName={dealerData?.name} 
+                  onPhotoUpdate={handlePhotoUpdate} 
                 />
-                <Button
-                  variant="default"
-                  size="icon"
-                  className="absolute bottom-0 right-0 h-9 w-9 rounded-full bg-[#E11900] hover:bg-[#B51400]"
-                >
-                  <Camera className="h-4 w-4" />
-                </Button>
               </div>
 
               <div className="flex flex-col items-center gap-1 text-center">
@@ -95,8 +145,8 @@ export default function DealerPortal() {
                   <MessageCircle className="h-4 w-4" />
                   <span className="text-sm font-semibold">Top-rated dealer partner</span>
                 </div>
-                <h2 className="text-2xl font-bold">Luke Tancreti</h2>
-                <p className="text-sm text-white/70">McGee Toyota of Claremont</p>
+                <h2 className="text-2xl font-bold">{dealerData?.name || 'Dealer Name'}</h2>
+                <p className="text-sm text-white/70">{dealerData?.dealership_name || 'Dealership Name'}</p>
               </div>
 
               <Separator className="bg-white/10" />
