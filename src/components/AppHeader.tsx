@@ -21,9 +21,9 @@ export function AppHeader() {
 
   // Determine if we should hide the header (but keep hooks consistent)
   const shouldHideHeader = location.pathname === '/' || 
-    ['/drivers', '/how-it-works', '/dealership/register', '/dealer/dashboard', '/driver/dashboard', '/swap-coordinator/dashboard'].includes(location.pathname);
+    ['/drivers', '/how-it-works', '/dealership/register', '/swap-coordinator/dashboard'].includes(location.pathname);
 
-  // Top-level routes where back button should be hidden
+  // Top-level routes where back button should be hidden (show hamburger menu instead)
   const topLevelRoutes = ['/', '/drivers', '/dealer/dashboard', '/driver/dashboard'];
   const shouldShowBack = !topLevelRoutes.includes(location.pathname);
   
