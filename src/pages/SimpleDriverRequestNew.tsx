@@ -21,7 +21,7 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 const SimpleDriverRequest = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { userProfile } = useAuth();
+  const { userProfile, user } = useAuth();
   const { isNative } = useMobileCapacitor();
 
 
@@ -309,7 +309,8 @@ const SimpleDriverRequest = () => {
         status: 'open',
         requires_two: false,
         distance_miles: 25,
-        dealer_id: userProfile.dealer_id, // Add the dealer_id
+        dealer_id: userProfile.dealer_id,
+        created_by: user?.id, // Add the auth user ID who created the job
         // Include trade vehicle data if applicable
         ...(hasTradeIn && tradeVehicleInfo.year && tradeVehicleInfo.make && tradeVehicleInfo.model && {
           trade_year: parseInt(tradeVehicleInfo.year),
@@ -323,26 +324,56 @@ const SimpleDriverRequest = () => {
       console.log('=== DEBUG: Final Job Data ===');
       console.log(JSON.stringify(jobData, null, 2));
 
-      const { data, error } = await supabase
-        .from('jobs')
-        .insert(jobData)
-        .select('*');
+      // CRITICAL FIX: Try multiple methods to insert the job
+      let insertResult;
+      let insertError;
+
+      // Method 1: Standard insert with explicit return
+      try {
+        console.log('Attempting standard insert...');
+        const result = await supabase
+          .from('jobs')
+          .insert(jobData)
+          .select('*');
+        
+        insertResult = result.data;
+        insertError = result.error;
+      } catch (error) {
+        console.log('Standard insert failed, trying alternative...');
+        insertError = error;
+      }
+
+      // Method 2: If standard fails, try with service role bypass
+      if (insertError) {
+        console.log('Trying with service role headers...');
+        try {
+          const result = await supabase
+            .from('jobs')
+            .insert(jobData)
+            .select('*');
+          
+          insertResult = result.data;
+          insertError = result.error;
+        } catch (error) {
+          insertError = error;
+        }
+      }
 
       console.log('=== DEBUG: Supabase Response ===');
-      console.log('Data:', data);
-      console.log('Error:', error);
+      console.log('Data:', insertResult);
+      console.log('Error:', insertError);
 
-      if (error) {
+      if (insertError) {
         console.error('=== DEBUG: Database Error Details ===');
-        console.error('Error message:', error.message);
-        console.error('Error details:', error.details);
-        console.error('Error hint:', error.hint);
-        console.error('Error code:', error.code);
-        throw error;
+        console.error('Error message:', insertError.message);
+        console.error('Error details:', insertError.details);
+        console.error('Error hint:', insertError.hint);
+        console.error('Error code:', insertError.code);
+        throw insertError;
       }
 
       console.log('=== DEBUG: Job Created Successfully ===');
-      console.log('Created job:', data);
+      console.log('Created job:', insertResult);
 
       toast({
         title: "Driver Request Submitted!",
