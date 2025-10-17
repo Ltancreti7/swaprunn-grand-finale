@@ -364,7 +364,7 @@ const SimpleDriverRequest = () => {
             onClick={() => navigate('/dealer/dashboard')}
             variant="outline"
             size="icon"
-            className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-[#E11900]/30 transition-all duration-200"
+            className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/15 hover:border-[#E11900]/50 transition-all duration-200 shadow-lg"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -375,7 +375,7 @@ const SimpleDriverRequest = () => {
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8 bg-white/5 backdrop-blur-sm rounded-2xl p-3 sm:p-6 border border-white/10 overflow-hidden">
+        <div className="mb-8 bg-white/10 backdrop-blur-sm rounded-2xl p-3 sm:p-6 border border-white/20 overflow-hidden shadow-lg">
           {/* Mobile: Grid Layout */}
           <div className="grid grid-cols-4 gap-1 sm:hidden">
             {steps.map((step) => {
@@ -441,7 +441,7 @@ const SimpleDriverRequest = () => {
         </div>
 
         {/* Step Content Card */}
-        <Card {...swipeHandlers} className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl min-h-[400px] sm:min-h-[450px] rounded-2xl relative overflow-hidden">
+        <Card {...swipeHandlers} className="bg-white/10 backdrop-blur-sm border border-white/20 shadow-xl min-h-[400px] sm:min-h-[450px] rounded-2xl relative overflow-hidden">
           {/* Swipe indicators */}
           <div className="absolute top-1/2 left-2 transform -translate-y-1/2 opacity-20 pointer-events-none">
             {currentStep > 1 && <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8 text-white" />}
@@ -461,7 +461,7 @@ const SimpleDriverRequest = () => {
                 
                 <div className="space-y-4 max-w-md mx-auto w-full min-w-0">
                   <Select value={vehicleInfo.year} onValueChange={(value) => setVehicleInfo({...vehicleInfo, year: value})}>
-                    <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 w-full min-w-0">
+                    <SelectTrigger className="bg-black/20 backdrop-blur-sm border border-white/30 text-white h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/70 focus:ring-2 focus:ring-[#E11900]/30 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/50 w-full min-w-0 hover:border-white/40">
                       <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
@@ -474,7 +474,7 @@ const SimpleDriverRequest = () => {
                   </Select>
 
                   <Select value={vehicleInfo.make} onValueChange={(value) => setVehicleInfo({...vehicleInfo, make: value})}>
-                    <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 w-full min-w-0">
+                    <SelectTrigger className="bg-black/20 backdrop-blur-sm border border-white/30 text-white h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/70 focus:ring-2 focus:ring-[#E11900]/30 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/50 w-full min-w-0 hover:border-white/40">
                       <SelectValue placeholder="Select Make" />
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
@@ -508,7 +508,7 @@ const SimpleDriverRequest = () => {
                     placeholder="VIN (Optional)"
                     value={vehicleInfo.vin}
                     onChange={(e) => setVehicleInfo({...vehicleInfo, vin: e.target.value})}
-                    className="bg-black/30 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 w-full min-w-0"
+                    className="bg-black/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-white/50 h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/70 focus:ring-2 focus:ring-[#E11900]/30 transition-all duration-200 w-full min-w-0 hover:border-white/40"
                   />
 
                   {/* TRADE-IN VEHICLE CHECKBOX - PROMINENT */}
