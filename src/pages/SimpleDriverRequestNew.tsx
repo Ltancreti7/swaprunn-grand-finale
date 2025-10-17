@@ -82,6 +82,16 @@ const SimpleDriverRequest = () => {
     vin: ""
   });
 
+  // Trade-in vehicle (driver will drive this back)
+  const [hasTradeIn, setHasTradeIn] = useState(false);
+  const [tradeVehicleInfo, setTradeVehicleInfo] = useState({
+    year: "",
+    make: "",
+    model: "",
+    vin: ""
+  });
+  const [availableTradeModels, setAvailableTradeModels] = useState<string[]>([]);
+
   // Update available models when make changes
   useEffect(() => {
     if (vehicleInfo.make && modelsByMake[vehicleInfo.make]) {
@@ -95,6 +105,20 @@ const SimpleDriverRequest = () => {
       setVehicleInfo(prev => ({ ...prev, model: "" }));
     }
   }, [vehicleInfo.make]);
+
+  // Update available trade models when trade make changes
+  useEffect(() => {
+    if (tradeVehicleInfo.make && modelsByMake[tradeVehicleInfo.make]) {
+      setAvailableTradeModels(modelsByMake[tradeVehicleInfo.make]);
+      // Reset model if it's not available for the new make
+      if (tradeVehicleInfo.model && !modelsByMake[tradeVehicleInfo.make].includes(tradeVehicleInfo.model)) {
+        setTradeVehicleInfo(prev => ({ ...prev, model: "" }));
+      }
+    } else {
+      setAvailableTradeModels([]);
+      setTradeVehicleInfo(prev => ({ ...prev, model: "" }));
+    }
+  }, [tradeVehicleInfo.make]);
 
   const [deliveryAddress, setDeliveryAddress] = useState<AddressData>({
     street: "",
