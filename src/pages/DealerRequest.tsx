@@ -298,7 +298,7 @@ const DealerRequest = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={() => window.history.back()}
+                  onClick={() => navigate('/dealer/dashboard')}
                   className="text-white/80 hover:text-white hover:bg-white/10 px-4 py-2"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
