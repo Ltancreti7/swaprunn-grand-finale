@@ -32,7 +32,23 @@ export default function DriverDashboard() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [jobs, setJobs] = useState<JobData[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
-  const [upcomingJobs, setUpcomingJobs] = useState<any[]>([]);
+  const [upcomingJobs, setUpcomingJobs] = useState<Array<{
+    id: string;
+    accepted_at: string;
+    started_at?: string | null;
+    jobs: {
+      id: string;
+      type: string;
+      pickup_address: string;
+      delivery_address: string;
+      year: number;
+      make: string;
+      model: string;
+      customer_name: string;
+      distance_miles: number;
+      vin?: string;
+    };
+  }>>([]);
   const [upcomingLoading, setUpcomingLoading] = useState(true);
   const [earnings, setEarnings] = useState<EarningsData | null>(null);
   const [earningsLoading, setEarningsLoading] = useState(true);
