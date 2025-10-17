@@ -99,9 +99,24 @@ function DriverPersonalProfile() {
       fetchDriverData();
     }
   }, [userProfile]);
+  
   useEffect(() => {
     // Resume tracking if needed on component mount
     driveTrackingService.resumeTrackingIfNeeded();
+  }, []);
+
+  // Listen for new job notifications to refresh available jobs
+  useEffect(() => {
+    const handleNewJob = () => {
+      console.log('Refreshing available jobs due to new job notification');
+      fetchDriverData();
+    };
+
+    window.addEventListener('newJobAvailable', handleNewJob);
+    
+    return () => {
+      window.removeEventListener('newJobAvailable', handleNewJob);
+    };
   }, []);
   const fetchDriverData = async () => {
     if (!userProfile?.driver_id) return;

@@ -117,6 +117,9 @@ export const useDriverNotifications = () => {
             }
           }
 
+          // Trigger a custom event to refresh available jobs in driver dashboard
+          window.dispatchEvent(new CustomEvent('newJobAvailable', { detail: newJob }));
+
           // Don't show toast, will use modal instead
           // Modal is triggered via showAlert state
         }
