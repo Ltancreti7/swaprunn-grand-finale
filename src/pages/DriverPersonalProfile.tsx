@@ -190,14 +190,7 @@ function DriverPersonalProfile() {
       });
     }
   };
-  const handlePhotoUpdate = (newUrl: string) => {
-    if (driverData) {
-      setDriverData({
-        ...driverData,
-        profile_photo_url: newUrl
-      });
-    }
-  };
+
   const handleProfileUpdate = (updatedData: any) => {
     setDriverData(prev => ({
       ...prev,
@@ -326,7 +319,7 @@ function DriverPersonalProfile() {
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
                       {/* Profile Photo */}
                       <div className="flex-shrink-0 transform hover:scale-105 transition-transform duration-300">
-                        <ProfilePhoto photoUrl={driverData?.profile_photo_url} driverName={driverData?.name} onPhotoUpdate={handlePhotoUpdate} />
+                        <ProfilePhoto photoUrl={driverData?.profile_photo_url} driverName={driverData?.name} />
                       </div>
                       
                       {/* Driver Information */}

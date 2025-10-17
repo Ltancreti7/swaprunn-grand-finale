@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Camera, Trash2 } from "lucide-react";
 import { z } from "zod";
 
 const editDriverProfileSchema = z.object({
@@ -29,6 +31,7 @@ interface DriverData {
   max_miles?: number;
   city_ok?: boolean;
   available?: boolean;
+  profile_photo_url?: string | null;
 }
 
 interface EditDriverProfileProps {
@@ -45,8 +48,79 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
   const [maxMiles, setMaxMiles] = useState(driverData.max_miles || 50);
   const [cityOk, setCityOk] = useState(driverData.city_ok ?? true);
   const [available, setAvailable] = useState(driverData.available ?? true);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState(driverData.profile_photo_url || '');
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      // Upload to storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/profile.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('driver-photos')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('driver-photos')
+        .getPublicUrl(fileName);
+
+      setProfilePhotoUrl(data.publicUrl);
+      
+      toast({
+        title: "Photo uploaded",
+        description: "Photo will be saved when you update your profile"
+      });
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload photo. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setProfilePhotoUrl('');
+    toast({
+      title: "Photo removed",
+      description: "Photo will be removed when you save your profile"
+    });
+  };
 
   const handleSave = async () => {
     try {
@@ -72,7 +146,7 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
         return;
       }
 
-      // Update driver profile
+      // Update driver profile including photo
       const { error } = await supabase
         .from('drivers')
         .update({
@@ -82,6 +156,7 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
           max_miles: maxMiles,
           city_ok: cityOk,
           available: available,
+          profile_photo_url: profilePhotoUrl || null,
         })
         .eq('id', driverData.id);
 
@@ -100,6 +175,7 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
         max_miles: maxMiles,
         city_ok: cityOk,
         available: available,
+        profile_photo_url: profilePhotoUrl || null,
       });
 
       onClose();
@@ -142,6 +218,57 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
         </DialogHeader>
         
         <div className="space-y-6 py-4">
+          {/* Profile Photo Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground">Profile Photo</h3>
+            
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-muted border-2 border-border flex items-center justify-center">
+                  {profilePhotoUrl ? (
+                    <img src={profilePhotoUrl} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-2xl font-bold text-muted-foreground">
+                      {driverData.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'D'}
+                    </span>
+                  )}
+                </div>
+                
+                {profilePhotoUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="absolute -top-1 -right-1 w-6 h-6 bg-destructive hover:bg-destructive/90 rounded-full flex items-center justify-center"
+                  >
+                    <Trash2 className="w-3 h-3 text-destructive-foreground" />
+                  </button>
+                )}
+              </div>
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="flex items-center gap-2"
+              >
+                <Camera className="w-4 h-4" />
+                {uploadingPhoto ? 'Uploading...' : profilePhotoUrl ? 'Change Photo' : 'Add Photo'}
+              </Button>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Contact Information Section */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground">Contact Information</h3>

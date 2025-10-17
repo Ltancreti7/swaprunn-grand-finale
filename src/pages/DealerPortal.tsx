@@ -53,9 +53,7 @@ export default function DealerPortal() {
     fetchDealerData();
   }, [fetchDealerData]);
 
-  const handlePhotoUpdate = (newUrl: string) => {
-    setDealerData(prev => prev ? { ...prev, profile_photo_url: newUrl } : null);
-  };
+
 
   if (loading) {
     return (
@@ -123,7 +121,6 @@ export default function DealerPortal() {
                 <DealerProfilePhoto 
                   photoUrl={dealerData?.profile_photo_url} 
                   dealerName={dealerData?.name} 
-                  onPhotoUpdate={handlePhotoUpdate} 
                 />
               </div>
 

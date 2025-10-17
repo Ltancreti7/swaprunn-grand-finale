@@ -288,14 +288,7 @@ const DealerDashboard = () => {
       console.error('❌ Error in fetchActiveAssignments:', error);
     }
   }, [userProfile?.dealer_id, fetchJobs, fetchActiveAssignments, toast]);
-  const handlePhotoUpdate = (newUrl: string) => {
-    if (dealerData) {
-      setDealerData({
-        ...dealerData,
-        profile_photo_url: newUrl
-      });
-    }
-  };
+
   const handleDealerProfileUpdate = (updatedData: Partial<DealerData>) => {
     setDealerData(prev => ({
       ...prev,
@@ -390,7 +383,7 @@ const DealerDashboard = () => {
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex flex-col items-center gap-6 sm:gap-8 md:flex-row md:items-start md:gap-12">
                       <div className="flex-shrink-0">
-                        <DealerProfilePhoto photoUrl={dealerData?.profile_photo_url} dealerName={dealerData?.name} onPhotoUpdate={handlePhotoUpdate} />
+                        <DealerProfilePhoto photoUrl={dealerData?.profile_photo_url} dealerName={dealerData?.name} />
                       </div>
                       <div className="flex-1 w-full min-w-0 text-center md:text-left">
                         <div className="flex flex-col items-center gap-3 mb-6 sm:mb-8 md:flex-row md:items-center">

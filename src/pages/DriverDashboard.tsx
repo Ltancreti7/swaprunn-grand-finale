@@ -244,9 +244,7 @@ export default function DriverDashboard() {
     }
   };
 
-  const handlePhotoUpdate = (newUrl: string) => {
-    setDriverData(prev => prev ? { ...prev, profile_photo_url: newUrl } : null);
-  };
+
 
   const handleProfileUpdate = (updatedData: Partial<DriverData>) => {
     setDriverData(prev => prev ? { ...prev, ...updatedData } : null);
@@ -350,7 +348,6 @@ export default function DriverDashboard() {
                           <ProfilePhoto 
                             photoUrl={driverData?.profile_photo_url} 
                             driverName={driverData?.name} 
-                            onPhotoUpdate={handlePhotoUpdate} 
                           />
                           {!driverData?.profile_photo_url && (
                             <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-red-600 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap shadow-lg animate-pulse">
