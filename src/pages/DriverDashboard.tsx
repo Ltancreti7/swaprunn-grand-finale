@@ -275,6 +275,7 @@ export default function DriverDashboard() {
     <>
       <title>Driver Dashboard | SwapRunn</title>
       <meta name="description" content="Manage your driving jobs and earnings from your SwapRunn driver dashboard." />
+      <meta name="updated" content="2025-10-17" />
       <link rel="canonical" href="/driver/dashboard" />
       
       <div className="min-h-screen relative bg-black" style={{
