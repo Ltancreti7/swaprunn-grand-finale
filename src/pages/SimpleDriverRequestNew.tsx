@@ -508,10 +508,87 @@ const SimpleDriverRequest = () => {
                     onChange={(e) => setVehicleInfo({...vehicleInfo, vin: e.target.value})}
                     className="bg-black/30 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 w-full min-w-0"
                   />
+
+                  {/* TRADE-IN VEHICLE CHECKBOX - PROMINENT */}
+                  <div className="mt-6 p-4 bg-[#E11900]/10 border-2 border-[#E11900]/30 rounded-xl">
+                    <div className="flex items-center justify-center space-x-3">
+                      <Checkbox
+                        id="hasTradeIn"
+                        checked={hasTradeIn}
+                        onCheckedChange={(checked) => setHasTradeIn(!!checked)}
+                        className="border-white/40 data-[state=checked]:bg-[#E11900] w-6 h-6"
+                      />
+                      <Label htmlFor="hasTradeIn" className="text-white text-lg font-bold cursor-pointer">
+                        📋 IS THERE A TRADE-IN VEHICLE?
+                      </Label>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Trade-in Vehicle Section */}
-                <div className="max-w-md mx-auto mt-8">
+                {/* Trade-in Vehicle Details */}
+                {hasTradeIn && (
+                  <div className="max-w-md mx-auto mt-6 p-6 bg-[#E11900]/5 border border-[#E11900]/20 rounded-xl">
+                    <div className="text-center mb-4">
+                      <h3 className="text-xl font-bold text-white mb-2">🚗 TRADE-IN VEHICLE</h3>
+                      <p className="text-white/70 text-sm">Driver will drive this back from delivery</p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <Select value={tradeVehicleInfo.year} onValueChange={(value) => setTradeVehicleInfo({...tradeVehicleInfo, year: value})}>
+                        <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-base rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 w-full min-w-0">
+                          <SelectValue placeholder="Trade Year" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
+                          {years.map((year) => (
+                            <SelectItem key={year} value={year} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20 break-words">
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <Select value={tradeVehicleInfo.make} onValueChange={(value) => setTradeVehicleInfo({...tradeVehicleInfo, make: value})}>
+                        <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-base rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 w-full min-w-0">
+                          <SelectValue placeholder="Trade Make" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
+                          {makes.map((make) => (
+                            <SelectItem key={make} value={make} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20 break-words">
+                              {make}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <Select 
+                        value={tradeVehicleInfo.model} 
+                        onValueChange={(value) => setTradeVehicleInfo({...tradeVehicleInfo, model: value})}
+                        disabled={!tradeVehicleInfo.make}
+                      >
+                        <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-14 text-base rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 disabled:opacity-50 w-full min-w-0">
+                          <SelectValue placeholder={tradeVehicleInfo.make ? "Trade Model" : "Select Make First"} />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
+                          {availableTradeModels.map((model) => (
+                            <SelectItem key={model} value={model} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20 break-words">
+                              {model}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <Input
+                        placeholder="Trade VIN (Optional)"
+                        value={tradeVehicleInfo.vin}
+                        onChange={(e) => setTradeVehicleInfo({...tradeVehicleInfo, vin: e.target.value})}
+                        className="bg-black/30 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 h-14 text-base rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 w-full min-w-0"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Old Trade Section - Removing */}
+                <div className="max-w-md mx-auto mt-8 hidden">
                   <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                     <div className="flex items-center justify-center space-x-3 mb-6">
                       <Checkbox
