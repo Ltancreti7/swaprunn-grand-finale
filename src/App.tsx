@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 
 import DriverPersonalProfile from "./pages/DriverPersonalProfile";
@@ -64,7 +64,7 @@ const App = () => (
           <Route path="/learn-more" element={<LearnMore />} />
           <Route path="/why-us" element={<WhyUs />} />
           
-          <Route path="/dealers" element={<DealersOverview />} />
+          <Route path="/dealers" element={<Navigate to="/dealer/auth" replace />} />
           <Route path="/dealers/registration" element={<DealershipRegistration />} />
           <Route path="/dealership/register" element={<DealershipRegistration />} />
           <Route path="/billing" element={<BillingSettings />} />
