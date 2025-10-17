@@ -329,11 +329,18 @@ export default function DriverDashboard() {
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
                       <div className="flex-shrink-0">
-                        <ProfilePhoto 
-                          photoUrl={driverData?.profile_photo_url} 
-                          driverName={driverData?.name} 
-                          onPhotoUpdate={handlePhotoUpdate} 
-                        />
+                        <div className="relative">
+                          <ProfilePhoto 
+                            photoUrl={driverData?.profile_photo_url} 
+                            driverName={driverData?.name} 
+                            onPhotoUpdate={handlePhotoUpdate} 
+                          />
+                          {!driverData?.profile_photo_url && (
+                            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-red-600 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap shadow-lg animate-pulse">
+                              📸 Add Photo
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex-1 w-full min-w-0 text-center md:text-left">
                         <div className="flex flex-col md:flex-row items-center md:items-center gap-3 mb-8">

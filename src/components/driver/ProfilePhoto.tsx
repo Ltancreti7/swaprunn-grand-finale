@@ -52,6 +52,23 @@ export function ProfilePhoto({
       const preview = URL.createObjectURL(file);
       setPreviewUrl(preview);
 
+      // Ensure the storage bucket exists
+      try {
+        const { data: buckets } = await supabase.storage.listBuckets();
+        const bucketExists = buckets?.some(bucket => bucket.id === 'driver-photos');
+        
+        if (!bucketExists) {
+          await supabase.storage.createBucket('driver-photos', {
+            public: true,
+            fileSizeLimit: 5242880, // 5MB
+            allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+          });
+        }
+      } catch (bucketError) {
+        console.log('Bucket creation handled by server:', bucketError);
+        // Continue with upload even if bucket creation fails - it might already exist
+      }
+
       // Upload to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/profile.${fileExt}`;
