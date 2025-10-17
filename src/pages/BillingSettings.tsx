@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,11 +36,7 @@ export default function BillingSettings() {
   });
   const [updatingAddOns, setUpdatingAddOns] = useState(false);
 
-  useEffect(() => {
-    fetchSubscription();
-  }, [userProfile]);
-
-  const fetchSubscription = async () => {
+  const fetchSubscription = useCallback(async () => {
     if (!userProfile?.dealer_id) return;
 
     try {
@@ -73,7 +69,11 @@ export default function BillingSettings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userProfile?.dealer_id, toast]);
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [fetchSubscription]);
 
   const handleSubscribe = async () => {
     if (!userProfile?.dealer_id) return;

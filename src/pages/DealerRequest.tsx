@@ -185,7 +185,7 @@ const DealerRequest = () => {
     setIsSubmitting(true);
 
     try {
-      const jobData: any = {
+      const jobData = {
         dealer_id: userProfile.id,
         vehicle_year: year,
         vehicle_make: make,
