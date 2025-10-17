@@ -89,7 +89,8 @@ const SimpleDriverRequest = () => {
     year: "",
     make: "",
     model: "",
-    vin: ""
+    vin: "",
+    transmission: ""
   });
   const [availableTradeModels, setAvailableTradeModels] = useState<string[]>([]);
 
@@ -284,7 +285,8 @@ const SimpleDriverRequest = () => {
           trade_year: parseInt(tradeVehicleInfo.year),
           trade_make: tradeVehicleInfo.make,
           trade_model: tradeVehicleInfo.model,
-          trade_vin: tradeVehicleInfo.vin
+          trade_vin: tradeVehicleInfo.vin,
+          trade_transmission: tradeVehicleInfo.transmission
         })
       };
 
@@ -583,6 +585,35 @@ const SimpleDriverRequest = () => {
                         onChange={(e) => setTradeVehicleInfo({...tradeVehicleInfo, vin: e.target.value})}
                         className="bg-black/30 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 h-14 text-base rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 w-full min-w-0"
                       />
+
+                      {/* Transmission Selection */}
+                      <div className="space-y-3">
+                        <label className="text-white font-medium text-base">Transmission</label>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setTradeVehicleInfo({...tradeVehicleInfo, transmission: 'Automatic'})}
+                            className={`flex-1 h-14 rounded-xl font-semibold text-base transition-all duration-200 ${
+                              tradeVehicleInfo.transmission === 'Automatic'
+                                ? 'bg-[#E11900] text-white shadow-lg scale-105'
+                                : 'bg-black/30 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-white/10 hover:text-white'
+                            }`}
+                          >
+                            🔄 Automatic
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTradeVehicleInfo({...tradeVehicleInfo, transmission: 'Manual'})}
+                            className={`flex-1 h-14 rounded-xl font-semibold text-base transition-all duration-200 ${
+                              tradeVehicleInfo.transmission === 'Manual'
+                                ? 'bg-[#E11900] text-white shadow-lg scale-105'
+                                : 'bg-black/30 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-white/10 hover:text-white'
+                            }`}
+                          >
+                            ⚙️ Manual
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
