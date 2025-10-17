@@ -100,16 +100,35 @@ export function ProfilePhoto({
         </div>
         
         {/* Camera overlay button */}
-        <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="absolute -bottom-1 -right-1 w-12 h-12 bg-red-600 hover:bg-red-700 disabled:bg-red-800 rounded-full flex items-center justify-center transition-colors">
-          {uploading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Camera className="w-6 h-6 text-white" />}
+        <button 
+          onClick={() => fileInputRef.current?.click()} 
+          disabled={uploading} 
+          className="absolute -bottom-1 -right-1 w-12 h-12 bg-red-600 hover:bg-red-700 disabled:bg-red-800 rounded-full flex items-center justify-center transition-colors shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
+          title={uploading ? "Uploading photo..." : "Change profile photo"}
+        >
+          {uploading ? (
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Camera className="w-6 h-6 text-white" />
+          )}
         </button>
       </div>
 
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+      <input 
+        ref={fileInputRef} 
+        type="file" 
+        accept="image/jpeg,image/png,image/webp,image/gif" 
+        onChange={handleFileSelect} 
+        className="hidden" 
+      />
 
-      {driverName && <div className="text-center">
+      {driverName && (
+        <div className="text-center">
           <h3 className="text-lg font-semibold text-white">{driverName}</h3>
-          <p className="text-sm text-white/70">Tap photo to update</p>
-        </div>}
+          <p className="text-sm text-white/70 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            📸 Tap photo to update
+          </p>
+        </div>
+      )}
     </div>;
 }
