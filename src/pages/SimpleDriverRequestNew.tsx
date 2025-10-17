@@ -283,6 +283,16 @@ const SimpleDriverRequest = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('=== DEBUG: Job Submission Started ===');
+      console.log('User Profile:', userProfile);
+      console.log('Vehicle Info:', vehicleInfo);
+      console.log('Delivery Address:', deliveryAddress);
+      console.log('Customer Info:', customerInfo);
+      console.log('Has Trade In:', hasTradeIn);
+      console.log('Trade Vehicle Info:', tradeVehicleInfo);
+      console.log('Timeframe:', timeframe);
+      console.log('Notes:', notes);
+
       // Submit the request with smart defaults
       const jobData = {
         type: hasTradeIn ? ('swap' as const) : ('delivery' as const),
@@ -293,7 +303,7 @@ const SimpleDriverRequest = () => {
         model: vehicleInfo.model,
         vin: vehicleInfo.vin || null,
         customer_name: customerInfo.name,
-        customer_phone: cleanPhoneNumber(customerInfo.phone),
+        customer_phone: cleanPhoneNumber(customerInfo.phone) || customerInfo.phone,
         timeframe: timeframe,
         notes: notes,
         status: 'open',
@@ -310,11 +320,29 @@ const SimpleDriverRequest = () => {
         })
       };
 
-      const { error } = await supabase
-        .from('jobs')
-        .insert(jobData);
+      console.log('=== DEBUG: Final Job Data ===');
+      console.log(JSON.stringify(jobData, null, 2));
 
-      if (error) throw error;
+      const { data, error } = await supabase
+        .from('jobs')
+        .insert(jobData)
+        .select('*');
+
+      console.log('=== DEBUG: Supabase Response ===');
+      console.log('Data:', data);
+      console.log('Error:', error);
+
+      if (error) {
+        console.error('=== DEBUG: Database Error Details ===');
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
+        console.error('Error code:', error.code);
+        throw error;
+      }
+
+      console.log('=== DEBUG: Job Created Successfully ===');
+      console.log('Created job:', data);
 
       toast({
         title: "Driver Request Submitted!",
@@ -323,12 +351,17 @@ const SimpleDriverRequest = () => {
 
       navigate('/dealer/dashboard');
     } catch (error) {
-      console.error('Error submitting request:', error);
+      console.error('=== DEBUG: Error submitting request ===');
+      console.error('Error object:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error constructor:', error?.constructor?.name);
       
       let errorMessage = "Failed to submit request. Please try again.";
       
       // Provide more specific error messages
       if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        
         if (error.message.includes('row-level security')) {
           errorMessage = "Authentication error. Please log out and log back in.";
         } else if (error.message.includes('dealer_id')) {
@@ -339,9 +372,25 @@ const SimpleDriverRequest = () => {
           errorMessage = "Network error. Please check your connection.";
         } else if (error.message.includes('null value')) {
           errorMessage = "Missing required information. Please check all fields.";
+        } else if (error.message.includes('permission')) {
+          errorMessage = "Permission denied. Please check your account settings.";
+        } else if (error.message.includes('foreign key')) {
+          errorMessage = "Invalid dealer account. Please contact support.";
         } else {
           // Include the actual error message for debugging
-          errorMessage = `${errorMessage} (${error.message})`;
+          errorMessage = `Submission failed: ${error.message}`;
+        }
+      } else if (typeof error === 'object' && error !== null) {
+        // Handle Supabase error objects
+        const supabaseError = error as { message?: string; details?: string; hint?: string; code?: string };
+        if (supabaseError.message) {
+          errorMessage = `Database error: ${supabaseError.message}`;
+        }
+        if (supabaseError.details) {
+          console.error('Error details:', supabaseError.details);
+        }
+        if (supabaseError.hint) {
+          console.error('Error hint:', supabaseError.hint);
         }
       }
       
