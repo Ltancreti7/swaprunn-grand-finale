@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { bulletproofJobCreation } from "@/services/bulletproofJobService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -324,56 +325,33 @@ const SimpleDriverRequest = () => {
       console.log('=== DEBUG: Final Job Data ===');
       console.log(JSON.stringify(jobData, null, 2));
 
-      // CRITICAL FIX: Try multiple methods to insert the job
-      let insertResult;
-      let insertError;
-
-      // Method 1: Standard insert with explicit return
-      try {
-        console.log('Attempting standard insert...');
-        const result = await supabase
-          .from('jobs')
-          .insert(jobData)
-          .select('*');
-        
-        insertResult = result.data;
-        insertError = result.error;
-      } catch (error) {
-        console.log('Standard insert failed, trying alternative...');
-        insertError = error;
-      }
-
-      // Method 2: If standard fails, try with service role bypass
-      if (insertError) {
-        console.log('Trying with service role headers...');
-        try {
-          const result = await supabase
-            .from('jobs')
-            .insert(jobData)
-            .select('*');
-          
-          insertResult = result.data;
-          insertError = result.error;
-        } catch (error) {
-          insertError = error;
-        }
-      }
-
-      console.log('=== DEBUG: Supabase Response ===');
-      console.log('Data:', insertResult);
-      console.log('Error:', insertError);
-
-      if (insertError) {
-        console.error('=== DEBUG: Database Error Details ===');
-        console.error('Error message:', insertError.message);
-        console.error('Error details:', insertError.details);
-        console.error('Error hint:', insertError.hint);
-        console.error('Error code:', insertError.code);
-        throw insertError;
-      }
+      // BULLETPROOF SOLUTION: Use dedicated job creation service
+      console.log('🚀 Using bulletproof job creation service...');
+      
+      const createdJob = await bulletproofJobCreation({
+        type: hasTradeIn ? 'swap' : 'delivery',
+        pickup_address: `${pickupAddress.street}, ${pickupAddress.city}, ${pickupAddress.state} ${pickupAddress.zip}`,
+        delivery_address: `${deliveryAddress.street}, ${deliveryAddress.city}, ${deliveryAddress.state} ${deliveryAddress.zip}`,
+        year: parseInt(vehicleInfo.year),
+        make: vehicleInfo.make,
+        model: vehicleInfo.model,
+        vin: vehicleInfo.vin || null,
+        customer_name: customerInfo.name,
+        customer_phone: cleanPhoneNumber(customerInfo.phone) || customerInfo.phone,
+        timeframe: timeframe,
+        notes: notes || null,
+        requires_two: false,
+        distance_miles: 25,
+        // Trade vehicle parameters
+        trade_year: hasTradeIn && tradeVehicleInfo.year ? parseInt(tradeVehicleInfo.year) : null,
+        trade_make: hasTradeIn ? tradeVehicleInfo.make : null,
+        trade_model: hasTradeIn ? tradeVehicleInfo.model : null,
+        trade_vin: hasTradeIn ? (tradeVehicleInfo.vin || null) : null,
+        trade_transmission: hasTradeIn ? tradeVehicleInfo.transmission : null
+      });
 
       console.log('=== DEBUG: Job Created Successfully ===');
-      console.log('Created job:', insertResult);
+      console.log('Created job:', createdJob);
 
       toast({
         title: "Driver Request Submitted!",
