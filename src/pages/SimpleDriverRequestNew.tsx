@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AddressInput, AddressData } from "@/components/ui/address-input";
 import { ArrowLeft, ArrowRight, Car, MapPin, User, Clock, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
@@ -153,8 +154,11 @@ const SimpleDriverRequest = () => {
 
   const canProceedToNext = () => {
     switch (currentStep) {
-      case 1:
-        return vehicleInfo.year && vehicleInfo.make && vehicleInfo.model;
+      case 1: {
+        const mainVehicleValid = vehicleInfo.year && vehicleInfo.make && vehicleInfo.model;
+        const tradeVehicleValid = !hasTradeIn || (tradeVehicleInfo.year && tradeVehicleInfo.make && tradeVehicleInfo.model);
+        return mainVehicleValid && tradeVehicleValid;
+      }
       case 2:
         return deliveryAddress.street && deliveryAddress.city;
       case 3:
@@ -260,24 +264,33 @@ const SimpleDriverRequest = () => {
 
     try {
       // Submit the request with smart defaults
+      const jobData = {
+        type: hasTradeIn ? ('swap' as const) : ('delivery' as const),
+        pickup_address: `${pickupAddress.street}, ${pickupAddress.city}, ${pickupAddress.state} ${pickupAddress.zip}`,
+        delivery_address: `${deliveryAddress.street}, ${deliveryAddress.city}, ${deliveryAddress.state} ${deliveryAddress.zip}`,
+        year: parseInt(vehicleInfo.year),
+        make: vehicleInfo.make,
+        model: vehicleInfo.model,
+        vin: vehicleInfo.vin,
+        customer_name: customerInfo.name,
+        customer_phone: cleanPhoneNumber(customerInfo.phone),
+        timeframe: timeframe,
+        notes: notes,
+        status: 'open',
+        requires_two: false,
+        distance_miles: 25,
+        // Include trade vehicle data if applicable
+        ...(hasTradeIn && {
+          trade_year: parseInt(tradeVehicleInfo.year),
+          trade_make: tradeVehicleInfo.make,
+          trade_model: tradeVehicleInfo.model,
+          trade_vin: tradeVehicleInfo.vin
+        })
+      };
+
       const { error } = await supabase
         .from('jobs')
-        .insert({
-          type: 'delivery',
-          pickup_address: `${pickupAddress.street}, ${pickupAddress.city}, ${pickupAddress.state} ${pickupAddress.zip}`,
-          delivery_address: `${deliveryAddress.street}, ${deliveryAddress.city}, ${deliveryAddress.state} ${deliveryAddress.zip}`,
-          year: parseInt(vehicleInfo.year),
-          make: vehicleInfo.make,
-          model: vehicleInfo.model,
-          vin: vehicleInfo.vin,
-          customer_name: customerInfo.name,
-          customer_phone: cleanPhoneNumber(customerInfo.phone),
-          timeframe: timeframe,
-          notes: notes,
-          status: 'open',
-          requires_two: false,
-          distance_miles: 25
-        });
+        .insert(jobData);
 
       if (error) throw error;
 
@@ -495,6 +508,82 @@ const SimpleDriverRequest = () => {
                     onChange={(e) => setVehicleInfo({...vehicleInfo, vin: e.target.value})}
                     className="bg-black/30 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 h-14 text-base sm:text-lg rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 w-full min-w-0"
                   />
+                </div>
+
+                {/* Trade-in Vehicle Section */}
+                <div className="max-w-md mx-auto mt-8">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                    <div className="flex items-center justify-center space-x-3 mb-6">
+                      <Checkbox
+                        id="hasTradeIn"
+                        checked={hasTradeIn}
+                        onCheckedChange={(checked) => setHasTradeIn(!!checked)}
+                        className="border-white/40 data-[state=checked]:bg-[#E11900] w-5 h-5"
+                      />
+                      <Label htmlFor="hasTradeIn" className="text-white text-base font-medium cursor-pointer">
+                        Is there a trade-in vehicle?
+                      </Label>
+                    </div>
+                    
+                    {hasTradeIn && (
+                      <div className="space-y-4">
+                        <div className="text-center mb-4">
+                          <h3 className="text-lg font-semibold text-white mb-1">Trade-In Vehicle</h3>
+                          <p className="text-white/60 text-sm">Driver will drive this back from delivery</p>
+                        </div>
+                        
+                        <Select value={tradeVehicleInfo.year} onValueChange={(value) => setTradeVehicleInfo({...tradeVehicleInfo, year: value})}>
+                          <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-12 text-sm rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 w-full min-w-0">
+                            <SelectValue placeholder="Trade Year" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
+                            {years.map((year) => (
+                              <SelectItem key={year} value={year} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20 break-words">
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <Select value={tradeVehicleInfo.make} onValueChange={(value) => setTradeVehicleInfo({...tradeVehicleInfo, make: value})}>
+                          <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-12 text-sm rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 w-full min-w-0">
+                            <SelectValue placeholder="Trade Make" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
+                            {makes.map((make) => (
+                              <SelectItem key={make} value={make} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20 break-words">
+                                {make}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <Select 
+                          value={tradeVehicleInfo.model} 
+                          onValueChange={(value) => setTradeVehicleInfo({...tradeVehicleInfo, model: value})}
+                          disabled={!tradeVehicleInfo.make}
+                        >
+                          <SelectTrigger className="bg-black/30 backdrop-blur-sm border border-white/20 text-white h-12 text-sm rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 [&>span]:text-white data-[placeholder]:text-white/40 disabled:opacity-50 w-full min-w-0">
+                            <SelectValue placeholder={tradeVehicleInfo.make ? "Trade Model" : "Select Make First"} />
+                          </SelectTrigger>
+                          <SelectContent className="bg-black/95 backdrop-blur-sm border-white/20 max-h-60">
+                            {availableTradeModels.map((model) => (
+                              <SelectItem key={model} value={model} className="text-white hover:bg-white/10 focus:bg-[#E11900]/20 break-words">
+                                {model}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <Input
+                          placeholder="Trade VIN (Optional)"
+                          value={tradeVehicleInfo.vin}
+                          onChange={(e) => setTradeVehicleInfo({...tradeVehicleInfo, vin: e.target.value})}
+                          className="bg-black/30 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 h-12 text-sm rounded-xl focus:border-[#E11900]/50 focus:ring-2 focus:ring-[#E11900]/20 transition-all duration-200 w-full min-w-0"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
