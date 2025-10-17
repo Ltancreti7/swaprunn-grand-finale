@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Logo from "@/components/Logo";
 import { DealerProfilePhoto } from "@/components/dealer/DealerProfilePhoto";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 
@@ -83,19 +82,7 @@ export default function DealerPortal() {
       }}
     >
       <div className="min-h-screen bg-black/80 backdrop-blur-sm">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-10 pt-8">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <Logo className="h-8" />
-            <Button
-              className="h-10 w-10 rounded-full bg-white/10 text-white hover:bg-white/20"
-              variant="ghost"
-              size="icon"
-            >
-              <MessageCircle className="h-5 w-5" />
-            </Button>
-          </div>
-
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-10 pt-20">
           {/* Title */}
           <div>
             <h1 className="text-3xl font-bold">Dealer Portal</h1>

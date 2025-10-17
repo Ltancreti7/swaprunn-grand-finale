@@ -14,9 +14,7 @@ import { DealerProfilePhoto } from "@/components/dealer/DealerProfilePhoto";
 import { JobStatsCard } from "@/components/dealer/JobStatsCard";
 import { JobCard } from "@/components/dealer/JobCard";
 import { AssignmentCard } from "@/components/dealer/AssignmentCard";
-import { NavigationDrawer } from "@/components/NavigationDrawer";
-import { MessagesButton } from "@/components/messages/MessagesButton";
-import { MessagesOverlay } from "@/components/messages/MessagesOverlay";
+
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { Job as SupabaseJob } from "@/services/supabaseService";
 
@@ -82,7 +80,6 @@ const DealerDashboard = () => {
   const [activeAssignments, setActiveAssignments] = useState<ActiveAssignment[]>([]);
   const [newAssignmentsCount, setNewAssignmentsCount] = useState(0);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
   const {
     user,
     userProfile,
@@ -344,29 +341,7 @@ const DealerDashboard = () => {
     }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
         
-        {/* Navigation Header */}
-        <header className="fixed top-2 left-0 right-0 z-[60] bg-black/50 backdrop-blur-xl border-b border-white/10 shadow-lg">
-          <div className="flex items-center justify-between h-16 px-4 py-2">
-            {/* Left: Hamburger Menu */}
-            <div className="flex items-center justify-center min-w-[40px] h-[40px]">
-              <NavigationDrawer />
-            </div>
 
-            {/* Center: Logo */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <img 
-                src="/swaprunn-logo-2025.png?v=20251001" 
-                alt="SwapRunn" 
-                className="h-16 w-auto transition-all duration-300 drop-shadow-lg" 
-              />
-            </div>
-
-            {/* Right: Messages Button */}
-            <div className="flex items-center justify-center min-w-[40px] h-[40px]">
-              <MessagesButton onClick={() => setShowMessages(true)} unreadCount={totalUnread} />
-            </div>
-          </div>
-        </header>
         
         <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-12">
           <div className="space-y-4 sm:space-y-6 lg:space-y-8">
@@ -544,13 +519,7 @@ const DealerDashboard = () => {
       {/* Edit Profile Modal */}
       {dealerData && <EditDealerProfile isOpen={isEditProfileOpen} onClose={() => setIsEditProfileOpen(false)} dealerData={dealerData} onUpdate={handleDealerProfileUpdate} />}
       
-      {/* Messages Overlay */}
-      <MessagesOverlay 
-        isOpen={showMessages} 
-        onClose={() => setShowMessages(false)} 
-        userType={userProfile?.user_type || 'dealer'}
-        currentUserId={userProfile?.user_id || 'guest'}
-      />
+
     </>
   );
 };
