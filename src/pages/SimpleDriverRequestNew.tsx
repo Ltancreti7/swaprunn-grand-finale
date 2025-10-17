@@ -512,7 +512,7 @@ const SimpleDriverRequest = () => {
                   />
 
                   {/* TRADE-IN VEHICLE CHECKBOX - PROMINENT */}
-                  <div className="mt-6 p-4 bg-[#E11900]/10 border-2 border-[#E11900]/30 rounded-xl">
+                  <div className="mt-6 p-4 bg-[#E11900]/15 border-2 border-[#E11900]/50 rounded-xl shadow-lg">
                     <div className="flex items-center justify-center space-x-3">
                       <Checkbox
                         id="hasTradeIn"
@@ -529,7 +529,7 @@ const SimpleDriverRequest = () => {
 
                 {/* Trade-in Vehicle Details */}
                 {hasTradeIn && (
-                  <div className="max-w-md mx-auto mt-6 p-6 bg-[#E11900]/5 border border-[#E11900]/20 rounded-xl">
+                  <div className="max-w-md mx-auto mt-6 p-6 bg-[#E11900]/15 border border-[#E11900]/40 rounded-xl shadow-lg">
                     <div className="text-center mb-4">
                       <h3 className="text-xl font-bold text-white mb-2">🚗 TRADE-IN VEHICLE</h3>
                       <p className="text-white/70 text-sm">Driver will drive this back from delivery</p>
@@ -595,8 +595,8 @@ const SimpleDriverRequest = () => {
                             onClick={() => setTradeVehicleInfo({...tradeVehicleInfo, transmission: 'Automatic'})}
                             className={`flex-1 h-14 rounded-xl font-semibold text-base transition-all duration-200 ${
                               tradeVehicleInfo.transmission === 'Automatic'
-                                ? 'bg-[#E11900] text-white shadow-lg scale-105'
-                                : 'bg-black/30 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-white/10 hover:text-white'
+                                ? 'bg-[#E11900] hover:bg-[#B51400] text-white shadow-lg scale-105'
+                                : 'bg-black/30 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-[#E11900]/10 hover:text-white hover:border-[#E11900]/30'
                             }`}
                           >
                             🔄 Automatic
@@ -606,8 +606,8 @@ const SimpleDriverRequest = () => {
                             onClick={() => setTradeVehicleInfo({...tradeVehicleInfo, transmission: 'Manual'})}
                             className={`flex-1 h-14 rounded-xl font-semibold text-base transition-all duration-200 ${
                               tradeVehicleInfo.transmission === 'Manual'
-                                ? 'bg-[#E11900] text-white shadow-lg scale-105'
-                                : 'bg-black/30 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-white/10 hover:text-white'
+                                ? 'bg-[#E11900] hover:bg-[#B51400] text-white shadow-lg scale-105'
+                                : 'bg-black/30 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-[#E11900]/10 hover:text-white hover:border-[#E11900]/30'
                             }`}
                           >
                             ⚙️ Manual
