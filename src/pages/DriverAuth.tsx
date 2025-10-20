@@ -13,6 +13,25 @@ import SiteHeader from "@/components/SiteHeader";
 import { ArrowLeft } from "lucide-react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import BackButton from "@/components/BackButton";
+import type { User } from "@supabase/supabase-js";
+
+type DriverMetadata = {
+  user_type?: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  phone_number?: string;
+  contact_phone?: string;
+};
+
+const extractDriverMetadata = (user: User | null): DriverMetadata => {
+  const raw = user?.user_metadata;
+  if (raw && typeof raw === 'object') {
+    return raw as DriverMetadata;
+  }
+  return {};
+};
 
 const SAVED_EMAIL_KEY = 'swaprunn_driver_saved_email';
 const SAVED_PASSWORD_KEY = 'swaprunn_driver_saved_password'; 
@@ -44,18 +63,55 @@ const DriverAuth = () => {
     setRememberMe(savedRememberMe);
   }, []);
 
-  const createDriverProfile = async () => {
+  const createDriverProfile = async (details?: {
+    fullName?: string | null;
+    phone?: string | null;
+  }) => {
     try {
+      const resolvedFullName = (details?.fullName ?? fullName).trim();
+      const hasFullName = resolvedFullName.length > 0;
+      const resolvedPhoneInput = details?.phone ?? phoneNumber;
+      const cleanedPhone = cleanPhoneNumber(resolvedPhoneInput);
+
       const { error } = await supabase.rpc('create_profile_for_current_user', {
         _user_type: 'driver',
-        _name: fullName,
-        _phone: cleanPhoneNumber(phoneNumber)
+        _name: hasFullName ? resolvedFullName : null,
+        _phone: cleanedPhone
       });
 
       if (error) throw error;
     } catch (error) {
       console.error('Error creating driver profile:', error);
       throw error;
+    }
+  };
+
+  const tryRepairDriverProfile = async (authUser: User | null) => {
+    if (!authUser) return;
+
+    const metadata = extractDriverMetadata(authUser);
+    if (metadata.user_type !== 'driver') {
+      return;
+    }
+
+    const metadataFullName = (() => {
+      const direct = typeof metadata.full_name === 'string' ? metadata.full_name : '';
+      if (direct.trim()) return direct.trim();
+      const first = typeof metadata.first_name === 'string' ? metadata.first_name : '';
+      const last = typeof metadata.last_name === 'string' ? metadata.last_name : '';
+      return `${first} ${last}`.trim();
+    })();
+
+    const metadataPhoneCandidate = [metadata.phone, metadata.phone_number, metadata.contact_phone]
+      .find((candidate) => typeof candidate === 'string' && candidate.trim());
+
+    try {
+      await createDriverProfile({
+        fullName: metadataFullName || null,
+        phone: metadataPhoneCandidate ?? null,
+      });
+    } catch (repairError) {
+      console.error('Automatic driver profile repair failed:', repairError);
     }
   };
 
@@ -134,17 +190,28 @@ const DriverAuth = () => {
         if (error) throw error;
 
         // CRITICAL: Verify user is actually a driver
-        const { data: profile } = await supabase
+        const { data: initialProfile } = await supabase
           .rpc('get_user_profile')
           .maybeSingle();
 
+        let profile = initialProfile;
+
+        if (!profile) {
+          await tryRepairDriverProfile(data.user ?? null);
+          const { data: repairedProfile } = await supabase
+            .rpc('get_user_profile')
+            .maybeSingle();
+          profile = repairedProfile ?? null;
+        }
+
         if (profile?.user_type !== 'driver') {
-          // Wrong account type - sign them out immediately
           await supabase.auth.signOut();
+          const metadataUserType = extractDriverMetadata(data.user ?? null).user_type;
+          const accountType = profile?.user_type || metadataUserType || 'different type';
           throw new Error(
-            `This is a driver login page. Your account is registered as a ${profile?.user_type || 'different type'}. Please use the correct login page: ${
-              profile?.user_type === 'dealer' ? '/dealer/auth' : 
-              profile?.user_type === 'swap_coordinator' ? '/swap-coordinator/auth' : 
+            `This is a driver login page. Your account is registered as a ${accountType}. Please use the correct login page: ${
+              accountType === 'dealer' ? '/dealer/auth' : 
+              accountType === 'swap_coordinator' ? '/swap-coordinator/auth' : 
               '/'
             }`
           );

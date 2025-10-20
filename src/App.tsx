@@ -35,6 +35,7 @@ import SwapCoordinatorDashboard from "./pages/SwapCoordinatorDashboard";
 import PasswordResetRequest from "./pages/PasswordResetRequest";
 import PasswordUpdate from "./pages/PasswordUpdate";
 import DealerPortal from "./pages/DealerPortal";
+import SalesDashboard from "./pages/SalesDashboard";
 
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -97,6 +98,11 @@ const App = () => (
           <Route path="/dealer/portal" element={
             <ProtectedRoute requiredUserType="dealer">
               <DealerPortal />
+            </ProtectedRoute>
+          } />
+          <Route path="/sales/dashboard" element={
+            <ProtectedRoute requiredUserType="dealer">
+              <SalesDashboard />
             </ProtectedRoute>
           } />
           <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />

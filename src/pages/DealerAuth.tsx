@@ -15,6 +15,28 @@ import { Crown, ArrowLeft, Fingerprint } from "lucide-react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { useBiometricAuth } from "@/hooks/useBiometricAuth";
 import BackButton from "@/components/BackButton";
+import type { User } from "@supabase/supabase-js";
+
+type DealerMetadata = {
+  user_type?: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  company_name?: string;
+  dealership_name?: string;
+  organization?: string;
+  phone?: string;
+  phone_number?: string;
+  contact_phone?: string;
+};
+
+const extractDealerMetadata = (user: User | null): DealerMetadata => {
+  const raw = user?.user_metadata;
+  if (raw && typeof raw === 'object') {
+    return raw as DealerMetadata;
+  }
+  return {};
+};
 
 const SAVED_EMAIL_KEY = 'swaprunn_saved_email';
 const SAVED_PASSWORD_KEY = 'swaprunn_saved_password';
@@ -94,21 +116,87 @@ const DealerAuth = () => {
     }
   }, [biometric.isAvailable, isSignUp, attemptBiometricLogin]);
 
-  const createDealerProfile = async () => {
+  const createDealerProfile = async (details?: {
+    fullName?: string | null;
+    companyName?: string | null;
+    phone?: string | null;
+  }) => {
     try {
+      const resolvedFullName = (details?.fullName ?? `${firstName} ${lastName}`.trim()).trim();
+      const hasFullName = resolvedFullName.length > 0;
+      const resolvedCompany = (details?.companyName ?? companyName).trim();
+      const hasCompany = resolvedCompany.length > 0;
+      const resolvedPhone = details?.phone?.trim() ?? undefined;
+
       const {
         data,
         error
       } = await supabase.rpc('create_profile_for_current_user', {
         _user_type: 'dealer',
-        _company_name: companyName,
-        _name: `${firstName} ${lastName}`.trim()
+        _company_name: hasCompany ? resolvedCompany : null,
+        _name: hasFullName ? resolvedFullName : null,
+        _phone: resolvedPhone ?? null
       });
       if (error) throw error;
       return data;
     } catch (error) {
       console.error('Error creating dealer profile:', error);
       throw error;
+    }
+  };
+
+  const tryRepairDealerProfile = async (authUser: User | null) => {
+    if (!authUser) return null;
+
+    const metadata = extractDealerMetadata(authUser);
+    const metadataUserType = metadata.user_type;
+
+    if (metadataUserType !== 'dealer') {
+      return null;
+    }
+
+    const metadataFullName = (() => {
+      const direct = typeof metadata.full_name === 'string' ? metadata.full_name : '';
+      if (direct?.trim()) return direct.trim();
+      const first = typeof metadata.first_name === 'string' ? metadata.first_name : '';
+      const last = typeof metadata.last_name === 'string' ? metadata.last_name : '';
+      return `${first} ${last}`.trim();
+    })();
+
+    const metadataCompany = (() => {
+      const companyCandidates = [
+        metadata.company_name,
+        metadata.dealership_name,
+        metadata.organization,
+        metadataFullName
+      ];
+      for (const candidate of companyCandidates) {
+        if (typeof candidate === 'string' && candidate.trim()) {
+          return candidate.trim();
+        }
+      }
+      return null;
+    })();
+
+    const metadataPhone = (() => {
+      const candidates = [metadata.phone, metadata.phone_number, metadata.contact_phone];
+      for (const candidate of candidates) {
+        if (typeof candidate === 'string' && candidate.trim()) {
+          return candidate.trim();
+        }
+      }
+      return null;
+    })();
+
+    try {
+      return await createDealerProfile({
+        fullName: metadataFullName || null,
+        companyName: metadataCompany,
+        phone: metadataPhone
+      });
+    } catch (repairError) {
+      console.error('Automatic dealer profile repair failed:', repairError);
+      return null;
     }
   };
   const handleAuth = async (e: React.FormEvent) => {
@@ -170,17 +258,28 @@ const DealerAuth = () => {
         if (error) throw error;
 
         // CRITICAL: Verify user is actually a dealer
-        const { data: profile } = await supabase
+        const { data: initialProfile } = await supabase
           .rpc('get_user_profile')
           .maybeSingle();
 
+        let profile = initialProfile;
+
+        if (!profile) {
+          await tryRepairDealerProfile(data.user ?? null);
+          const { data: repairedProfile } = await supabase
+            .rpc('get_user_profile')
+            .maybeSingle();
+          profile = repairedProfile ?? null;
+        }
+
         if (profile?.user_type !== 'dealer') {
-          // Wrong account type - sign them out immediately
           await supabase.auth.signOut();
+          const metadataUserType = extractDealerMetadata(data.user ?? null).user_type;
+          const accountType = profile?.user_type || metadataUserType || 'different type';
           throw new Error(
-            `This is a dealer login page. Your account is registered as a ${profile?.user_type || 'different type'}. Please use the correct login page: ${
-              profile?.user_type === 'driver' ? '/driver/auth' : 
-              profile?.user_type === 'swap_coordinator' ? '/swap-coordinator/auth' : 
+            `This is a dealer login page. Your account is registered as a ${accountType}. Please use the correct login page: ${
+              accountType === 'driver' ? '/driver/auth' : 
+              accountType === 'swap_coordinator' ? '/swap-coordinator/auth' : 
               '/'
             }`
           );

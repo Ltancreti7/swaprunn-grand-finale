@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { supabaseService } from "@/services/supabaseService";
 import BackButton from "@/components/BackButton";
 import SiteHeader from "@/components/SiteHeader";
 import { useToast } from "@/hooks/use-toast";
@@ -91,7 +92,7 @@ const DealerRequest = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
 
   // Generate years from 2026 to 2005
   const years = Array.from(
@@ -172,11 +173,11 @@ const DealerRequest = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!userProfile) {
+
+    if (!user || !userProfile?.dealer_id) {
       toast({
-        title: "Authentication Required",
-        description: "Please log in to submit a delivery request.",
+        title: "Profile Required",
+        description: "Please sign in with a dealer account before requesting a driver.",
         variant: "destructive",
       });
       return;
@@ -184,60 +185,79 @@ const DealerRequest = () => {
 
     setIsSubmitting(true);
 
+    const driverCount = Math.max(1, parseInt(driversNeeded, 10) || 1);
+    const parsedVehicleYear = year ? Number(year) : undefined;
+    const parsedTradeYear = hasTradeIn && tradeYear ? Number(tradeYear) : null;
+    const sanitizedPaperwork = paperwork.length ? paperwork : null;
+
     try {
-      const jobData = {
-        dealer_id: userProfile.id,
-        vehicle_year: year,
-        vehicle_make: make,
-        vehicle_model: model,
-        vehicle_vin: vin || null,
-        stock_number: stockNumber || null,
-        // Trade-in vehicle data
-        has_trade_in: hasTradeIn,
-        trade_year: hasTradeIn ? tradeYear : null,
-        trade_make: hasTradeIn ? tradeMake : null,
-        trade_model: hasTradeIn ? tradeModel : null,
-        trade_transmission: hasTradeIn ? tradeTransmission : null,
-        // Addresses and other data
-        pickup_address: addressToString(pickupAddress),
-        delivery_address: addressToString(deliveryAddress),
+      const job = await supabaseService.createJob({
+        type: "delivery",
+        vin: vin || undefined,
+        year: parsedVehicleYear,
+        make,
+        model,
         customer_name: customerName,
         customer_phone: customerPhone,
-        estimated_distance: estimatedDistance,
-        timeframe: timeframe,
-        specific_date: specificDate || null,
-        specific_time: specificTime || null,
-        drivers_needed: parseInt(driversNeeded),
-        specific_driver_id: specificDriverId || null,
-        notes: notes || null,
-        payment_method: paymentMethod || null,
-        amount_to_collect: amountToCollect || null,
-        paperwork: paperwork,
+        pickup_address: addressToString(pickupAddress),
+        delivery_address: addressToString(deliveryAddress),
+        notes: notes || undefined,
+        timeframe: timeframe || undefined,
+        transmission: transmission || undefined,
+        specific_time: specificTime || undefined,
+        specific_date: specificDate || undefined,
+        distance_miles: estimatedDistance,
+        requires_two: driverCount > 1,
+        stock_number: stockNumber || undefined,
+        drivers_needed: driverCount,
+        specific_driver_id: specificDriverId ? specificDriverId : null,
+        payment_method: paymentMethod || undefined,
+        amount_to_collect: amountToCollect || undefined,
+        paperwork: sanitizedPaperwork,
         pre_delivery_checklist: preDeliveryChecklist,
-        status: "pending",
-      };
+        has_trade_in: hasTradeIn,
+        trade_year: parsedTradeYear,
+        trade_make: hasTradeIn ? tradeMake || null : null,
+        trade_model: hasTradeIn ? tradeModel || null : null,
+        trade_transmission: hasTradeIn ? tradeTransmission || null : null,
+        dealerId: userProfile.dealer_id,
+        createdBy: user.id,
+      });
 
-      const { data, error } = await supabase.from("jobs").insert([jobData]).select();
-
-      if (error) throw error;
+      try {
+        await supabase.functions.invoke("notify-drivers-new-job", {
+          body: {
+            job_id: job.id,
+            type: job.type,
+            year: job.year ?? parsedVehicleYear,
+            make: job.make ?? make,
+            model: job.model ?? model,
+            pickup_address: job.pickup_address ?? addressToString(pickupAddress),
+            delivery_address: job.delivery_address ?? addressToString(deliveryAddress),
+            distance_miles: job.distance_miles ?? estimatedDistance,
+            requires_two: job.requires_two ?? driverCount > 1,
+            customer_name: job.customer_name ?? customerName,
+          },
+        });
+      } catch (notifyError) {
+        console.error("Failed to trigger driver notifications:", notifyError);
+      }
 
       setShowSuccessBanner(true);
       toast({
         title: "Request Submitted!",
-        description: "Your delivery request has been submitted successfully. You'll be notified when a driver accepts.",
+        description: "Your delivery request has been submitted and drivers have been notified.",
       });
 
-      // Reset form after successful submission
       setTimeout(() => {
         setShowSuccessBanner(false);
         navigate("/dealer/dashboard");
       }, 3000);
-
     } catch (error) {
       console.error("Error submitting request:", error);
       toast({
         title: "Submission Failed",
-        description: "There was an error submitting your request. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error submitting your request. Please try again.",
         variant: "destructive",
       });
     } finally {

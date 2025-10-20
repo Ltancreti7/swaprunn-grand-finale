@@ -7,9 +7,12 @@ export interface Job {
   year?: number | null;
   make?: string | null;
   model?: string | null;
+  stock_number?: string | null;
   customer_name?: string | null;
   customer_phone?: string | null;
   customer_address?: string | null;
+  drivers_needed?: number | null;
+  specific_driver_id?: string | null;
   pickup_address?: string | null;
   delivery_address?: string | null;
   distance_miles?: number | null;
@@ -17,6 +20,16 @@ export interface Job {
   status: string;
   track_token: string;
   notes?: string | null;
+  payment_method?: string | null;
+  amount_to_collect?: string | null;
+  paperwork?: string[] | null;
+  pre_delivery_checklist?: Record<string, unknown> | null;
+  has_trade_in?: boolean | null;
+  trade_year?: number | null;
+  trade_make?: string | null;
+  trade_model?: string | null;
+  trade_transmission?: string | null;
+  trade_vin?: string | null;
   created_at: string;
   // Assignment data
   driver_id?: string | null;
@@ -60,6 +73,34 @@ export interface CreateJobData {
   specific_time?: string;
   specific_date?: string;
   distance_miles?: number;
+  requires_two?: boolean;
+  stock_number?: string | null;
+  drivers_needed?: number;
+  specific_driver_id?: string | null;
+  payment_method?: string | null;
+  amount_to_collect?: string | null;
+  paperwork?: string[] | null;
+  pre_delivery_checklist?: Record<string, unknown> | null;
+  has_trade_in?: boolean;
+  trade_year?: number | null;
+  trade_make?: string | null;
+  trade_model?: string | null;
+  trade_transmission?: string | null;
+  dealerId: string;
+  createdBy: string;
+}
+
+export interface DriverOpenJob {
+  id: string;
+  type: string | null;
+  status: string | null;
+  pickup_address: string | null;
+  delivery_address: string | null;
+  distance_miles: number | null;
+  dealer_name: string | null;
+  dealer_store: string | null;
+  estimated_pay_cents: number | null;
+  created_at: string | null;
 }
 
 class SupabaseService {
@@ -96,24 +137,22 @@ class SupabaseService {
   }
 
   async createJob(jobData: CreateJobData): Promise<Job> {
+    const {
+      dealerId,
+      createdBy,
+      distance_miles,
+      requires_two,
+      ...columns
+    } = jobData;
+
     const { data, error } = await supabase
       .from('jobs')
       .insert({
-        type: jobData.type,
-        vin: jobData.vin,
-        year: jobData.year,
-        make: jobData.make,
-        model: jobData.model,
-        customer_name: jobData.customer_name,
-        customer_phone: jobData.customer_phone,
-        pickup_address: jobData.pickup_address,
-        delivery_address: jobData.delivery_address,
-        distance_miles: jobData.distance_miles || 25,
-        notes: jobData.notes,
-        timeframe: jobData.timeframe,
-        transmission: jobData.transmission,
-        specific_time: jobData.specific_time,
-        specific_date: jobData.specific_date,
+        ...columns,
+        dealer_id: dealerId,
+        created_by: createdBy,
+        distance_miles: distance_miles ?? 25,
+        requires_two: requires_two ?? false,
         status: 'open'
       })
       .select()
@@ -307,13 +346,13 @@ class SupabaseService {
   }
 
   // Get open jobs for drivers (secure - no customer personal info)
-  async getOpenJobsForDrivers(): Promise<any[]> {
+  async getOpenJobsForDrivers(): Promise<DriverOpenJob[]> {
     const { data, error } = await supabase
       .rpc('get_open_jobs_for_drivers');
 
     if (error) throw error;
     
-    return data || [];
+    return (data ?? []) as DriverOpenJob[];
   }
 
   // History
@@ -329,7 +368,7 @@ class SupabaseService {
 
 
   // Create test job
-  async createTestJob(): Promise<Job> {
+  async createTestJob(dealerId: string, createdBy: string): Promise<Job> {
     return this.createJob({
       type: 'delivery',
       vin: 'TESTVIN123',
@@ -343,7 +382,9 @@ class SupabaseService {
       distance_miles: 45,
       timeframe: 'asap',
       transmission: 'automatic',
-      notes: 'Test delivery job - please handle with care'
+      notes: 'Test delivery job - please handle with care',
+      dealerId,
+      createdBy
     });
   }
 }

@@ -8,6 +8,26 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import BackButton from "@/components/BackButton";
+import { cleanPhoneNumber } from "@/lib/utils";
+import type { User } from "@supabase/supabase-js";
+
+type SwapCoordinatorMetadata = {
+  user_type?: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  phone_number?: string;
+  contact_phone?: string;
+};
+
+const extractSwapCoordinatorMetadata = (user: User | null): SwapCoordinatorMetadata => {
+  const raw = user?.user_metadata;
+  if (raw && typeof raw === "object") {
+    return raw as SwapCoordinatorMetadata;
+  }
+  return {};
+};
 
 export default function SwapCoordinatorAuth() {
   const navigate = useNavigate();
@@ -18,6 +38,59 @@ export default function SwapCoordinatorAuth() {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const createSwapCoordinatorProfile = async (details?: {
+    fullName?: string | null;
+    phone?: string | null;
+  }) => {
+    const resolvedFullName = (details?.fullName ?? `${firstName} ${lastName}`.trim()).trim();
+    const hasFullName = resolvedFullName.length > 0;
+    const resolvedPhone = details?.phone ?? phone;
+    const sanitizedPhone = resolvedPhone ? cleanPhoneNumber(resolvedPhone) : "";
+
+    try {
+      const { error } = await supabase.rpc("create_profile_for_current_user", {
+        _user_type: "swap_coordinator",
+        _name: hasFullName ? resolvedFullName : null,
+        _phone: sanitizedPhone || null,
+        _company_name: null
+      });
+
+      if (error) throw error;
+    } catch (profileError) {
+      console.error("Swap coordinator profile creation failed:", profileError);
+      throw profileError;
+    }
+  };
+
+  const tryRepairSwapCoordinatorProfile = async (authUser: User | null) => {
+    if (!authUser) return;
+
+    const metadata = extractSwapCoordinatorMetadata(authUser);
+    if (metadata.user_type !== "swap_coordinator") {
+      return;
+    }
+
+    const metadataFullName = (() => {
+      const direct = typeof metadata.full_name === "string" ? metadata.full_name : "";
+      if (direct.trim()) return direct.trim();
+      const first = typeof metadata.first_name === "string" ? metadata.first_name : "";
+      const last = typeof metadata.last_name === "string" ? metadata.last_name : "";
+      return `${first} ${last}`.trim();
+    })();
+
+    const metadataPhoneCandidate = [metadata.phone, metadata.phone_number, metadata.contact_phone]
+      .find((candidate) => typeof candidate === "string" && candidate.trim()) ?? null;
+
+    try {
+      await createSwapCoordinatorProfile({
+        fullName: metadataFullName || null,
+        phone: metadataPhoneCandidate,
+      });
+    } catch (repairError) {
+      console.error("Automatic swap coordinator profile repair failed:", repairError);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,17 +106,28 @@ export default function SwapCoordinatorAuth() {
         if (error) throw error;
 
         // CRITICAL: Verify user is actually a swap coordinator
-        const { data: profile } = await supabase
+        const { data: initialProfile } = await supabase
           .rpc('get_user_profile')
           .maybeSingle();
 
+        let profile = initialProfile;
+
+        if (!profile) {
+          await tryRepairSwapCoordinatorProfile(data.user ?? null);
+          const { data: repairedProfile } = await supabase
+            .rpc('get_user_profile')
+            .maybeSingle();
+          profile = repairedProfile ?? null;
+        }
+
         if (profile?.user_type !== 'swap_coordinator') {
-          // Wrong account type - sign them out immediately
           await supabase.auth.signOut();
+          const metadataUserType = extractSwapCoordinatorMetadata(data.user ?? null).user_type;
+          const accountType = profile?.user_type || metadataUserType || 'different type';
           throw new Error(
-            `This is a swap coordinator login page. Your account is registered as a ${profile?.user_type || 'different type'}. Please use the correct login page: ${
-              profile?.user_type === 'dealer' ? '/dealer/auth' : 
-              profile?.user_type === 'driver' ? '/driver/auth' : 
+            `This is a swap coordinator login page. Your account is registered as a ${accountType}. Please use the correct login page: ${
+              accountType === 'dealer' ? '/dealer/auth' : 
+              accountType === 'driver' ? '/driver/auth' : 
               '/'
             }`
           );
@@ -51,7 +135,7 @@ export default function SwapCoordinatorAuth() {
 
         navigate("/swap-coordinator/dashboard");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: authData, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -67,6 +151,16 @@ export default function SwapCoordinatorAuth() {
         });
 
         if (error) throw error;
+        if (authData.user) {
+          try {
+            await createSwapCoordinatorProfile({
+              fullName: `${firstName} ${lastName}`.trim(),
+              phone
+            });
+          } catch (profileError) {
+            console.error('Swap coordinator profile creation after signup failed:', profileError);
+          }
+        }
         toast.success("Account created! Redirecting...");
         navigate("/swap-coordinator/dashboard");
       }

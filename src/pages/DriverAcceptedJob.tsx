@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Clock, MapPin, Navigation } from 'lucide-react';
+import { Phone, Clock, MapPin, Navigation } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-
 interface JobDetail {
   id: string;
   type: string;
@@ -29,7 +28,7 @@ interface JobDetail {
   customer_phone?: string;
   notes?: string;
   dealer_id: string;
-  created_by?: string;
+  created_by?: string | null;
 }
 
 interface AssignmentDetail {
@@ -38,11 +37,12 @@ interface AssignmentDetail {
   accepted_at?: string;
 }
 
-interface SalespersonInfo {
-  name: string;
-  phone?: string;
-  email?: string;
-}
+type AssignmentWithJob = {
+  id: string;
+  started_at: string | null;
+  accepted_at: string | null;
+  jobs: JobDetail | null;
+};
 
 export default function DriverAcceptedJob() {
   const { jobId } = useParams();
@@ -52,17 +52,14 @@ export default function DriverAcceptedJob() {
   
   const [jobDetail, setJobDetail] = useState<JobDetail | null>(null);
   const [assignment, setAssignment] = useState<AssignmentDetail | null>(null);
-  const [salesperson, setSalesperson] = useState<SalespersonInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  useEffect(() => {
-    if (jobId && userProfile?.driver_id) {
-      fetchJobDetails();
+  const fetchJobDetails = useCallback(async () => {
+    if (!jobId || !userProfile?.driver_id) {
+      return;
     }
-  }, [jobId, userProfile]);
 
-  const fetchJobDetails = async () => {
     try {
       setIsLoading(true);
 
@@ -79,6 +76,10 @@ export default function DriverAcceptedJob() {
             status,
             pickup_address,
             delivery_address,
+            pickup_lat,
+            pickup_lng,
+            delivery_lat,
+            delivery_lng,
             specific_time,
             timeframe,
             year,
@@ -95,32 +96,20 @@ export default function DriverAcceptedJob() {
         `)
         .eq('job_id', jobId)
         .eq('driver_id', userProfile.driver_id)
-        .single();
+        .maybeSingle<AssignmentWithJob>();
 
       if (assignmentError) throw assignmentError;
 
       if (assignmentData && assignmentData.jobs) {
-        setJobDetail(assignmentData.jobs as any);
+        setJobDetail(assignmentData.jobs);
         setAssignment({
           id: assignmentData.id,
           started_at: assignmentData.started_at,
           accepted_at: assignmentData.accepted_at,
         });
-
-        // Fetch salesperson info if created_by exists
-        if ((assignmentData.jobs as any).created_by) {
-          const { data: userData } = await supabase.auth.admin.getUserById(
-            (assignmentData.jobs as any).created_by
-          );
-          
-          if (userData?.user) {
-            setSalesperson({
-              name: userData.user.user_metadata?.full_name || 'Salesperson',
-              phone: userData.user.user_metadata?.phone,
-              email: userData.user.email,
-            });
-          }
-        }
+      } else {
+        setJobDetail(null);
+        setAssignment(null);
       }
     } catch (error) {
       console.error('Error fetching job details:', error);
@@ -132,7 +121,13 @@ export default function DriverAcceptedJob() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [jobId, toast, userProfile?.driver_id]);
+
+  useEffect(() => {
+    if (jobId && userProfile?.driver_id) {
+      fetchJobDetails();
+    }
+  }, [fetchJobDetails, jobId, userProfile?.driver_id]);
 
   const handleStartDelivery = async () => {
     if (!assignment?.id) return;
@@ -204,10 +199,6 @@ export default function DriverAcceptedJob() {
 
   const handleCall = (phone?: string) => {
     if (phone) window.location.href = `tel:${phone}`;
-  };
-
-  const handleEmail = (email?: string) => {
-    if (email) window.location.href = `mailto:${email}`;
   };
 
   const handleNavigate = (address: string, lat?: number, lng?: number) => {
@@ -352,41 +343,30 @@ export default function DriverAcceptedJob() {
           </Card>
         )}
 
-        {/* Salesperson Contact */}
-        {salesperson && (
+        {/* Customer Contact */}
+        {(jobDetail.customer_name || jobDetail.customer_phone) && (
           <Card className="bg-card/50 backdrop-blur-sm border-white/10 shadow-soft rounded-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-white">Salesperson Contact</CardTitle>
+              <CardTitle className="text-lg font-semibold text-white">Customer Contact</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm text-white/50">Name</p>
-                <p className="text-white font-medium">{salesperson.name}</p>
-              </div>
-              <div className="flex gap-2">
-                {salesperson.phone && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 border-white/20 text-white hover:bg-white/10"
-                    onClick={() => handleCall(salesperson.phone)}
-                  >
-                    <Phone className="w-4 h-4 mr-2" />
-                    Call
-                  </Button>
-                )}
-                {salesperson.email && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 border-white/20 text-white hover:bg-white/10"
-                    onClick={() => handleEmail(salesperson.email)}
-                  >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Email
-                  </Button>
-                )}
-              </div>
+              {jobDetail.customer_name && (
+                <div>
+                  <p className="text-sm text-white/50">Name</p>
+                  <p className="text-white font-medium">{jobDetail.customer_name}</p>
+                </div>
+              )}
+              {jobDetail.customer_phone && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-white/20 text-white hover:bg-white/10"
+                  onClick={() => handleCall(jobDetail.customer_phone)}
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Call Customer
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}

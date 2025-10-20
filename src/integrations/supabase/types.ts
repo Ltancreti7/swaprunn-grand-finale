@@ -1369,6 +1369,22 @@ export type Database = {
           year: number
         }[]
       }
+      get_driver_schedule: {
+        Args: { _user_id: string }
+        Returns: {
+          job_id: string
+          assignment_id: string | null
+          driver_id: string | null
+          driver_name: string | null
+          driver_phone: string | null
+          pickup_address: string | null
+          delivery_address: string | null
+          specific_date: string | null
+          specific_time: string | null
+          job_status: string | null
+          created_at: string
+        }[]
+      }
       get_user_dealership_role: {
         Args: { p_dealer_id: string; p_user_id: string }
         Returns: Database["public"]["Enums"]["dealership_role"]
