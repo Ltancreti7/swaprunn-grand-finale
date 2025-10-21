@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// @ts-expect-error Remote import available at runtime in Deno
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -95,7 +96,10 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         if (!response.ok) {
-          console.error(`Push failed for subscription ${sub.id}:`, response.status);
+          console.error('Push failed for subscription', {
+            subscriptionId: sub.id,
+            status: response.status
+          });
           
           // Remove invalid subscriptions
           if (response.status === 410) {
@@ -109,8 +113,11 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         return true;
-      } catch (error) {
-        console.error(`Error sending push to subscription ${sub.id}:`, error);
+        } catch (error) {
+          console.error('Error sending push to subscription', {
+            subscriptionId: sub.id,
+            message: error instanceof Error ? error.message : String(error)
+          });
         return false;
       }
     });
@@ -147,7 +154,9 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
   } catch (error: any) {
-    console.error('Error in send-push-notification function:', error);
+    console.error('Error in send-push-notification function', {
+      message: error?.message ?? String(error)
+    });
     return new Response(
       JSON.stringify({ error: error.message }),
       { 

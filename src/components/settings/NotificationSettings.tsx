@@ -99,7 +99,7 @@ export const NotificationSettings = () => {
           {!isSupported && (
             <div className="bg-muted p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                Push notifications are not supported on this browser. You'll still receive in-app notifications.
+                {"Push notifications are not supported on this browser. You'll still receive in-app notifications."}
               </p>
             </div>
           )}

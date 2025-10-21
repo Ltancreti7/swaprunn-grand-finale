@@ -33,7 +33,7 @@ const AboutSwapRunn = () => {
                 <h2 className="text-2xl font-bold text-white mb-6">Our Mission</h2>
                 <p className="text-white/80 text-lg mb-6">
                   SwapRunn was founded to solve the frustrating logistics challenges that dealerships face every day. 
-                  We believe that vehicle delivery shouldn't be a bottleneck in your sales process.
+                  {"We believe that vehicle delivery shouldn't be a bottleneck in your sales process."}
                 </p>
                 
                 <h2 className="text-2xl font-bold text-white mb-6">Why Choose SwapRunn?</h2>

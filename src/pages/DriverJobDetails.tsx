@@ -14,7 +14,7 @@ import { toast } from '@/hooks/use-toast';
 
 interface JobDetail {
   id: string;
-  type: 'delivery' | 'swap';
+  type: 'delivery' | 'swap' | 'parts' | 'service';
   status: string;
   created_at: string;
   pickup_address: string;
@@ -250,7 +250,7 @@ export default function DriverJobDetails() {
         <Card className="w-full max-w-md mx-4">
           <CardContent className="p-6 text-center">
             <h2 className="text-xl font-semibold mb-2">Job Not Found</h2>
-            <p className="text-muted-foreground mb-4">This job doesn't exist or you don't have access to it.</p>
+            <p className="text-muted-foreground mb-4">{"This job doesn't exist or you don't have access to it."}</p>
             <Button onClick={() => navigate('/driver/dashboard')}>
               Back to Dashboard
             </Button>

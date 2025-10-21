@@ -82,7 +82,7 @@ const DealershipRegistration = () => {
       // Log submission attempt to Supabase (background, doesn't block UX)
       const logSubmission = async (status: 'success' | 'failure', errorMsg?: string) => {
         try {
-          await supabase.from('form_submissions').insert({
+          await supabase.from('form_submissions' as any).insert({
             form_type: 'dealer_registration',
             name: formData.fullName,
             email: formData.email,
@@ -547,7 +547,7 @@ const DealershipRegistration = () => {
               </div>
               
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-                <h4 className="text-white font-semibold mb-2">What's Included:</h4>
+                <h4 className="text-white font-semibold mb-2">{"What's Included:"}</h4>
                 <ul className="text-sm text-white/80 space-y-1">
                   <li>• Unlimited driver requests</li>
                   <li>• Real-time tracking & updates</li>

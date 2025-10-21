@@ -67,7 +67,7 @@ const Terms = () => {
             <p className="mb-4 text-white/90">All drivers must:</p>
             <ul className="list-disc pl-6 mb-4 text-white/90">
               <li>Pass background checks through our partner Checkr</li>
-              <li>Maintain valid driver's license and insurance</li>
+              <li>{"Maintain valid driver's license and insurance"}</li>
               <li>Complete platform onboarding and training</li>
               <li>Maintain professional conduct at all times</li>
             </ul>

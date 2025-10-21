@@ -27,7 +27,7 @@ export function InviteStaffEmail({ inviterName, dealershipName, role, inviteLink
               <Users style={{ color: 'white', width: '32px', height: '32px' }} />
             </div>
             <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', margin: '0 0 8px 0' }}>
-              You're invited to join {dealershipName}
+              You&apos;re invited to join {dealershipName}
             </h1>
             <p style={{ fontSize: '16px', color: '#6b7280', margin: 0 }}>
               {inviterName} has invited you to join their dealership team
@@ -67,7 +67,7 @@ export function InviteStaffEmail({ inviterName, dealershipName, role, inviteLink
               <strong>What this means:</strong>
             </p>
             <ul style={{ fontSize: '14px', color: '#6b7280', margin: 0, paddingLeft: '20px' }}>
-              <li>You'll have access to {dealershipName}'s SwapRunn dashboard</li>
+              <li>You&apos;ll have access to {dealershipName}&apos;s SwapRunn dashboard</li>
               <li>You can {role === 'manager' ? 'manage jobs and invite other staff' : 'view and work with vehicle delivery jobs'}</li>
               <li>Your activity will be tracked under the {dealershipName} account</li>
             </ul>
@@ -75,7 +75,7 @@ export function InviteStaffEmail({ inviterName, dealershipName, role, inviteLink
 
           <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '20px', marginTop: '20px' }}>
             <p style={{ fontSize: '12px', color: '#9ca3af', textAlign: 'center', margin: 0 }}>
-              This invitation will expire in 7 days. If you didn't expect this invitation, you can safely ignore this email.
+              This invitation will expire in 7 days. If you didn&apos;t expect this invitation, you can safely ignore this email.
             </p>
           </div>
         </div>

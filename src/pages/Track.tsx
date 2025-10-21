@@ -53,7 +53,7 @@ const Track = () => {
             <Package className="h-12 w-12 text-text-secondary mx-auto mb-4" />
             <h1 className="text-xl font-semibold text-text-primary mb-2">Tracking Not Found</h1>
             <p className="text-text-secondary">
-              The tracking link you're looking for doesn't exist or has expired.
+              {"The tracking link you're looking for doesn't exist or has expired."}
             </p>
           </CardContent>
         </Card>
@@ -241,7 +241,7 @@ const Track = () => {
               {job.status === 'open' && (
                 <div className="text-center text-text-secondary">
                   <Clock className="h-8 w-8 mx-auto mb-2" />
-                  <p>We're finding the best driver for your {job.type.toLowerCase()}...</p>
+                  <p>{"We're finding the best driver for your "}{job.type.toLowerCase()}...</p>
                 </div>
               )}
               {job.status === 'assigned' && (
@@ -275,7 +275,7 @@ const Track = () => {
             </CardHeader>
             <CardContent>
               <p className="text-text-secondary mb-4">
-                If you have any questions about your delivery, please don't hesitate to contact us.
+                {"If you have any questions about your delivery, please don't hesitate to contact us."}
               </p>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">

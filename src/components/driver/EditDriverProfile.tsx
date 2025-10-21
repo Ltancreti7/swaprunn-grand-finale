@@ -148,7 +148,7 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
 
       // Update driver profile including photo
       const { error } = await supabase
-        .from('drivers')
+        .from('drivers' as any)
         .update({
           phone: phone.trim() || null,
           email: email.trim() || null,
@@ -339,7 +339,7 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Set the maximum distance you're willing to drive for a job
+                {"Set the maximum distance you're willing to drive for a job"}
               </p>
             </div>
 
@@ -366,7 +366,7 @@ export const EditDriverProfile = ({ isOpen, onClose, driverData, onUpdate }: Edi
                   Available for Jobs
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Turn this off when you're not available to accept new jobs
+                  {"Turn this off when you're not available to accept new jobs"}
                 </p>
               </div>
               <Switch

@@ -1,23 +1,39 @@
 version = 1
 
-[[analyzers]]
-name = "secrets"
+exclude_patterns = [
+  "node_modules/**",
+  "dist/**",
+  "build/**",
+  ".next/**",
+  "coverage/**",
+  "*.snap",
+  "**/*.spec.*",
+  "**/*.test.*",
+  "**/__tests__/**",
+  "**/__mocks__/**",
+  "**/*.stories.*",
+  ".storybook/**",
+  "cypress/**",
+  "playwright/**"
+]
 
-[[analyzers]]
-name = "sql"
-
-[[analyzers]]
-name = "docker"
-
-  [analyzers.meta]
-  dockerfile_paths = ["Dockerfile"]
+test_patterns = [
+  "**/*.spec.*",
+  "**/*.test.*",
+  "**/__tests__/**"
+]
 
 [[analyzers]]
 name = "javascript"
+enabled = true
+  [[transformers]]
+  name = "prettier"
+  enabled = true
 
-  [analyzers.meta]
-  plugins = ["react"]
-  environment = ["nodejs"]
+[[analyzers]]
+name = "secrets"
+enabled = true
 
-[[transformers]]
-name = "prettier"
+[[analyzers]]
+name = "docker"
+enabled = true

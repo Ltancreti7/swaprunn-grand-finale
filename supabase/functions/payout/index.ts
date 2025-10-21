@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// @ts-expect-error Remote import available at runtime in Deno
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -17,10 +18,13 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let assignmentId: string | null = null;
+
   try {
-    const { assignment_id } = await req.json();
-    
-    if (!assignment_id) {
+    const body = await req.json();
+    assignmentId = body?.assignment_id ?? null;
+
+    if (!assignmentId) {
       return new Response('Missing assignment_id', { 
         status: 400, 
         headers: corsHeaders 
@@ -36,11 +40,14 @@ serve(async (req) => {
         job:jobs(*),
         timesheet:timesheets(*)
       `)
-      .eq('id', assignment_id)
+  .eq('id', assignmentId)
       .single();
 
     if (assignmentError || !assignment) {
-      console.error('Assignment not found:', assignmentError);
+      console.error('Assignment not found', {
+        assignmentId,
+        message: assignmentError?.message
+      });
       return new Response('Assignment not found', { 
         status: 404, 
         headers: corsHeaders 
@@ -66,14 +73,17 @@ serve(async (req) => {
       const { error: payoutError } = await supabase
         .from('payouts')
         .insert({
-          assignment_id,
+          assignment_id: assignmentId,
           driver_id: assignment.driver_id,
           amount_cents: amountCents,
           status: 'pending'
         });
 
       if (payoutError) {
-        console.error('Error creating payout record:', payoutError);
+        console.error('Error creating payout record', {
+          assignmentId,
+          message: payoutError.message
+        });
       }
 
       return new Response(JSON.stringify({ 
@@ -106,7 +116,7 @@ serve(async (req) => {
       const { error: payoutError } = await supabase
         .from('payouts')
         .insert({
-          assignment_id,
+          assignment_id: assignmentId,
           driver_id: assignment.driver_id,
           amount_cents: amountCents,
           stripe_transfer_id: transfer.id,
@@ -114,7 +124,10 @@ serve(async (req) => {
         });
 
       if (payoutError) {
-        console.error('Error creating payout record:', payoutError);
+        console.error('Error creating payout record', {
+          assignmentId,
+          message: payoutError.message
+        });
       }
 
       return new Response(JSON.stringify({ 
@@ -125,20 +138,28 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     } else {
-      console.error('Stripe transfer failed:', transfer);
+      console.error('Stripe transfer failed', {
+        assignmentId,
+        driverId: assignment.driver_id,
+        status: transferResponse.status,
+        message: transfer?.error?.message ?? transfer?.message ?? 'Unknown error'
+      });
       
       // Create failed payout record
       const { error: payoutError } = await supabase
         .from('payouts')
         .insert({
-          assignment_id,
+          assignment_id: assignmentId,
           driver_id: assignment.driver_id,
           amount_cents: amountCents,
           status: 'failed'
         });
 
       if (payoutError) {
-        console.error('Error creating payout record:', payoutError);
+        console.error('Error creating payout record', {
+          assignmentId,
+          message: payoutError.message
+        });
       }
 
       return new Response(JSON.stringify({ 
@@ -151,7 +172,10 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('Payout error:', error);
+    console.error('Payout error', {
+      assignmentId,
+      message: error instanceof Error ? error.message : String(error)
+    });
     return new Response(JSON.stringify({ 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error'

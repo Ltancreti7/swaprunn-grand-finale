@@ -52,7 +52,7 @@ serve(async (req) => {
     const result = await response.json();
 
     if (response.ok) {
-      console.log('SMS sent successfully:', result.sid);
+      console.log('SMS sent successfully', { sid: result.sid });
       return new Response(JSON.stringify({ 
         success: true, 
         message_sid: result.sid 
@@ -60,7 +60,11 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     } else {
-      console.error('Twilio error:', result);
+      console.error('Twilio error', {
+        status: response.status,
+        code: result?.code,
+        message: result?.message
+      });
       return new Response(JSON.stringify({ 
         success: false, 
         error: result.message 
@@ -71,7 +75,9 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('SMS error:', error);
+    console.error('SMS error', {
+      message: error instanceof Error ? error.message : String(error)
+    });
     return new Response(JSON.stringify({ 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error'

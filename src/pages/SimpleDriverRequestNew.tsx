@@ -786,7 +786,7 @@ const SimpleDriverRequest = () => {
                 <div className="text-center mb-8">
                   <MapPin className="h-16 w-16 text-[#E11900] mx-auto mb-4" />
                   <h2 className="text-2xl font-bold text-white mb-2">Where should we deliver it?</h2>
-                  <p className="text-white/70">Enter the customer's address</p>
+                  <p className="text-white/70">{"Enter the customer's address"}</p>
                 </div>
                 
                 <div className="space-y-4 max-w-md mx-auto">
@@ -825,7 +825,7 @@ const SimpleDriverRequest = () => {
               <div className="space-y-6">
                 <div className="text-center mb-8">
                   <User className="h-16 w-16 text-[#E11900] mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold text-white mb-2">Who's the customer?</h2>
+                  <h2 className="text-2xl font-bold text-white mb-2">{"Who's the customer?"}</h2>
                   <p className="text-white/70">We need their contact info</p>
                 </div>
                 

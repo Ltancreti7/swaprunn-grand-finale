@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// @ts-expect-error Remote import available at runtime in Deno
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -104,7 +105,11 @@ serve(async (req) => {
       const usageRecord = await usageResponse.json();
       
       if (!usageResponse.ok) {
-        console.error('Stripe usage recording failed:', usageRecord);
+        console.error('Stripe usage recording failed', {
+          dealerId,
+          status: usageResponse.status,
+          message: usageRecord?.error || usageRecord?.message || 'Unknown error'
+        });
         continue;
       }
 
@@ -118,7 +123,10 @@ serve(async (req) => {
         .in('id', usage.records.map(r => r.id));
 
       if (updateError) {
-        console.error('Failed to mark records as billed:', updateError);
+        console.error('Failed to mark records as billed', {
+          dealerId,
+          message: updateError.message
+        });
       }
 
       results.push({
@@ -139,7 +147,9 @@ serve(async (req) => {
     });
 
   } catch (error: any) {
-    console.error('Usage recording error:', error);
+    console.error('Usage recording error', {
+      message: error?.message ?? String(error)
+    });
     return new Response(JSON.stringify({ 
       error: error.message 
     }), {

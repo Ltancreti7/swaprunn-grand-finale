@@ -1,4 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+// @ts-expect-error Remote import resolved at runtime in Deno
+import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,14 +18,14 @@ interface DistanceResponse {
   error?: string
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { pickup_address, delivery_address }: DistanceRequest = await req.json()
+  const { pickup_address, delivery_address }: DistanceRequest = await req.json()
 
     if (!pickup_address || !delivery_address) {
       return new Response(
@@ -76,10 +77,18 @@ Deno.serve(async (req) => {
     })
 
     const routesData = await routesResponse.json()
-    console.log('Google Maps Routes API response:', JSON.stringify(routesData, null, 2))
+    console.log('Google Maps Routes API response received', {
+      ok: routesResponse.ok,
+      status: routesResponse.status,
+      hasRoutes: Array.isArray(routesData?.routes) && routesData.routes.length > 0
+    })
 
     if (!routesResponse.ok || !routesData.routes || routesData.routes.length === 0) {
-      console.error('Google Maps Routes API error:', routesData)
+      const apiError = routesData?.error || routesData?.error_message;
+      console.error('Google Maps Routes API error', {
+        status: routesResponse.status,
+        message: typeof apiError === 'string' ? apiError : undefined
+      })
       return new Response(
         JSON.stringify({
           distance: 25,
@@ -109,7 +118,7 @@ Deno.serve(async (req) => {
       success: true
     }
 
-    console.log('Distance calculation result:', result)
+  console.log('Distance calculation result', result)
 
     return new Response(
       JSON.stringify(result),
@@ -117,7 +126,8 @@ Deno.serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error in calculate-distance function:', error)
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Error in calculate-distance function', { message })
     return new Response(
       JSON.stringify({
         distance: 25,

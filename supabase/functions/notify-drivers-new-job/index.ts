@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
 const corsHeaders = {
@@ -32,7 +32,12 @@ serve(async (req) => {
     );
 
     const jobData: NewJobNotification = await req.json();
-    console.log('Processing new job notification:', jobData);
+    console.log('Processing new job notification', {
+      jobId: jobData.job_id,
+      type: jobData.type,
+      distanceMiles: jobData.distance_miles,
+      requiresTwo: jobData.requires_two
+    });
 
     // Get the job details including dealer_id
     const { data: job, error: jobError } = await supabase
@@ -42,7 +47,10 @@ serve(async (req) => {
       .single();
 
     if (jobError || !job) {
-      console.error('Error fetching job details:', jobError);
+      console.error('Error fetching job details', {
+        jobId: jobData.job_id,
+        message: jobError?.message ?? String(jobError)
+      });
       return new Response(
         JSON.stringify({ success: false, error: 'Job not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -50,7 +58,7 @@ serve(async (req) => {
     }
 
     // Get drivers from the same dealership that are available
-    const { data: driverProfiles, error: profilesError } = await supabase
+    const { data: driverProfilesData, error: profilesError } = await supabase
       .from('profiles')
       .select(`
         user_id,
@@ -62,19 +70,43 @@ serve(async (req) => {
       .eq('drivers.available', true);
 
     if (profilesError) {
-      console.error('Error fetching driver profiles:', profilesError);
+      console.error('Error fetching driver profiles', {
+        dealerId: job.dealer_id,
+        message: profilesError.message
+      });
       throw profilesError;
     }
 
-    if (!driverProfiles || driverProfiles.length === 0) {
-      console.log('No available drivers found for dealership:', job.dealer_id);
+    type DriverRecord = {
+      id: string;
+      name?: string | null;
+      available?: boolean | null;
+    };
+
+    type DriverProfileRow = {
+      user_id: string;
+      driver_id: string | null;
+      drivers: DriverRecord | DriverRecord[] | null;
+    };
+
+    const driverProfiles = (driverProfilesData ?? []) as DriverProfileRow[];
+
+    if (driverProfiles.length === 0) {
+      console.log('No available drivers found for dealership', { dealerId: job.dealer_id });
       return new Response(
         JSON.stringify({ success: true, sent: 0, message: 'No available drivers from this dealership' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const drivers = driverProfiles.map(p => p.drivers).filter(Boolean);
+    const drivers = driverProfiles.flatMap((profile) => {
+      const record = profile.drivers;
+      if (!record) {
+        return [];
+      }
+      return Array.isArray(record) ? record : [record];
+    });
+
     const userIds = driverProfiles.map(p => p.user_id);
 
     // Get push subscriptions for these drivers
@@ -84,7 +116,10 @@ serve(async (req) => {
       .in('user_id', userIds);
 
     if (subsError) {
-      console.error('Error fetching subscriptions:', subsError);
+      console.error('Error fetching subscriptions for drivers', {
+        message: subsError.message,
+        driverCount: drivers.length
+      });
     }
 
     // Format notification message
@@ -124,7 +159,10 @@ serve(async (req) => {
           });
 
           if (!response.ok) {
-            console.error(`Push failed for subscription ${sub.id}:`, response.status);
+            console.error('Push failed for subscription in notify-drivers-new-job', {
+              subscriptionId: sub.id,
+              status: response.status
+            });
             
             // Remove invalid subscriptions (410 = Gone)
             if (response.status === 410) {
@@ -139,7 +177,10 @@ serve(async (req) => {
 
           return true;
         } catch (error) {
-          console.error(`Error sending push to subscription ${sub.id}:`, error);
+          console.error('Error sending push to subscription in notify-drivers-new-job', {
+            subscriptionId: sub.id,
+            message: error instanceof Error ? error.message : String(error)
+          });
           return false;
         }
       });
@@ -170,7 +211,10 @@ serve(async (req) => {
           });
           smsCount++;
         } catch (smsError) {
-          console.error('SMS notification error for driver:', driver.id, smsError);
+          console.error('SMS notification error for driver', {
+            driverId: driver.id,
+            message: smsError instanceof Error ? smsError.message : String(smsError)
+          });
         }
       }
     }
@@ -188,7 +232,12 @@ serve(async (req) => {
         success: (successCount + smsCount) > 0
       });
 
-    console.log(`Notifications sent to dealership drivers: ${successCount} push, ${smsCount} SMS to ${drivers.length} drivers from dealership ${job.dealer_id}`);
+    console.log('Notifications sent to dealership drivers', {
+      pushCount: successCount,
+      smsCount,
+      totalDrivers: drivers.length,
+      dealerId: job.dealer_id
+    });
 
     return new Response(
       JSON.stringify({ 
@@ -203,10 +252,11 @@ serve(async (req) => {
       }
     );
 
-  } catch (error: any) {
-    console.error('Error in notify-drivers-new-job function:', error);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error in notify-drivers-new-job function', { message });
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

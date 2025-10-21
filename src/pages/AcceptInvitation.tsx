@@ -241,7 +241,7 @@ function AcceptInvitation() {
                   <Users className="h-6 w-6 text-[#DC2626]" />
                 </div>
                 <h1 className="text-lg font-semibold text-white">Join {invitation.dealers.name}</h1>
-                <p className="text-sm text-white/70 mt-2">You've been invited to join the team</p>
+                <p className="text-sm text-white/70 mt-2">{"You've been invited to join the team"}</p>
               </div>
 
               <div className="space-y-3 mb-6 text-sm">
