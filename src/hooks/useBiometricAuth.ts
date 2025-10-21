@@ -48,7 +48,7 @@ export const useBiometricAuth = () => {
   /**
    * Prompt user for biometric authentication
    */
-  const authenticate = async (reason: string = 'Authenticate to login'): Promise<boolean> => {
+  const authenticate = async (reason = 'Authenticate to login'): Promise<boolean> => {
     if (!isAvailable || !isNative) return false;
 
     try {
