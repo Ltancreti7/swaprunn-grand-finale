@@ -99,7 +99,7 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
           autocompleteRef.current.addListener('place_changed', () => {
             const place = autocompleteRef.current?.getPlace();
-            if (place && place.address_components) {
+            if (place?.address_components) {
               const addressComponents = place.address_components;
               
               let street = '';
