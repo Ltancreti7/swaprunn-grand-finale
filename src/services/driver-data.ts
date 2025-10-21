@@ -158,7 +158,7 @@ export const getDriver = async (driverId: string): Promise<DriverProfile | null>
   }
 };
 
-export const getTimecard = async (driverId: string, period: string = 'week'): Promise<TimecardData | null> => {
+export const getTimecard = async (driverId: string, period = 'week'): Promise<TimecardData | null> => {
   if (USE_MOCK_DATA) {
     await delay(300);
     return mockTimecards[driverId] || null;
@@ -173,7 +173,7 @@ export const getTimecard = async (driverId: string, period: string = 'week'): Pr
   }
 };
 
-export const getEarnings = async (driverId: string, period: string = 'week'): Promise<EarningsData | null> => {
+export const getEarnings = async (driverId: string, period = 'week'): Promise<EarningsData | null> => {
   if (USE_MOCK_DATA) {
     await delay(400);
     return mockEarnings[driverId] || null;
@@ -188,7 +188,7 @@ export const getEarnings = async (driverId: string, period: string = 'week'): Pr
   }
 };
 
-export const getJobs = async (driverId: string, limit: number = 20): Promise<JobData[]> => {
+export const getJobs = async (driverId: string, limit = 20): Promise<JobData[]> => {
   if (USE_MOCK_DATA) {
     await delay(600);
     return mockJobs[driverId] || [];
