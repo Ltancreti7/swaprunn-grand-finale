@@ -35,7 +35,7 @@ const supabase = createClient(
     console.log("Job data:", data);
     
     // Clean up test job
-    if (data && data[0]) {
+    if (data?.[0]) {
       await supabase.from('jobs').delete().eq('id', data[0].id);
       console.log("🧹 Cleaned up test job");
     }

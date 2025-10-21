@@ -100,7 +100,7 @@ export default function DriverAcceptedJob() {
 
       if (assignmentError) throw assignmentError;
 
-      if (assignmentData && assignmentData.jobs) {
+      if (assignmentData?.jobs) {
         setJobDetail(assignmentData.jobs);
         setAssignment({
           id: assignmentData.id,
