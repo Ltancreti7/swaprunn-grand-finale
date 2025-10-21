@@ -1,11 +1,17 @@
-import { useState } from 'react';
-import { FileText, Upload, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
-import type { DriverProfile } from '@/services/driver-data';
+import { useState } from "react";
+import {
+  FileText,
+  Upload,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import type { DriverProfile } from "@/services/driver-data";
 
 interface DocumentsProps {
   driver: DriverProfile | null;
@@ -18,21 +24,21 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
 
   const handleUpload = async (docType: string) => {
     setUploadingDoc(docType);
-    
+
     // Simulate file picker and upload
     try {
       // Create a fake file input
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.pdf,.jpg,.jpeg,.png';
-      
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".pdf,.jpg,.jpeg,.png";
+
       input.onchange = async () => {
-        if (input.files && input.files[0]) {
+        if (input.files?.[0]) {
           const file = input.files[0];
-          
+
           // Simulate upload delay
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
           toast({
             title: "Document Uploaded",
             description: `${docType} has been uploaded successfully.`,
@@ -40,11 +46,11 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
         }
         setUploadingDoc(null);
       };
-      
+
       input.oncancel = () => {
         setUploadingDoc(null);
       };
-      
+
       input.click();
     } catch (error) {
       toast({
@@ -58,11 +64,11 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'Valid':
+      case "Valid":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'Expiring':
+      case "Expiring":
         return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      case 'Missing':
+      case "Missing":
         return <XCircle className="h-4 w-4 text-red-600" />;
       default:
         return <FileText className="h-4 w-4 text-gray-400" />;
@@ -71,23 +77,35 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Valid':
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">Valid</Badge>;
-      case 'Expiring':
-        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">Expiring</Badge>;
-      case 'Missing':
-        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300">Missing</Badge>;
+      case "Valid":
+        return (
+          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+            Valid
+          </Badge>
+        );
+      case "Expiring":
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
+            Expiring
+          </Badge>
+        );
+      case "Missing":
+        return (
+          <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300">
+            Missing
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     return new Date(dateString).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -95,7 +113,9 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
     if (!dateString) return false;
     const expiryDate = new Date(dateString);
     const today = new Date();
-    const daysDiff = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+    const daysDiff = Math.ceil(
+      (expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24),
+    );
     return daysDiff <= 30; // Expiring within 30 days
   };
 
@@ -111,7 +131,10 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
         <CardContent>
           <div className="space-y-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-3 border border-border rounded-lg">
+              <div
+                key={i}
+                className="flex items-center justify-between p-3 border border-border rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-4 w-4" />
                   <Skeleton className="h-4 w-32" />
@@ -157,21 +180,30 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
       <CardContent>
         <div className="space-y-4">
           {driver.docs.map((doc, index) => (
-            <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg bg-surface-secondary">
+            <div
+              key={index}
+              className="flex items-center justify-between p-4 border border-border rounded-lg bg-surface-secondary"
+            >
               <div className="flex items-center gap-3">
                 {getStatusIcon(doc.status)}
                 <div>
-                  <div className="font-medium text-text-primary">{doc.type}</div>
+                  <div className="font-medium text-text-primary">
+                    {doc.type}
+                  </div>
                   {doc.expiresAt && (
-                    <div className={`text-sm ${
-                      isExpiringSoon(doc.expiresAt) ? 'text-yellow-600' : 'text-text-secondary'
-                    }`}>
+                    <div
+                      className={`text-sm ${
+                        isExpiringSoon(doc.expiresAt)
+                          ? "text-yellow-600"
+                          : "text-text-secondary"
+                      }`}
+                    >
                       Expires: {formatDate(doc.expiresAt)}
                     </div>
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 {getStatusBadge(doc.status)}
                 <Button
@@ -189,7 +221,7 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
                   ) : (
                     <>
                       <Upload className="h-4 w-4" />
-                      {doc.status === 'Missing' ? 'Upload' : 'Update'}
+                      {doc.status === "Missing" ? "Upload" : "Update"}
                     </>
                   )}
                 </Button>

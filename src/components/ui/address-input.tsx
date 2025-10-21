@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { Input } from "./input";
 import { Label } from "./label";
-import { formatState, formatZipCode } from '@/hooks/useFormValidation';
+import { formatState, formatZipCode } from "@/hooks/useFormValidation";
 import { Loader } from "@googlemaps/js-api-loader";
 
 // Type declaration for Google Maps
@@ -52,15 +52,18 @@ export const AddressInput: React.FC<AddressInputProps> = ({
     });
   };
 
-  const handleFieldChangeWithFormat = (field: keyof AddressData, fieldValue: string) => {
+  const handleFieldChangeWithFormat = (
+    field: keyof AddressData,
+    fieldValue: string,
+  ) => {
     let processedValue = fieldValue;
-    
-    if (field === 'state') {
+
+    if (field === "state") {
       processedValue = formatState(fieldValue);
-    } else if (field === 'zip') {
+    } else if (field === "zip") {
       processedValue = formatZipCode(fieldValue);
     }
-    
+
     handleFieldChange(field, processedValue);
   };
 
@@ -68,22 +71,22 @@ export const AddressInput: React.FC<AddressInputProps> = ({
     const initAutocomplete = async () => {
       try {
         let apiKey = "demo_key";
-        
+
         // Try to fetch API key from edge function
         try {
-          const response = await fetch('/functions/v1/google-maps-config');
+          const response = await fetch("/functions/v1/google-maps-config");
           if (response.ok) {
             const data = await response.json();
             apiKey = data.apiKey || "demo_key";
           }
         } catch (error) {
-          console.log('Using demo API key for development');
+          console.log("Using demo API key for development");
         }
-        
+
         const loader = new Loader({
           apiKey: apiKey,
           version: "weekly",
-          libraries: ["places"]
+          libraries: ["places"],
         });
 
         await loader.load();
@@ -92,38 +95,41 @@ export const AddressInput: React.FC<AddressInputProps> = ({
           autocompleteRef.current = new window.google.maps.places.Autocomplete(
             streetInputRef.current,
             {
-              types: ['address'],
-              componentRestrictions: { country: 'us' }
-            }
+              types: ["address"],
+              componentRestrictions: { country: "us" },
+            },
           );
 
-          autocompleteRef.current.addListener('place_changed', () => {
+          autocompleteRef.current.addListener("place_changed", () => {
             const place = autocompleteRef.current?.getPlace();
-            if (place && place.address_components) {
+            if (place?.address_components) {
               const addressComponents = place.address_components;
-              
-              let street = '';
-              let city = '';
-              let state = '';
-              let zip = '';
+
+              let street = "";
+              let city = "";
+              let state = "";
+              let zip = "";
 
               // Extract address components
               addressComponents.forEach((component) => {
                 const types = component.types;
-                
-                if (types.includes('street_number')) {
-                  street = component.long_name + ' ';
+
+                if (types.includes("street_number")) {
+                  street = component.long_name + " ";
                 }
-                if (types.includes('route')) {
+                if (types.includes("route")) {
                   street += component.long_name;
                 }
-                if (types.includes('locality') || types.includes('sublocality_level_1')) {
+                if (
+                  types.includes("locality") ||
+                  types.includes("sublocality_level_1")
+                ) {
                   city = component.long_name;
                 }
-                if (types.includes('administrative_area_level_1')) {
+                if (types.includes("administrative_area_level_1")) {
                   state = component.short_name;
                 }
-                if (types.includes('postal_code')) {
+                if (types.includes("postal_code")) {
                   zip = component.long_name;
                 }
               });
@@ -133,13 +139,13 @@ export const AddressInput: React.FC<AddressInputProps> = ({
                 street: street.trim(),
                 city,
                 state,
-                zip
+                zip,
               });
             }
           });
         }
       } catch (error) {
-        console.log('Google Places API not available, using manual input');
+        console.log("Google Places API not available, using manual input");
       }
     };
 
@@ -147,17 +153,22 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
     return () => {
       if (autocompleteRef.current && window.google) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        window.google.maps.event.clearInstanceListeners(
+          autocompleteRef.current,
+        );
       }
     };
   }, [onChange]);
 
   return (
     <div className={`space-y-3 ${className}`}>
-      <Label htmlFor={`${label}-street`} className="text-white text-lg font-semibold">
+      <Label
+        htmlFor={`${label}-street`}
+        className="text-white text-lg font-semibold"
+      >
         {label} {required && "*"}
       </Label>
-      
+
       {/* Street Address - Full Width */}
       <Input
         ref={streetInputRef}
@@ -168,7 +179,7 @@ export const AddressInput: React.FC<AddressInputProps> = ({
         required={required}
         className="bg-neutral-800/60 border-2 border-white/25 text-white placeholder:text-white/40 text-lg h-14 rounded-xl"
       />
-      
+
       {/* City, State, ZIP - Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="md:col-span-1">
@@ -180,18 +191,20 @@ export const AddressInput: React.FC<AddressInputProps> = ({
             className="bg-neutral-800/60 border-2 border-white/25 text-white placeholder:text-white/40 text-lg h-14 rounded-xl"
           />
         </div>
-        
+
         <div>
           <Input
             value={value.state}
-            onChange={(e) => handleFieldChangeWithFormat("state", e.target.value)}
+            onChange={(e) =>
+              handleFieldChangeWithFormat("state", e.target.value)
+            }
             placeholder="State"
             maxLength={2}
             required={required}
             className="uppercase bg-neutral-800/60 border-2 border-white/25 text-white placeholder:text-white/40 text-lg h-14 rounded-xl"
           />
         </div>
-        
+
         <div>
           <Input
             value={value.zip}
@@ -209,14 +222,19 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
 // Utility function to convert AddressData to string
 export const addressToString = (address: AddressData): string => {
-  const parts = [address.street, address.city, address.state, address.zip].filter(Boolean);
+  const parts = [
+    address.street,
+    address.city,
+    address.state,
+    address.zip,
+  ].filter(Boolean);
   return parts.join(", ");
 };
 
 // Utility function to parse address string to AddressData (basic implementation)
 export const stringToAddress = (addressString: string): AddressData => {
-  const parts = addressString.split(",").map(part => part.trim());
-  
+  const parts = addressString.split(",").map((part) => part.trim());
+
   return {
     street: parts[0] || "",
     city: parts[1] || "",
