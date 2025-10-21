@@ -1,6 +1,12 @@
 version = 1
 
 [[analyzers]]
+name = "secrets"
+
+[[analyzers]]
+name = "sql"
+
+[[analyzers]]
 name = "docker"
 
   [analyzers.meta]
@@ -12,3 +18,6 @@ name = "javascript"
   [analyzers.meta]
   plugins = ["react"]
   environment = ["nodejs"]
+
+[[transformers]]
+name = "prettier"
