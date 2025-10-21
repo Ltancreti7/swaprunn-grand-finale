@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Phone, Clock, MapPin, Navigation } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
+import React, { useCallback, useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Phone, Clock, MapPin, Navigation } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 interface JobDetail {
   id: string;
   type: string;
@@ -49,7 +49,7 @@ export default function DriverAcceptedJob() {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { toast } = useToast();
-  
+
   const [jobDetail, setJobDetail] = useState<JobDetail | null>(null);
   const [assignment, setAssignment] = useState<AssignmentDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,8 +65,9 @@ export default function DriverAcceptedJob() {
 
       // Fetch job and assignment details
       const { data: assignmentData, error: assignmentError } = await supabase
-        .from('assignments')
-        .select(`
+        .from("assignments")
+        .select(
+          `
           id,
           started_at,
           accepted_at,
@@ -93,14 +94,15 @@ export default function DriverAcceptedJob() {
             dealer_id,
             created_by
           )
-        `)
-        .eq('job_id', jobId)
-        .eq('driver_id', userProfile.driver_id)
+        `,
+        )
+        .eq("job_id", jobId)
+        .eq("driver_id", userProfile.driver_id)
         .maybeSingle<AssignmentWithJob>();
 
       if (assignmentError) throw assignmentError;
 
-      if (assignmentData && assignmentData.jobs) {
+      if (assignmentData?.jobs) {
         setJobDetail(assignmentData.jobs);
         setAssignment({
           id: assignmentData.id,
@@ -112,11 +114,11 @@ export default function DriverAcceptedJob() {
         setAssignment(null);
       }
     } catch (error) {
-      console.error('Error fetching job details:', error);
+      console.error("Error fetching job details:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to load job details',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load job details",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -136,31 +138,31 @@ export default function DriverAcceptedJob() {
       setIsUpdating(true);
 
       const { error } = await supabase
-        .from('assignments')
+        .from("assignments")
         .update({ started_at: new Date().toISOString() })
-        .eq('id', assignment.id);
+        .eq("id", assignment.id);
 
       if (error) throw error;
 
       // Update job status
       await supabase
-        .from('jobs')
-        .update({ status: 'in_progress' })
-        .eq('id', jobId);
+        .from("jobs")
+        .update({ status: "in_progress" })
+        .eq("id", jobId);
 
       toast({
-        title: 'Delivery Started',
-        description: 'Good luck on your delivery!',
+        title: "Delivery Started",
+        description: "Good luck on your delivery!",
       });
 
       // Refresh data
       fetchJobDetails();
     } catch (error) {
-      console.error('Error starting delivery:', error);
+      console.error("Error starting delivery:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to start delivery',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to start delivery",
+        variant: "destructive",
       });
     } finally {
       setIsUpdating(false);
@@ -168,29 +170,29 @@ export default function DriverAcceptedJob() {
   };
 
   const handleCancelJob = async () => {
-    if (!confirm('Are you sure you want to cancel this job?')) return;
+    if (!confirm("Are you sure you want to cancel this job?")) return;
 
     try {
       setIsUpdating(true);
 
       // Delete assignment
-      await supabase.from('assignments').delete().eq('id', assignment?.id);
+      await supabase.from("assignments").delete().eq("id", assignment?.id);
 
       // Update job status back to open
-      await supabase.from('jobs').update({ status: 'open' }).eq('id', jobId);
+      await supabase.from("jobs").update({ status: "open" }).eq("id", jobId);
 
       toast({
-        title: 'Job Cancelled',
-        description: 'You have cancelled this delivery',
+        title: "Job Cancelled",
+        description: "You have cancelled this delivery",
       });
 
-      navigate('/driver/dashboard');
+      navigate("/driver/dashboard");
     } catch (error) {
-      console.error('Error cancelling job:', error);
+      console.error("Error cancelling job:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to cancel job',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to cancel job",
+        variant: "destructive",
       });
     } finally {
       setIsUpdating(false);
@@ -232,8 +234,10 @@ export default function DriverAcceptedJob() {
         <Card className="bg-card border-border max-w-md">
           <CardContent className="p-6 text-center">
             <h2 className="text-xl font-semibold mb-2">Job Not Found</h2>
-            <p className="text-muted-foreground mb-4">This job doesn't exist or you don't have access to it.</p>
-            <Button onClick={() => navigate('/driver/dashboard')}>
+            <p className="text-muted-foreground mb-4">
+              This job doesn't exist or you don't have access to it.
+            </p>
+            <Button onClick={() => navigate("/driver/dashboard")}>
               Back to Dashboard
             </Button>
           </CardContent>
@@ -250,31 +254,43 @@ export default function DriverAcceptedJob() {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-2">Upcoming Delivery</h1>
-          <p className="text-white/70">Review job details and start when ready</p>
+          <p className="text-white/70">
+            Review job details and start when ready
+          </p>
         </div>
 
         {/* Vehicle Info Card */}
         <Card className="bg-card/50 backdrop-blur-sm border-white/10 shadow-soft rounded-xl">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold text-white">Vehicle Information</CardTitle>
+            <CardTitle className="text-lg font-semibold text-white">
+              Vehicle Information
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-white/50">Year</p>
-                <p className="text-white font-medium">{jobDetail.year || 'N/A'}</p>
+                <p className="text-white font-medium">
+                  {jobDetail.year || "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-white/50">Make</p>
-                <p className="text-white font-medium">{jobDetail.make || 'N/A'}</p>
+                <p className="text-white font-medium">
+                  {jobDetail.make || "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-white/50">Model</p>
-                <p className="text-white font-medium">{jobDetail.model || 'N/A'}</p>
+                <p className="text-white font-medium">
+                  {jobDetail.model || "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-white/50">Transmission</p>
-                <p className="text-white font-medium">{jobDetail.transmission || 'N/A'}</p>
+                <p className="text-white font-medium">
+                  {jobDetail.transmission || "N/A"}
+                </p>
               </div>
             </div>
             {jobDetail.vin && (
@@ -293,14 +309,22 @@ export default function DriverAcceptedJob() {
               <MapPin className="w-5 h-5 text-primary mt-0.5" />
               <div>
                 <p className="text-sm text-white/50 mb-1">Delivery Address</p>
-                <p className="text-white font-medium">{jobDetail.delivery_address}</p>
+                <p className="text-white font-medium">
+                  {jobDetail.delivery_address}
+                </p>
               </div>
             </div>
             <Button
               size="sm"
               variant="ghost"
               className="text-primary hover:text-primary/80 hover:bg-primary/10"
-              onClick={() => handleNavigate(jobDetail.delivery_address, jobDetail.delivery_lat, jobDetail.delivery_lng)}
+              onClick={() =>
+                handleNavigate(
+                  jobDetail.delivery_address,
+                  jobDetail.delivery_lat,
+                  jobDetail.delivery_lng,
+                )
+              }
             >
               <Navigation className="w-4 h-4" />
             </Button>
@@ -313,15 +337,25 @@ export default function DriverAcceptedJob() {
             <div className="flex items-start gap-3 flex-1">
               <MapPin className="w-5 h-5 text-white/50 mt-0.5" />
               <div>
-                <p className="text-sm text-white/50 mb-1">Pickup Address (Dealership)</p>
-                <p className="text-white font-medium">{jobDetail.pickup_address}</p>
+                <p className="text-sm text-white/50 mb-1">
+                  Pickup Address (Dealership)
+                </p>
+                <p className="text-white font-medium">
+                  {jobDetail.pickup_address}
+                </p>
               </div>
             </div>
             <Button
               size="sm"
               variant="ghost"
               className="text-white/70 hover:text-white hover:bg-white/10"
-              onClick={() => handleNavigate(jobDetail.pickup_address, jobDetail.pickup_lat, jobDetail.pickup_lng)}
+              onClick={() =>
+                handleNavigate(
+                  jobDetail.pickup_address,
+                  jobDetail.pickup_lat,
+                  jobDetail.pickup_lng,
+                )
+              }
             >
               <Navigation className="w-4 h-4" />
             </Button>
@@ -347,13 +381,17 @@ export default function DriverAcceptedJob() {
         {(jobDetail.customer_name || jobDetail.customer_phone) && (
           <Card className="bg-card/50 backdrop-blur-sm border-white/10 shadow-soft rounded-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-white">Customer Contact</CardTitle>
+              <CardTitle className="text-lg font-semibold text-white">
+                Customer Contact
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {jobDetail.customer_name && (
                 <div>
                   <p className="text-sm text-white/50">Name</p>
-                  <p className="text-white font-medium">{jobDetail.customer_name}</p>
+                  <p className="text-white font-medium">
+                    {jobDetail.customer_name}
+                  </p>
                 </div>
               )}
               {jobDetail.customer_phone && (
@@ -375,7 +413,9 @@ export default function DriverAcceptedJob() {
         {jobDetail.notes && (
           <Card className="bg-card/50 backdrop-blur-sm border-white/10 shadow-soft rounded-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-white">Special Instructions</CardTitle>
+              <CardTitle className="text-lg font-semibold text-white">
+                Special Instructions
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-white/90">{jobDetail.notes}</p>
@@ -386,11 +426,15 @@ export default function DriverAcceptedJob() {
         {/* Action Buttons */}
         <div className="pt-4 space-y-4">
           <Button
-            onClick={hasStarted ? () => navigate('/driver/dashboard') : handleStartDelivery}
+            onClick={
+              hasStarted
+                ? () => navigate("/driver/dashboard")
+                : handleStartDelivery
+            }
             disabled={isUpdating}
             className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold text-lg rounded-xl shadow-elegant transition-all duration-200 hover:shadow-soft hover:-translate-y-0.5"
           >
-            {hasStarted ? 'Return to Dealership' : 'Start Delivery'}
+            {hasStarted ? "Return to Dealership" : "Start Delivery"}
           </Button>
 
           {!hasStarted && (
