@@ -333,8 +333,9 @@ const HowItWorks = () => {
                   <h3 className="text-xl font-bold text-white">More Screenshots Coming</h3>
                 </div>
                 <p className="text-white/70">
-                  We're continuously updating this page with new screenshots as we add features. 
-                  Check back soon to see the latest updates to our platform.
+                  {"We're continuously updating this page with new screenshots as we add features."}
+                  <br />
+                  {"Check back soon to see the latest updates to our platform."}
                 </p>
               </CardContent>
             </Card>
@@ -348,7 +349,7 @@ const HowItWorks = () => {
               <Clock className="h-16 w-16 text-[#E11900] mx-auto mb-4" />
               <h3 className="text-2xl font-bold text-white mb-4">Driver Experience Coming Soon</h3>
               <p className="text-white/70 text-lg mb-6">
-                We're adding the driver workflow next - showing how professional drivers receive, accept, and complete deliveries.
+                {"We're adding the driver workflow next - showing how professional drivers receive, accept, and complete deliveries."}
               </p>
               <p className="text-white/50 text-sm">
                 Professional drivers will see dedicated sections for job discovery, acceptance, and completion tracking.
