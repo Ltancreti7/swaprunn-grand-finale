@@ -130,7 +130,7 @@ const Drivers = () => {
 
                     <div className="space-y-4">
                       <Button asChild size="lg" className="w-full bg-[#E11900] hover:bg-[#B51400] text-white h-14 rounded-lg font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl">
-                        <Link to="/driver-auth">
+                        <Link to="/driver-auth?mode=login">
                           Sign In
                         </Link>
                       </Button>
@@ -145,7 +145,7 @@ const Drivers = () => {
                       </div>
 
                       <Button asChild size="lg" className="w-full bg-transparent hover:bg-white/10 border-2 border-white/50 hover:border-white/70 text-white h-14 rounded-lg font-semibold text-lg transition-all duration-200">
-                        <Link to="/driver-auth">
+                        <Link to="/driver-auth?mode=signup">
                           Create Account
                         </Link>
                       </Button>

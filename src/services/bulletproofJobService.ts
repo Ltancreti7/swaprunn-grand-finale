@@ -19,6 +19,7 @@ interface JobCreationParams {
   trade_model?: string | null;
   trade_vin?: string | null;
   trade_transmission?: string | null;
+  created_by?: string | null;
 }
 
 type PreparedJobInsert = {
@@ -43,6 +44,7 @@ type PreparedJobInsert = {
   trade_model?: string | null;
   trade_vin?: string | null;
   trade_transmission?: string | null;
+  created_by?: string | null;
 };
 
 export const bulletproofJobCreation = async (params: JobCreationParams) => {
@@ -69,6 +71,22 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
     
     if (!profile.dealer_id) {
       throw new Error('Dealer account not properly configured');
+    }
+
+    let requestingUserId = params.created_by ?? null;
+
+    if (!requestingUserId) {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+
+      if (userError) {
+        throw new Error(`Auth error: ${userError.message}`);
+      }
+
+      requestingUserId = userData?.user?.id ?? null;
+    }
+
+    if (!requestingUserId) {
+      throw new Error('Unable to determine requesting user');
     }
     
     // Generate tracking token
@@ -99,7 +117,8 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
       requires_two: params.requires_two || false,
       distance_miles: params.distance_miles || 25,
       dealer_id: profile.dealer_id,
-      track_token: trackingToken
+      track_token: trackingToken,
+      created_by: requestingUserId
     };
 
     const tradeDetails = [

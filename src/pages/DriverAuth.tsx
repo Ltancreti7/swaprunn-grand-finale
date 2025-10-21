@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ const SAVED_PASSWORD_KEY = 'swaprunn_driver_saved_password';
 const REMEMBER_ME_KEY = 'swaprunn_driver_remember_me';
 
 const DriverAuth = () => {
+  const location = useLocation();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,6 +63,17 @@ const DriverAuth = () => {
     }
     setRememberMe(savedRememberMe);
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const mode = params.get('mode');
+
+    if (mode === 'signup') {
+      setIsSignUp(true);
+    } else if (mode === 'login') {
+      setIsSignUp(false);
+    }
+  }, [location.search]);
 
   const createDriverProfile = async (details?: {
     fullName?: string | null;

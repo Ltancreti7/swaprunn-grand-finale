@@ -342,6 +342,7 @@ const SimpleDriverRequest = () => {
         notes: notes || null,
         requires_two: false,
         distance_miles: 25,
+        created_by: user?.id ?? null,
         // Trade vehicle parameters
         trade_year: hasTradeIn && tradeVehicleInfo.year ? parseInt(tradeVehicleInfo.year) : null,
         trade_make: hasTradeIn ? tradeVehicleInfo.make : null,

@@ -25,16 +25,19 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error("Supabase service credentials are not configured");
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
       }
-    );
+    });
 
     const { firstName, lastName, name, email: rawEmail, phone, role, password, dealership_id, is_staff_member }: CreateStaffRequest = await req.json();
     
@@ -49,21 +52,45 @@ const handler = async (req: Request): Promise<Response> => {
     // Find existing user by email (case-insensitive)
     let authUserId: string;
     let createdUser = false;
-    
-    const { data: existingUsers, error: checkError } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (checkError) {
-      console.error("Error checking existing users:", checkError);
-      throw new Error("Failed to check existing users");
+
+    const adminApi = supabaseAdmin.auth.admin as typeof supabaseAdmin.auth.admin & {
+      getUserByEmail?: (email: string) => Promise<{
+        data: { user: { id: string } | null };
+        error: { message: string } | null;
+      }>;
+    };
+
+    let existingUserId: string | null = null;
+
+    if (typeof adminApi.getUserByEmail === "function") {
+      const { data: existingUserData, error: getUserError } = await adminApi.getUserByEmail(email);
+
+      if (getUserError && getUserError.message !== "User not found") {
+        console.error("Error checking existing user by email:", getUserError);
+        throw new Error("Failed to check existing users");
+      }
+
+      existingUserId = existingUserData?.user?.id ?? null;
+    } else {
+      console.warn("getUserByEmail is not available in this Supabase client version; falling back to admin listUsers.");
+
+      type AdminUser = {
+        id: string;
+        email?: string | null;
+      };
+
+      const { data: userList, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+      if (listError) {
+        console.error("Fallback user list lookup failed:", listError);
+        throw new Error("Failed to check existing users");
+      }
+
+      existingUserId = userList.users.find((user: AdminUser) => user.email?.toLowerCase() === email)?.id ?? null;
     }
 
-    const existingUser = existingUsers.users.find(user => 
-      user.email?.toLowerCase() === email
-    );
-    
-    if (existingUser) {
-      console.log("User already exists, reusing:", existingUser.id);
-      authUserId = existingUser.id;
+    if (existingUserId) {
+      console.log("User already exists, reusing:", existingUserId);
+      authUserId = existingUserId;
       createdUser = false;
     } else {
       // Create new auth user - generate temp password if not provided
@@ -106,17 +133,18 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error('No authorization header');
       }
 
-      const supabaseClient = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-        {
-          global: {
-            headers: {
-              Authorization: authHeader,
-            },
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+      if (!anonKey) {
+        throw new Error("Supabase anon key is not configured");
+      }
+
+      const supabaseClient = createClient(supabaseUrl, anonKey, {
+        global: {
+          headers: {
+            Authorization: authHeader,
           },
-        }
-      );
+        },
+      });
 
       // Get the current user's profile to find their dealer_id
       const { data: currentUser } = await supabaseClient.auth.getUser();
@@ -237,12 +265,16 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in create-staff-member function:", error);
+    const message = error instanceof Error ? error.message : "Failed to create staff member";
+    const details = error instanceof Error
+      ? { name: error.name, message: error.message, stack: error.stack }
+      : error;
     return new Response(
       JSON.stringify({ 
-        error: error.message || "Failed to create staff member",
-        details: error
+        error: message,
+        details
       }),
       {
         status: 500,
