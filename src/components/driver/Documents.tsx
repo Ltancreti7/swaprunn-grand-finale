@@ -27,7 +27,7 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
       input.accept = '.pdf,.jpg,.jpeg,.png';
       
       input.onchange = async () => {
-        if (input.files && input.files[0]) {
+        if (input.files?.[0]) {
           const file = input.files[0];
           
           // Simulate upload delay

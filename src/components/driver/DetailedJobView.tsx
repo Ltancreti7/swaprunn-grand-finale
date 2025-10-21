@@ -208,7 +208,7 @@ export function DetailedJobView({ assignment, job, driverId, onJobUpdate }: Deta
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       setProofPhoto(e.target.files[0]);
     }
   };
