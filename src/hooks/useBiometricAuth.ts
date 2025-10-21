@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Capacitor } from '@capacitor/core';
+import { useState, useEffect } from "react";
+import { Capacitor } from "@capacitor/core";
 
-const SERVER_ID = 'app.swaprunn.auth';
+const SERVER_ID = "app.swaprunn.auth";
 
 /**
  * Hook for biometric authentication (Face ID / Touch ID)
@@ -9,7 +9,9 @@ const SERVER_ID = 'app.swaprunn.auth';
  */
 export const useBiometricAuth = () => {
   const [isAvailable, setIsAvailable] = useState(false);
-  const [biometryType, setBiometryType] = useState<'face' | 'fingerprint' | 'none'>('none');
+  const [biometryType, setBiometryType] = useState<
+    "face" | "fingerprint" | "none"
+  >("none");
   const [isNative, setIsNative] = useState(false);
 
   useEffect(() => {
@@ -27,41 +29,46 @@ export const useBiometricAuth = () => {
 
     try {
       // Dynamically import the native biometric plugin
-      const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+      const { NativeBiometric } = await import(
+        "@capgo/capacitor-native-biometric"
+      );
       const result = await NativeBiometric.isAvailable();
       setIsAvailable(result.isAvailable);
-      
+
       // Map the biometry type enum to our type
-      const typeMap: Record<number, 'face' | 'fingerprint' | 'none'> = {
-        0: 'none',
-        1: 'fingerprint',
-        2: 'face',
+      const typeMap: Record<number, "face" | "fingerprint" | "none"> = {
+        0: "none",
+        1: "fingerprint",
+        2: "face",
       };
-      setBiometryType(typeMap[result.biometryType] || 'none');
+      setBiometryType(typeMap[result.biometryType] || "none");
     } catch (error) {
-      console.log('Biometric auth not available:', error);
+      console.log("Biometric auth not available:", error);
       setIsAvailable(false);
     }
   };
 
-
   /**
    * Prompt user for biometric authentication
    */
-  const authenticate = async (reason: string = 'Authenticate to login'): Promise<boolean> => {
+  const authenticate = async (
+    reason = "Authenticate to login",
+  ): Promise<boolean> => {
     if (!isAvailable || !isNative) return false;
 
     try {
-      const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+      const { NativeBiometric } = await import(
+        "@capgo/capacitor-native-biometric"
+      );
       await NativeBiometric.verifyIdentity({
         reason,
-        title: 'SwapRunn Login',
+        title: "SwapRunn Login",
         subtitle: reason,
-        description: 'Use biometric authentication to sign in',
+        description: "Use biometric authentication to sign in",
       });
       return true;
     } catch (error) {
-      console.error('Biometric auth failed:', error);
+      console.error("Biometric auth failed:", error);
       return false;
     }
   };
@@ -69,11 +76,16 @@ export const useBiometricAuth = () => {
   /**
    * Save credentials securely to device keychain/keystore
    */
-  const saveCredentials = async (email: string, password: string): Promise<boolean> => {
+  const saveCredentials = async (
+    email: string,
+    password: string,
+  ): Promise<boolean> => {
     if (!isAvailable || !isNative) return false;
 
     try {
-      const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+      const { NativeBiometric } = await import(
+        "@capgo/capacitor-native-biometric"
+      );
       await NativeBiometric.setCredentials({
         username: email,
         password: password,
@@ -81,7 +93,7 @@ export const useBiometricAuth = () => {
       });
       return true;
     } catch (error) {
-      console.error('Failed to save credentials:', error);
+      console.error("Failed to save credentials:", error);
       return false;
     }
   };
@@ -89,11 +101,16 @@ export const useBiometricAuth = () => {
   /**
    * Get saved credentials from device keychain/keystore
    */
-  const getCredentials = async (): Promise<{ email: string; password: string } | null> => {
+  const getCredentials = async (): Promise<{
+    email: string;
+    password: string;
+  } | null> => {
     if (!isAvailable || !isNative) return null;
 
     try {
-      const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+      const { NativeBiometric } = await import(
+        "@capgo/capacitor-native-biometric"
+      );
       const result = await NativeBiometric.getCredentials({
         server: SERVER_ID,
       });
@@ -102,7 +119,7 @@ export const useBiometricAuth = () => {
         password: result.password,
       };
     } catch (error) {
-      console.log('No saved credentials found');
+      console.log("No saved credentials found");
       return null;
     }
   };
@@ -114,12 +131,14 @@ export const useBiometricAuth = () => {
     if (!isAvailable || !isNative) return;
 
     try {
-      const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+      const { NativeBiometric } = await import(
+        "@capgo/capacitor-native-biometric"
+      );
       await NativeBiometric.deleteCredentials({
         server: SERVER_ID,
       });
     } catch (error) {
-      console.error('Failed to delete credentials:', error);
+      console.error("Failed to delete credentials:", error);
     }
   };
 
