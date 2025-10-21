@@ -427,6 +427,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_staff_invitation: {
+        Args: {
+          p_invite_token: string
+        }
+        Returns:
+          | {
+              dealer_id: string | null
+              error: string | null
+              success: boolean
+            }
+          | null
+      }
       create_profile_for_current_user: {
         Args: {
           _company_name?: string
@@ -461,6 +473,30 @@ export type Database = {
           pickup_address: string
           specific_date: string
           specific_time: string
+        }[]
+      }
+      get_open_jobs_for_drivers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          dealer_id: string | null
+          dealer_name: string | null
+          dealer_store: string | null
+          delivery_address: string | null
+          distance_miles: number | null
+          id: string
+          make: string | null
+          model: string | null
+          notes: string | null
+          pickup_address: string | null
+          requires_two: boolean | null
+          status: string | null
+          type: string | null
+          vin: string | null
+          year: number | null
+          estimated_pay_cents: number | null
         }[]
       }
       get_user_profile: {

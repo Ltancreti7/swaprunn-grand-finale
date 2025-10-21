@@ -24,7 +24,7 @@ interface AcceptStaffInvitationResponse {
   error?: string | null;
 }
 
-const ALLOWED_PROFILE_TYPES = new Set(['dealer']);
+const ALLOWED_PROFILE_TYPES = new Set(['dealer', 'staff']);
 
 function AcceptInvitation() {
   const { token } = useParams<{ token: string }>();

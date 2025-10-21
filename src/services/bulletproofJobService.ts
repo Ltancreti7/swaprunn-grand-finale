@@ -47,6 +47,19 @@ type PreparedJobInsert = {
   created_by?: string | null;
 };
 
+type CreatedJobRecord = {
+  id: string;
+  type: string;
+  year?: number | null;
+  make?: string | null;
+  model?: string | null;
+  pickup_address: string;
+  delivery_address: string;
+  distance_miles?: number | null;
+  requires_two?: boolean | null;
+  customer_name?: string | null;
+};
+
 export const bulletproofJobCreation = async (params: JobCreationParams) => {
   try {
     console.log('🚀 BULLETPROOF JOB CREATION - Starting...');
@@ -146,6 +159,27 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
         }
       : jobData;
 
+  const notifyDrivers = async (jobRecord: CreatedJobRecord) => {
+      try {
+        await supabase.functions.invoke('notify-drivers-new-job', {
+          body: {
+            job_id: jobRecord.id,
+            type: jobRecord.type,
+            year: jobRecord.year,
+            make: jobRecord.make,
+            model: jobRecord.model,
+            pickup_address: jobRecord.pickup_address,
+            delivery_address: jobRecord.delivery_address,
+            distance_miles: jobRecord.distance_miles ?? 0,
+            requires_two: jobRecord.requires_two ?? false,
+            customer_name: jobRecord.customer_name ?? null
+          }
+        });
+      } catch (notificationError) {
+        console.error('⚠️ Driver notification dispatch failed:', notificationError);
+      }
+    };
+
     const insertJob = async (payload: PreparedJobInsert) => {
       const { data, error } = await supabase
         .from('jobs')
@@ -195,6 +229,7 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
     try {
       const createdJob = await insertJob(jobDataWithTrade);
       console.log('✅ Job created successfully:', createdJob);
+      await notifyDrivers(createdJob);
       return createdJob;
     } catch (initialError) {
       if (tradeFieldsPresent && isMissingTradeColumn(initialError)) {
@@ -209,6 +244,7 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
 
         const createdJob = await insertJob(fallbackJobData);
         console.log('✅ Job created successfully after fallback:', createdJob);
+        await notifyDrivers(createdJob);
         return createdJob;
       }
 

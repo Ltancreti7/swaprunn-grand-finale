@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { supabaseService } from "@/services/supabaseService";
 import SiteHeader from "@/components/SiteHeader";
@@ -51,31 +51,33 @@ const DriverRequests = () => {
   const fetchRequests = async () => {
     try {
       // Use secure function that excludes customer personal information
-      const { data: jobs, error } = await supabase
-        .rpc('get_open_jobs_for_drivers');
+      const { data, error } = await supabase
+        .rpc('get_open_jobs_for_drivers' as never);
 
       if (error) throw error;
 
-      const formattedRequests = jobs?.map(job => ({
-        id: job.id,
-        type: job.type || 'delivery',
-        created_at: job.created_at || '',
-        pickup_address: job.pickup_address || '',
-        delivery_address: job.delivery_address || '',
-        distance_miles: job.distance_miles || 0,
-        requires_two: job.requires_two || false,
-        notes: job.notes || '',
-        vin: job.vin || '',
-        year: job.year?.toString() || '',
-        make: job.make || '',
-        model: job.model || '',
-        dealer_name: job.dealer_name || '',
-        dealer_store: job.dealer_store || '',
-        estimated_pay_cents: job.estimated_pay_cents || 0,
-        customer_name: job.customer_name || '',
-        customer_phone: job.customer_phone || '',
-        status: job.status
-      })) || [];
+      const jobs = Array.isArray(data) ? (data as Record<string, unknown>[]) : [];
+
+      const formattedRequests = jobs.map(job => ({
+        id: String(job.id ?? ''),
+        type: String(job.type ?? 'delivery'),
+        created_at: String(job.created_at ?? ''),
+        pickup_address: String(job.pickup_address ?? ''),
+        delivery_address: String(job.delivery_address ?? ''),
+        distance_miles: Number(job.distance_miles ?? 0),
+        requires_two: Boolean(job.requires_two),
+        notes: String(job.notes ?? ''),
+        vin: String(job.vin ?? ''),
+        year: job.year ? String(job.year) : '',
+        make: String(job.make ?? ''),
+        model: String(job.model ?? ''),
+        dealer_name: String(job.dealer_name ?? ''),
+        dealer_store: String(job.dealer_store ?? ''),
+        estimated_pay_cents: Number(job.estimated_pay_cents ?? 0),
+        customer_name: String(job.customer_name ?? ''),
+        customer_phone: String(job.customer_phone ?? ''),
+        status: String(job.status ?? '')
+      }));
 
       setRequests(formattedRequests);
     } catch (error) {
@@ -171,8 +173,7 @@ const DriverRequests = () => {
 
   // Redirect if not authenticated or not a driver
   if (!authLoading && (!user || userProfile?.user_type !== 'driver')) {
-    navigate('/driver/auth');
-    return null;
+    return <Navigate to="/driver/auth" replace />;
   }
 
   return (
