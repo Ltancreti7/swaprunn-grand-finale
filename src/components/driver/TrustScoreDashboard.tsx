@@ -59,7 +59,9 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
       if (driverError) throw driverError;
 
       // Get recent reputation metrics
-      const { data: reputationData, error: reputationError } = await (supabase as any)
+      const { data: reputationData, error: reputationError } = await (
+        supabase as any
+      )
         .from("reputation_metrics")
         .select("metric_type, score, recorded_at")
         .eq("driver_id", driverId)
