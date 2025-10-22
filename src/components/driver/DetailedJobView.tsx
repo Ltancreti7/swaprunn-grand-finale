@@ -112,28 +112,28 @@ export function DetailedJobView({
       }
 
       // Save vehicle inspection record
-      const { error: inspectionError } = await supabase
+      const { error: inspectionError } = await (supabase as any)
         .from("vehicle_inspections")
         .insert({
           job_id: job.id,
           assignment_id: assignment.id,
           inspection_type: "pre_drive",
           photo_urls: uploadedPhotoUrls,
-        });
+        } as any);
 
       if (inspectionError) throw inspectionError;
 
       // Update assignment and job
-      const { error: assignmentError } = await supabase
+      const { error: assignmentError } = await (supabase as any)
         .from("assignments")
-        .update({ started_at: new Date().toISOString() })
+        .update({ started_at: new Date().toISOString() } as any)
         .eq("id", assignment.id);
 
       if (assignmentError) throw assignmentError;
 
-      const { error: jobError } = await supabase
+      const { error: jobError } = await (supabase as any)
         .from("jobs")
-        .update({ status: "in_progress" })
+        .update({ status: "in_progress" } as any)
         .eq("id", job.id);
 
       if (jobError) throw jobError;
@@ -202,28 +202,28 @@ export function DetailedJobView({
       } = supabase.storage.from("vehicle-photos").getPublicUrl(filePath);
 
       // Save delivery inspection record
-      const { error: inspectionError } = await supabase
+      const { error: inspectionError } = await (supabase as any)
         .from("vehicle_inspections")
         .insert({
           job_id: job.id,
           assignment_id: assignment.id,
           inspection_type: "post_drive",
           photo_urls: [publicUrl],
-        });
+        } as any);
 
       if (inspectionError) throw inspectionError;
 
       // Update assignment and job
-      const { error: assignmentError } = await supabase
+      const { error: assignmentError } = await (supabase as any)
         .from("assignments")
-        .update({ ended_at: new Date().toISOString() })
+        .update({ ended_at: new Date().toISOString() } as any)
         .eq("id", assignment.id);
 
       if (assignmentError) throw assignmentError;
 
-      const { error: jobError } = await supabase
+      const { error: jobError } = await (supabase as any)
         .from("jobs")
-        .update({ status: "completed" })
+        .update({ status: "completed" } as any)
         .eq("id", job.id);
 
       if (jobError) throw jobError;
@@ -493,7 +493,7 @@ export function DetailedJobView({
                 {preDeparturePhotos.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
                     {preDeparturePhotoUrls.map((url, index) => (
-                      <div key={index} className="relative group">
+                      <div key={url} className="relative group">
                         <img
                           src={url}
                           alt={`Pre-departure ${index + 1}`}

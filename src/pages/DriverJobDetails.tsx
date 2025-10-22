@@ -1,20 +1,34 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Navigation, Phone, Camera, Play, CheckCircle, Car, User, DollarSign, MapPin, FileText, Clock } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ChatButton } from '@/components/chat/ChatButton';
-import { useAuth } from '@/hooks/useAuth';
-import { useMobileCapacitor } from '@/hooks/useMobileCapacitor';
-import { mobileCameraService } from '@/services/mobileCameraService';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Navigation,
+  Phone,
+  Camera,
+  Play,
+  CheckCircle,
+  Car,
+  User,
+  DollarSign,
+  MapPin,
+  FileText,
+  Clock,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChatButton } from "@/components/chat/ChatButton";
+import { useAuth } from "@/hooks/useAuth";
+import { useMobileCapacitor } from "@/hooks/useMobileCapacitor";
+import { mobileCameraService } from "@/services/mobileCameraService";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { supabaseService } from "@/services/supabaseService";
 
 interface JobDetail {
   id: string;
-  type: 'delivery' | 'swap' | 'parts' | 'service';
+  type: "delivery" | "swap" | "parts" | "service";
   status: string;
   created_at: string;
   pickup_address: string;
@@ -62,22 +76,24 @@ export default function DriverJobDetails() {
 
   const fetchJobDetail = async () => {
     if (!jobId) return;
-    
+
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('jobs')
-        .select(`
+        .from("jobs")
+        .select(
+          `
           *,
           assignments!inner(*)
-        `)
-        .eq('id', jobId)
+        `,
+        )
+        .eq("id", jobId)
         .single();
 
       if (error) throw error;
       setJobDetail(data);
     } catch (error) {
-      console.error('Error fetching job details:', error);
+      console.error("Error fetching job details:", error);
       toast({
         title: "Error",
         description: "Failed to load job details",
@@ -88,38 +104,40 @@ export default function DriverJobDetails() {
     }
   };
 
-  const handleJobStatusUpdate = async (action: 'start' | 'complete') => {
+  const handleJobStatusUpdate = async (action: "start" | "complete") => {
     if (!jobDetail?.assignments[0]?.id || !userProfile?.driver_id) return;
-    
+
     setIsUpdatingStatus(true);
     try {
-      const updateField = action === 'start' ? 'started_at' : 'ended_at';
-      const statusValue = action === 'start' ? 'in_progress' : 'completed';
-      
+      const updateField = action === "start" ? "started_at" : "ended_at";
+      const statusValue = action === "start" ? "in_progress" : "completed";
+
       // Update assignment
       const { error: assignmentError } = await supabase
-        .from('assignments')
+        .from("assignments")
         .update({ [updateField]: new Date().toISOString() })
-        .eq('id', jobDetail.assignments[0].id);
+        .eq("id", jobDetail.assignments[0].id);
 
       if (assignmentError) throw assignmentError;
 
       // Update job status
       const { error: jobError } = await supabase
-        .from('jobs')
+        .from("jobs")
         .update({ status: statusValue })
-        .eq('id', jobDetail.id);
+        .eq("id", jobDetail.id);
 
       if (jobError) throw jobError;
 
       toast({
-        title: action === 'start' ? "Job Started" : "Job Completed",
-        description: action === 'start' ? "You've started this job" : "Great work! Job marked as complete",
+        title: action === "start" ? "Job Started" : "Job Completed",
+        description:
+          action === "start"
+            ? "You've started this job"
+            : "Great work! Job marked as complete",
       });
 
       // Refresh job details
       await fetchJobDetail();
-      
     } catch (error) {
       console.error(`Error ${action}ing job:`, error);
       toast({
@@ -132,9 +150,13 @@ export default function DriverJobDetails() {
     }
   };
 
-  const handleNavigate = async (address: string, lat?: number, lng?: number) => {
+  const handleNavigate = async (
+    address: string,
+    lat?: number,
+    lng?: number,
+  ) => {
     await triggerHaptic();
-    
+
     // Use coordinates if available, otherwise fallback to address
     if (lat && lng) {
       const url = `maps://?daddr=${lat},${lng}`;
@@ -148,9 +170,9 @@ export default function DriverJobDetails() {
 
   const handleCall = async (phoneNumber: string) => {
     await triggerHaptic();
-    
+
     if (isNative) {
-      window.open(`tel:${phoneNumber}`, '_system');
+      window.open(`tel:${phoneNumber}`, "_system");
     } else {
       window.open(`tel:${phoneNumber}`);
     }
@@ -158,7 +180,7 @@ export default function DriverJobDetails() {
 
   const handleTakePhoto = async () => {
     await triggerHaptic();
-    
+
     try {
       const photoUrl = await mobileCameraService.takePhoto();
       if (photoUrl) {
@@ -177,43 +199,51 @@ export default function DriverJobDetails() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'open':
+      case "open":
         return <Badge variant="outline">Open</Badge>;
-      case 'in_progress':
-        return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">In Progress</Badge>;
-      case 'completed':
+      case "in_progress":
+        return (
+          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+            In Progress
+          </Badge>
+        );
+      case "completed":
         return <Badge variant="secondary">Completed</Badge>;
-      case 'cancelled':
-        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300">Cancelled</Badge>;
+      case "cancelled":
+        return (
+          <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300">
+            Cancelled
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
   const getJobTitle = () => {
-    if (!jobDetail) return '';
+    if (!jobDetail) return "";
     const { year, make, model, type } = jobDetail;
-    const jobType = type === 'swap' ? 'Swap' : 'Delivery';
-    
+    const jobType = type === "swap" ? "Swap" : "Delivery";
+
     if (year && make && model) {
       return `${year} ${make} ${model} ${jobType}`;
     } else if (make && model) {
@@ -250,8 +280,10 @@ export default function DriverJobDetails() {
         <Card className="w-full max-w-md mx-4">
           <CardContent className="p-6 text-center">
             <h2 className="text-xl font-semibold mb-2">Job Not Found</h2>
-            <p className="text-muted-foreground mb-4">{"This job doesn't exist or you don't have access to it."}</p>
-            <Button onClick={() => navigate('/driver/dashboard')}>
+            <p className="text-muted-foreground mb-4">
+              {"This job doesn't exist or you don't have access to it."}
+            </p>
+            <Button onClick={() => navigate("/driver/dashboard")}>
               Back to Dashboard
             </Button>
           </CardContent>
@@ -266,7 +298,7 @@ export default function DriverJobDetails() {
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
-            onClick={() => navigate('/driver/dashboard')}
+            onClick={() => navigate("/driver/dashboard")}
             variant="ghost"
             size="sm"
             className="text-white hover:bg-white/10"
@@ -294,12 +326,19 @@ export default function DriverJobDetails() {
         </Card>
 
         {/* Quick Actions - Mobile Optimized */}
-        {(jobDetail.status === 'open' || jobDetail.status === 'in_progress') && (
+        {(jobDetail.status === "open" ||
+          jobDetail.status === "in_progress") && (
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-4">
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <Button
-                  onClick={() => handleNavigate(jobDetail.pickup_address, jobDetail.pickup_lat, jobDetail.pickup_lng)}
+                  onClick={() =>
+                    handleNavigate(
+                      jobDetail.pickup_address,
+                      jobDetail.pickup_lat,
+                      jobDetail.pickup_lng,
+                    )
+                  }
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30"
@@ -319,25 +358,85 @@ export default function DriverJobDetails() {
               </div>
 
               {/* Status Actions */}
-              {jobDetail.status === 'open' && (
-                <Button
-                  onClick={() => handleJobStatusUpdate('start')}
-                  disabled={isUpdatingStatus}
-                  className="w-full flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                >
-                  <Play className="h-4 w-4" />
-                  {isUpdatingStatus ? 'Starting...' : 'Start Job'}
-                </Button>
+              {jobDetail.status === "open" && (
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => handleJobStatusUpdate("start")}
+                    disabled={isUpdatingStatus}
+                    className="w-full flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                  >
+                    <Play className="h-4 w-4" />
+                    {isUpdatingStatus ? "Starting..." : "Start Job"}
+                  </Button>
+
+                  {/* Accept button for drivers when job is open and not yet accepted */}
+                  {!jobDetail.assignments?.[0]?.accepted_at && (
+                    <Button
+                      onClick={async () => {
+                        if (!userProfile?.driver_id) {
+                          toast({
+                            title: "Driver profile missing",
+                            description: "Please complete your driver setup.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        try {
+                          setIsUpdatingStatus(true);
+                          await supabaseService.acceptJob(
+                            jobDetail.id,
+                            userProfile.driver_id,
+                          );
+                          toast({
+                            title: "Job accepted",
+                            description:
+                              "Check your dashboard for upcoming assignments.",
+                          });
+                          // Refresh job details to reflect accepted state
+                          await fetchJobDetail();
+                        } catch (err: any) {
+                          console.error("Error accepting job:", err);
+                          const errMsg =
+                            err instanceof Error ? err.message : String(err);
+                          if (
+                            errMsg === "JOB_ALREADY_TAKEN" ||
+                            err?.code === "23505" ||
+                            errMsg?.includes("duplicate key")
+                          ) {
+                            toast({
+                              title: "Job already taken",
+                              description:
+                                "Another driver has already accepted this job.",
+                              variant: "destructive",
+                            });
+                          } else {
+                            toast({
+                              title: "Unable to accept job",
+                              description: "Please try again.",
+                              variant: "destructive",
+                            });
+                          }
+                        } finally {
+                          setIsUpdatingStatus(false);
+                        }
+                      }}
+                      className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90"
+                    >
+                      Accept Job
+                    </Button>
+                  )}
+                </div>
               )}
 
-              {jobDetail.status === 'in_progress' && (
+              {jobDetail.status === "in_progress" && (
                 <Button
-                  onClick={() => handleJobStatusUpdate('complete')}
+                  onClick={() => handleJobStatusUpdate("complete")}
                   disabled={isUpdatingStatus}
                   className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
                 >
                   <CheckCircle className="h-4 w-4" />
-                  {isUpdatingStatus ? 'Completing...' : 'Complete Job'}
+                  {isUpdatingStatus ? "Completing..." : "Complete Job"}
                 </Button>
               )}
             </CardContent>
@@ -360,19 +459,23 @@ export default function DriverJobDetails() {
             {jobDetail.vin && (
               <div className="flex justify-between">
                 <span className="text-white/70">VIN:</span>
-                <span className="text-white font-mono text-sm">{jobDetail.vin}</span>
+                <span className="text-white font-mono text-sm">
+                  {jobDetail.vin}
+                </span>
               </div>
             )}
             {jobDetail.transmission && (
               <div className="flex justify-between">
                 <span className="text-white/70">Transmission:</span>
-                <span className="text-white capitalize">{jobDetail.transmission}</span>
+                <span className="text-white capitalize">
+                  {jobDetail.transmission}
+                </span>
               </div>
             )}
             <div className="flex justify-between">
               <span className="text-white/70">Job Type:</span>
               <Badge variant="outline" className="text-white border-white/30">
-                {jobDetail.type === 'swap' ? 'Swap' : 'Delivery'}
+                {jobDetail.type === "swap" ? "Swap" : "Delivery"}
               </Badge>
             </div>
           </CardContent>
@@ -389,7 +492,9 @@ export default function DriverJobDetails() {
           <CardContent className="space-y-3">
             <div className="flex justify-between">
               <span className="text-white/70">Customer:</span>
-              <span className="text-white font-medium">{jobDetail.customer_name || 'N/A'}</span>
+              <span className="text-white font-medium">
+                {jobDetail.customer_name || "N/A"}
+              </span>
             </div>
             {jobDetail.customer_phone && (
               <div className="flex justify-between items-center">
@@ -423,16 +528,22 @@ export default function DriverJobDetails() {
             </div>
             <div className="flex justify-between">
               <span className="text-white/70">Distance:</span>
-              <span className="text-white">{jobDetail.distance_miles} miles</span>
+              <span className="text-white">
+                {jobDetail.distance_miles} miles
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-white/70">Pay:</span>
-              <span className="text-green-400 font-semibold">{formatCurrency(calculatePay())}</span>
+              <span className="text-green-400 font-semibold">
+                {formatCurrency(calculatePay())}
+              </span>
             </div>
             {(jobDetail.timeframe || jobDetail.specific_date) && (
               <div className="flex justify-between">
                 <span className="text-white/70">Timeframe:</span>
-                <span className="text-white">{jobDetail.timeframe || jobDetail.specific_date}</span>
+                <span className="text-white">
+                  {jobDetail.timeframe || jobDetail.specific_date}
+                </span>
               </div>
             )}
             {jobDetail.specific_time && (
@@ -457,7 +568,13 @@ export default function DriverJobDetails() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-white/70">Pickup:</span>
                 <Button
-                  onClick={() => handleNavigate(jobDetail.pickup_address, jobDetail.pickup_lat, jobDetail.pickup_lng)}
+                  onClick={() =>
+                    handleNavigate(
+                      jobDetail.pickup_address,
+                      jobDetail.pickup_lat,
+                      jobDetail.pickup_lng,
+                    )
+                  }
                   variant="ghost"
                   size="sm"
                   className="h-auto p-1 text-blue-400 hover:text-blue-300"
@@ -473,7 +590,13 @@ export default function DriverJobDetails() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-white/70">Delivery:</span>
                 <Button
-                  onClick={() => handleNavigate(jobDetail.delivery_address, jobDetail.delivery_lat, jobDetail.delivery_lng)}
+                  onClick={() =>
+                    handleNavigate(
+                      jobDetail.delivery_address,
+                      jobDetail.delivery_lat,
+                      jobDetail.delivery_lng,
+                    )
+                  }
                   variant="ghost"
                   size="sm"
                   className="h-auto p-1 text-blue-400 hover:text-blue-300"
@@ -514,24 +637,32 @@ export default function DriverJobDetails() {
           <CardContent className="space-y-3">
             <div className="flex justify-between">
               <span className="text-white/70">Created:</span>
-              <span className="text-white">{formatDate(jobDetail.created_at)}</span>
+              <span className="text-white">
+                {formatDate(jobDetail.created_at)}
+              </span>
             </div>
             {jobDetail.assignments[0]?.accepted_at && (
               <div className="flex justify-between">
                 <span className="text-white/70">Accepted:</span>
-                <span className="text-white">{formatDate(jobDetail.assignments[0].accepted_at)}</span>
+                <span className="text-white">
+                  {formatDate(jobDetail.assignments[0].accepted_at)}
+                </span>
               </div>
             )}
             {jobDetail.assignments[0]?.started_at && (
               <div className="flex justify-between">
                 <span className="text-white/70">Started:</span>
-                <span className="text-white">{formatDate(jobDetail.assignments[0].started_at)}</span>
+                <span className="text-white">
+                  {formatDate(jobDetail.assignments[0].started_at)}
+                </span>
               </div>
             )}
             {jobDetail.assignments[0]?.ended_at && (
               <div className="flex justify-between">
                 <span className="text-white/70">Completed:</span>
-                <span className="text-white">{formatDate(jobDetail.assignments[0].ended_at)}</span>
+                <span className="text-white">
+                  {formatDate(jobDetail.assignments[0].ended_at)}
+                </span>
               </div>
             )}
           </CardContent>
@@ -540,11 +671,11 @@ export default function DriverJobDetails() {
         {/* Chat Button */}
         {jobDetail.assignments[0]?.id && (
           <div className="fixed bottom-6 right-6">
-            <ChatButton 
+            <ChatButton
               jobId={jobDetail.id}
               assignmentId={jobDetail.assignments[0].id}
               currentUserType="driver"
-              currentUserId={userProfile?.driver_id || ''}
+              currentUserId={userProfile?.driver_id || ""}
             />
           </div>
         )}

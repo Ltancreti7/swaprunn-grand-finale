@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { notificationService } from '@/services/notificationService';
-import { smsService } from '@/services/smsService';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { notificationService } from "@/services/notificationService";
+import { smsService } from "@/services/smsService";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export const useDriverNotifications = () => {
   const [newJobsCount, setNewJobsCount] = useState(0);
@@ -14,49 +14,49 @@ export const useDriverNotifications = () => {
 
   // Fetch count of unseen jobs since last_seen_jobs_at
   const fetchUnseenJobsCount = async () => {
-    if (userProfile?.user_type !== 'driver' || !userProfile.driver_id) return;
+    if (userProfile?.user_type !== "driver" || !userProfile.driver_id) return;
 
     try {
       // Get driver's last_seen_jobs_at timestamp
-      const { data: driverData } = await supabase
-        .from('drivers')
-        .select('last_seen_jobs_at')
-        .eq('id', userProfile.driver_id)
+      const { data: driverData } = await (supabase as any)
+        .from("drivers")
+        .select("last_seen_jobs_at")
+        .eq("id", userProfile.driver_id)
         .single();
 
       if (!driverData) return;
 
       // Count open jobs created after last_seen_jobs_at
-      const { count } = await supabase
-        .from('jobs')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'open')
-        .gt('created_at', driverData.last_seen_jobs_at || '1970-01-01');
+      const { count } = await (supabase as any)
+        .from("jobs")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "open")
+        .gt("created_at", driverData?.last_seen_jobs_at || "1970-01-01");
 
       setNewJobsCount(count || 0);
     } catch (error) {
-      console.error('Error fetching unseen jobs:', error);
+      console.error("Error fetching unseen jobs:", error);
     }
   };
 
   // Mark jobs as seen by updating last_seen_jobs_at
   const markJobsSeen = async () => {
-    if (userProfile?.user_type !== 'driver' || !userProfile.driver_id) return;
+    if (userProfile?.user_type !== "driver" || !userProfile.driver_id) return;
 
     try {
-      await supabase
-        .from('drivers')
+      await (supabase as any)
+        .from("drivers")
         .update({ last_seen_jobs_at: new Date().toISOString() })
-        .eq('id', userProfile.driver_id);
+        .eq("id", userProfile.driver_id);
 
       setNewJobsCount(0);
     } catch (error) {
-      console.error('Error marking jobs as seen:', error);
+      console.error("Error marking jobs as seen:", error);
     }
   };
 
   useEffect(() => {
-    if (userProfile?.user_type !== 'driver') return;
+    if (userProfile?.user_type !== "driver") return;
 
     // Request notification permissions on mount
     notificationService.requestPermission();
@@ -66,63 +66,67 @@ export const useDriverNotifications = () => {
 
     // Set up real-time subscription to jobs table
     const channel = supabase
-      .channel('job-notifications')
+      .channel("job-notifications")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'jobs',
-          filter: 'status=eq.open'
+          event: "INSERT",
+          schema: "public",
+          table: "jobs",
+          filter: "status=eq.open",
         },
         async (payload) => {
-          console.log('New job detected:', payload.new);
-          
+          console.log("New job detected:", payload.new);
+
           const newJob = payload.new;
-          
+
           // Update state
-          setNewJobsCount(prev => prev + 1);
+          setNewJobsCount((prev) => prev + 1);
           setLatestJob(newJob);
           setShowAlert(true);
 
           // Show browser notification
           notificationService.showJobNotification(newJob);
-          
+
           // Play sound
           notificationService.playNotificationSound();
 
           // Send SMS notification if driver has phone number
           if (userProfile?.driver_id) {
             try {
-              const { data: driverData } = await supabase
-                .from('drivers')
-                .select('phone')
-                .eq('id', userProfile.driver_id)
+              const { data: driverData } = await (supabase as any)
+                .from("drivers")
+                .select("phone")
+                .eq("id", userProfile.driver_id)
                 .single();
 
-              if (driverData?.phone) {
+              const phone = driverData?.phone || driverData?.phone_number;
+
+              if (phone) {
                 await smsService.sendJobNotification({
-                  to: driverData.phone,
+                  to: phone,
                   job: {
-                    year: newJob.year,
-                    make: newJob.make,
-                    model: newJob.model,
-                    distance_miles: newJob.distance_miles,
-                    estimated_pay_cents: newJob.estimated_pay_cents
-                  }
+                    year: newJob?.year,
+                    make: newJob?.make,
+                    model: newJob?.model,
+                    distance_miles: newJob?.distance_miles,
+                    estimated_pay_cents: newJob?.estimated_pay_cents,
+                  },
                 });
               }
             } catch (error) {
-              console.error('Error sending SMS notification:', error);
+              console.error("Error sending SMS notification:", error);
             }
           }
 
           // Trigger a custom event to refresh available jobs in driver dashboard
-          window.dispatchEvent(new CustomEvent('newJobAvailable', { detail: newJob }));
+          window.dispatchEvent(
+            new CustomEvent("newJobAvailable", { detail: newJob }),
+          );
 
           // Don't show toast, will use modal instead
           // Modal is triggered via showAlert state
-        }
+        },
       )
       .subscribe();
 
@@ -131,6 +135,25 @@ export const useDriverNotifications = () => {
       supabase.removeChannel(channel);
     };
   }, [userProfile, toast]);
+
+  // Listen for local mock events so mockStore-created jobs update UI immediately
+  useEffect(() => {
+    const handler = (e: any) => {
+      try {
+        const job = e?.detail;
+        if (!job) return;
+        setNewJobsCount((prev) => prev + 1);
+        setLatestJob(job);
+        setShowAlert(true);
+      } catch (err) {
+        console.error("Error handling mock newJobAvailable event", err);
+      }
+    };
+
+    window.addEventListener("newJobAvailable", handler as EventListener);
+    return () =>
+      window.removeEventListener("newJobAvailable", handler as EventListener);
+  }, []);
 
   const clearAlert = () => {
     setShowAlert(false);
@@ -147,6 +170,6 @@ export const useDriverNotifications = () => {
     clearAlert,
     clearNewJobsCount,
     markJobsSeen,
-    fetchUnseenJobsCount
+    fetchUnseenJobsCount,
   };
 };
