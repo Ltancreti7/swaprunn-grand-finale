@@ -1,4 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
+import { USE_MOCK_DATA } from '@/services/driver-data';
+import { mockStore } from '@/store/mockStore';
+import { notificationService } from '@/services/notificationService';
 
 interface JobCreationParams {
   type: 'delivery' | 'swap';
@@ -227,6 +230,49 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
     console.log('📝 Job data prepared (initial attempt):', jobDataWithTrade);
 
     try {
+      if (USE_MOCK_DATA) {
+        // Create a compatible job in the in-memory mock store and return a minimal record
+        const mock = mockStore.createJob({
+          type: jobDataWithTrade.type === 'delivery' ? 'Delivery' : 'Swap',
+          customerName: jobDataWithTrade.customer_name,
+          customerPhone: jobDataWithTrade.customer_phone,
+          pickupAddress: jobDataWithTrade.pickup_address,
+          deliveryAddress: jobDataWithTrade.delivery_address,
+          notes: jobDataWithTrade.notes || undefined,
+        });
+
+        const createdJob: CreatedJobRecord = {
+          id: mock.id,
+          type: mock.type,
+          year: jobDataWithTrade.year ?? null,
+          make: jobDataWithTrade.make ?? null,
+          model: jobDataWithTrade.model ?? null,
+          pickup_address: mock.pickupAddress,
+          delivery_address: mock.deliveryAddress,
+          distance_miles: jobDataWithTrade.distance_miles ?? null,
+          requires_two: jobDataWithTrade.requires_two ?? null,
+          customer_name: mock.customerName ?? null,
+        } as unknown as CreatedJobRecord;
+
+        console.log('✅ (mock) Job created successfully:', createdJob);
+        // In mock mode, simulate notifications and real-time updates so drivers see the request immediately
+        try {
+          // Show browser notification
+          notificationService.showJobNotification(mock as any);
+          notificationService.playNotificationSound();
+        } catch (err) {
+          console.warn('Mock notification failed', err);
+        }
+
+        // Dispatch a window event so local hooks can react (mock real-time)
+        try {
+          window.dispatchEvent(new CustomEvent('newJobAvailable', { detail: mock }));
+        } catch (err) {
+          // In non-browser test environments this may fail; ignore
+        }
+        return createdJob;
+      }
+
       const createdJob = await insertJob(jobDataWithTrade);
       console.log('✅ Job created successfully:', createdJob);
       await notifyDrivers(createdJob);

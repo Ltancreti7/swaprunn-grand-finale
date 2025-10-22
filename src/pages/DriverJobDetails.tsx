@@ -11,6 +11,7 @@ import { useMobileCapacitor } from '@/hooks/useMobileCapacitor';
 import { mobileCameraService } from '@/services/mobileCameraService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { supabaseService } from '@/services/supabaseService';
 
 interface JobDetail {
   id: string;
@@ -320,14 +321,49 @@ export default function DriverJobDetails() {
 
               {/* Status Actions */}
               {jobDetail.status === 'open' && (
-                <Button
-                  onClick={() => handleJobStatusUpdate('start')}
-                  disabled={isUpdatingStatus}
-                  className="w-full flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                >
-                  <Play className="h-4 w-4" />
-                  {isUpdatingStatus ? 'Starting...' : 'Start Job'}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => handleJobStatusUpdate('start')}
+                    disabled={isUpdatingStatus}
+                    className="w-full flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                  >
+                    <Play className="h-4 w-4" />
+                    {isUpdatingStatus ? 'Starting...' : 'Start Job'}
+                  </Button>
+
+                  {/* Accept button for drivers when job is open and not yet accepted */}
+                  {!jobDetail.assignments?.[0]?.accepted_at && (
+                    <Button
+                      onClick={async () => {
+                        if (!userProfile?.driver_id) {
+                          toast({ title: 'Driver profile missing', description: 'Please complete your driver setup.', variant: 'destructive' });
+                          return;
+                        }
+
+                        try {
+                          setIsUpdatingStatus(true);
+                          await supabaseService.acceptJob(jobDetail.id, userProfile.driver_id);
+                          toast({ title: 'Job accepted', description: 'Check your dashboard for upcoming assignments.' });
+                          // Refresh job details to reflect accepted state
+                          await fetchJobDetail();
+                        } catch (err: any) {
+                          console.error('Error accepting job:', err);
+                          const errMsg = err instanceof Error ? err.message : String(err);
+                          if (errMsg === 'JOB_ALREADY_TAKEN' || err?.code === '23505' || errMsg?.includes('duplicate key')) {
+                            toast({ title: 'Job already taken', description: 'Another driver has already accepted this job.', variant: 'destructive' });
+                          } else {
+                            toast({ title: 'Unable to accept job', description: 'Please try again.', variant: 'destructive' });
+                          }
+                        } finally {
+                          setIsUpdatingStatus(false);
+                        }
+                      }}
+                      className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90"
+                    >
+                      Accept Job
+                    </Button>
+                  )}
+                </div>
               )}
 
               {jobDetail.status === 'in_progress' && (

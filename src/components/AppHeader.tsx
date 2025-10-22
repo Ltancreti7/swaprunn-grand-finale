@@ -7,6 +7,8 @@ import { MessagesButton } from "./messages/MessagesButton";
 import { MessagesOverlay } from "./messages/MessagesOverlay";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useAuth } from "@/hooks/useAuth";
+import { useDriverNotifications } from '@/hooks/useDriverNotifications';
+import { Badge } from '@/components/ui/badge';
 import { cn } from "@/lib/utils";
 export function AppHeader() {
   const location = useLocation();
@@ -18,6 +20,7 @@ export function AppHeader() {
   const [showMessages, setShowMessages] = useState(false);
   const { totalUnread } = useUnreadMessages();
   const { userProfile } = useAuth();
+  const { newJobsCount } = useDriverNotifications();
 
   // Determine if we should hide the header (but keep hooks consistent)
   const shouldHideHeader = location.pathname === '/' || 
@@ -125,7 +128,12 @@ export function AppHeader() {
         {/* Right: Messages Button - Only show if user is logged in */}
         <div className="flex items-center justify-center min-w-[48px] h-[48px]">
           {userProfile ? (
-            <MessagesButton onClick={() => setShowMessages(true)} unreadCount={totalUnread} />
+            <div className="relative">
+              <MessagesButton onClick={() => setShowMessages(true)} unreadCount={totalUnread} />
+              {userProfile?.user_type === 'driver' && newJobsCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 bg-white text-[#E11900] font-bold px-2 py-0.5 text-[10px] rounded-full border border-[#E11900]">{newJobsCount}</Badge>
+              )}
+            </div>
           ) : (
             <div className="w-12 h-12" /> // Placeholder for alignment
           )}

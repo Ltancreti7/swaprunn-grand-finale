@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, User, Calendar, Phone, MapPin, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDriverNotifications } from '@/hooks/useDriverNotifications';
+import { Badge } from '@/components/ui/badge';
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { ProfilePhoto } from "@/components/driver/ProfilePhoto";
 import { EditDriverProfile } from "@/components/driver/EditDriverProfile";
@@ -55,6 +57,7 @@ export default function DriverDashboard() {
   const { user, userProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { newJobsCount, markJobsSeen, fetchUnseenJobsCount } = useDriverNotifications();
 
   // Fetch open jobs (available requests)
   const fetchJobs = async () => {
@@ -136,22 +139,60 @@ export default function DriverDashboard() {
     
     setEarningsLoading(true);
     try {
+      // Query completed assignments to calculate earnings
       const { data, error } = await supabase
-        .from('payouts')
-        .select('*')
+        .from('assignments')
+        .select(`
+          completed_at,
+          jobs!inner(
+            distance_miles
+          )
+        `)
         .eq('driver_id', userProfile.driver_id)
-        .order('created_at', { ascending: false });
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false });
       
       if (error) throw error;
       
-      const total = data?.reduce((sum, payout) => sum + (payout.amount_cents || 0), 0) || 0;
+      // Calculate earnings based on distance (example: $2 per mile)
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay());
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      let todayEarnings = 0;
+      let weekEarnings = 0;
+      let monthEarnings = 0;
+      
+      data?.forEach(assignment => {
+        const completedDate = new Date(assignment.completed_at);
+        const earnings = (assignment.jobs.distance_miles || 0) * 2; // $2 per mile
+        
+        if (completedDate >= today) {
+          todayEarnings += earnings;
+        }
+        if (completedDate >= weekStart) {
+          weekEarnings += earnings;
+        }
+        if (completedDate >= monthStart) {
+          monthEarnings += earnings;
+        }
+      });
+      
       setEarnings({
-        today: 0,
-        week: 0,
-        month: total / 100
+        today: todayEarnings,
+        week: weekEarnings,
+        month: monthEarnings
       });
     } catch (error) {
       console.error('Error fetching earnings:', error);
+      // Set default values on error
+      setEarnings({
+        today: 0,
+        week: 0,
+        month: 0
+      });
     } finally {
       setEarningsLoading(false);
     }
@@ -228,17 +269,35 @@ export default function DriverDashboard() {
   }
 
   const fetchDriverData = async () => {
-    if (!userProfile?.driver_id) return;
+    if (!user?.id) return;
 
     try {
-      const { data, error } = await supabase
-        .from("drivers")
+      const { data, error } = await (supabase as any)
+        .from("profiles")
         .select("*")
-        .eq("id", userProfile.driver_id)
+        .eq("user_id", user.id)
         .single();
 
       if (error) throw error;
-      setDriverData(data);
+
+      // Defensive transform: generated types are unreliable across environments
+      const d: any = data ?? {};
+
+      const transformedData: DriverData = {
+        id: String(d.id ?? d.user_id ?? ''),
+        name: d.full_name ?? d.name ?? user.email?.split('@')[0] ?? 'Driver',
+        email: user.email || '',
+        phone: d.phone ?? d.phone_number ?? '',
+        profile_photo_url: d.profile_photo_url ?? d.avatar_url ?? undefined,
+        created_at: d.created_at ?? '',
+        rating_avg: typeof d.rating_avg !== 'undefined' ? d.rating_avg : (d.rating?.avg ?? 0),
+        rating_count: typeof d.rating_count !== 'undefined' ? d.rating_count : (d.rating?.count ?? 0),
+        max_miles: typeof d.max_miles !== 'undefined' ? d.max_miles : (d.maxMiles ?? undefined),
+        city_ok: Boolean(d.city_ok ?? d.cityOk ?? false),
+        available: Boolean(d.available ?? (d.status === 'active'))
+      };
+
+      setDriverData(transformedData);
     } catch (error) {
       console.error("Error fetching driver data:", error);
     }
@@ -321,11 +380,15 @@ export default function DriverDashboard() {
                 <TabsTrigger value="profile" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0">
                   Profile
                 </TabsTrigger>
-                <TabsTrigger value="available" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0 relative">
+                <TabsTrigger value="available" onClick={async () => { markJobsSeen(); await fetchUnseenJobsCount(); }} className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0 relative">
                   Requests
-                  {jobs.length > 0 && <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
+                  {newJobsCount > 0 ? (
+                    <Badge className="absolute -top-2 -right-2 bg-white text-[#E11900] font-bold px-2 py-1 text-xs rounded-full min-w-[20px] h-[20px] flex items-center justify-center shadow-md animate-pulse border border-[#E11900]">
+                      {newJobsCount}
+                    </Badge>
+                  ) : (jobs.length > 0 && <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
                       {jobs.length}
-                    </span>}
+                    </span>)}
                 </TabsTrigger>
                 <TabsTrigger value="active" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white data-[state=active]:shadow-lg text-white/70 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white hover:bg-white/10 py-3 border-0 relative">
                   Upcoming

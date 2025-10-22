@@ -2,7 +2,7 @@
 // Switch this to real API endpoints when ready
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-const USE_MOCK_DATA = true; // Set to false when real APIs are available
+export const USE_MOCK_DATA = true; // Set to false when real APIs are available
 
 export interface DriverProfile {
   id: string;

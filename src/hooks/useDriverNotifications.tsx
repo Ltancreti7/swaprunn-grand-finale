@@ -18,7 +18,7 @@ export const useDriverNotifications = () => {
 
     try {
       // Get driver's last_seen_jobs_at timestamp
-      const { data: driverData } = await supabase
+      const { data: driverData } = await (supabase as any)
         .from('drivers')
         .select('last_seen_jobs_at')
         .eq('id', userProfile.driver_id)
@@ -27,11 +27,11 @@ export const useDriverNotifications = () => {
       if (!driverData) return;
 
       // Count open jobs created after last_seen_jobs_at
-      const { count } = await supabase
+      const { count } = await (supabase as any)
         .from('jobs')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'open')
-        .gt('created_at', driverData.last_seen_jobs_at || '1970-01-01');
+        .gt('created_at', driverData?.last_seen_jobs_at || '1970-01-01');
 
       setNewJobsCount(count || 0);
     } catch (error) {
@@ -44,7 +44,7 @@ export const useDriverNotifications = () => {
     if (userProfile?.user_type !== 'driver' || !userProfile.driver_id) return;
 
     try {
-      await supabase
+      await (supabase as any)
         .from('drivers')
         .update({ last_seen_jobs_at: new Date().toISOString() })
         .eq('id', userProfile.driver_id);
@@ -94,21 +94,23 @@ export const useDriverNotifications = () => {
           // Send SMS notification if driver has phone number
           if (userProfile?.driver_id) {
             try {
-              const { data: driverData } = await supabase
+              const { data: driverData } = await (supabase as any)
                 .from('drivers')
                 .select('phone')
                 .eq('id', userProfile.driver_id)
                 .single();
 
-              if (driverData?.phone) {
+              const phone = driverData?.phone || driverData?.phone_number;
+
+              if (phone) {
                 await smsService.sendJobNotification({
-                  to: driverData.phone,
+                  to: phone,
                   job: {
-                    year: newJob.year,
-                    make: newJob.make,
-                    model: newJob.model,
-                    distance_miles: newJob.distance_miles,
-                    estimated_pay_cents: newJob.estimated_pay_cents
+                    year: newJob?.year,
+                    make: newJob?.make,
+                    model: newJob?.model,
+                    distance_miles: newJob?.distance_miles,
+                    estimated_pay_cents: newJob?.estimated_pay_cents
                   }
                 });
               }
@@ -131,6 +133,24 @@ export const useDriverNotifications = () => {
       supabase.removeChannel(channel);
     };
   }, [userProfile, toast]);
+
+  // Listen for local mock events so mockStore-created jobs update UI immediately
+  useEffect(() => {
+    const handler = (e: any) => {
+      try {
+        const job = e?.detail;
+        if (!job) return;
+        setNewJobsCount(prev => prev + 1);
+        setLatestJob(job);
+        setShowAlert(true);
+      } catch (err) {
+        console.error('Error handling mock newJobAvailable event', err);
+      }
+    };
+
+    window.addEventListener('newJobAvailable', handler as EventListener);
+    return () => window.removeEventListener('newJobAvailable', handler as EventListener);
+  }, []);
 
   const clearAlert = () => {
     setShowAlert(false);
