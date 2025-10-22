@@ -5,7 +5,13 @@ import { cn } from "@/lib/utils";
 
 interface MobileActionButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
   size?: "default" | "sm" | "lg" | "icon";
   hapticStyle?: ImpactStyle;
   children: React.ReactNode;
@@ -31,7 +37,10 @@ export function MobileActionButton({
     <Button
       variant={variant}
       size={size}
-      className={cn("min-h-[44px] active:scale-[0.98] transition-transform", className)}
+      className={cn(
+        "min-h-[44px] active:scale-[0.98] transition-transform",
+        className,
+      )}
       onClick={handleClick}
       {...props}
     >

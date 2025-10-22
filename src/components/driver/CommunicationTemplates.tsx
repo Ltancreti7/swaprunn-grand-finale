@@ -1,11 +1,23 @@
-import { useState } from 'react';
-import { MessageSquare, Clock, MapPin, Truck, AlertCircle, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useState } from "react";
+import {
+  MessageSquare,
+  Clock,
+  MapPin,
+  Truck,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CommunicationTemplatesProps {
   onSendMessage?: (message: string) => void;
@@ -15,88 +27,100 @@ interface CommunicationTemplatesProps {
 
 const messageTemplates = [
   {
-    id: 'arrival',
-    category: 'Delivery Updates',
-    title: 'Arriving Soon',
-    message: 'Hi! I\'m your SwapRunn driver and I\'ll be arriving in about 10 minutes for your vehicle pickup/delivery. I\'ll call when I arrive. Thanks!',
+    id: "arrival",
+    category: "Delivery Updates",
+    title: "Arriving Soon",
+    message:
+      "Hi! I'm your SwapRunn driver and I'll be arriving in about 10 minutes for your vehicle pickup/delivery. I'll call when I arrive. Thanks!",
     icon: Clock,
-    color: 'bg-blue-50 border-blue-200'
+    color: "bg-blue-50 border-blue-200",
   },
   {
-    id: 'arrived',
-    category: 'Delivery Updates', 
-    title: 'Arrived at Location',
-    message: 'Hi! I\'ve arrived at your location for the vehicle pickup/delivery. I\'m in a [vehicle description]. Please let me know when you\'re ready!',
+    id: "arrived",
+    category: "Delivery Updates",
+    title: "Arrived at Location",
+    message:
+      "Hi! I've arrived at your location for the vehicle pickup/delivery. I'm in a [vehicle description]. Please let me know when you're ready!",
     icon: MapPin,
-    color: 'bg-green-50 border-green-200'
+    color: "bg-green-50 border-green-200",
   },
   {
-    id: 'delayed',
-    category: 'Delivery Updates',
-    title: 'Running Late',
-    message: 'Hi! I\'m running about [X] minutes late due to traffic. I apologize for the delay and will be there as soon as possible. Thanks for your patience!',
+    id: "delayed",
+    category: "Delivery Updates",
+    title: "Running Late",
+    message:
+      "Hi! I'm running about [X] minutes late due to traffic. I apologize for the delay and will be there as soon as possible. Thanks for your patience!",
     icon: AlertCircle,
-    color: 'bg-yellow-50 border-yellow-200'
+    color: "bg-yellow-50 border-yellow-200",
   },
   {
-    id: 'completed',
-    category: 'Delivery Updates',
-    title: 'Delivery Complete',
-    message: 'Your vehicle delivery has been completed successfully! Thank you for choosing SwapRunn. Please rate your experience when you have a moment.',
+    id: "completed",
+    category: "Delivery Updates",
+    title: "Delivery Complete",
+    message:
+      "Your vehicle delivery has been completed successfully! Thank you for choosing SwapRunn. Please rate your experience when you have a moment.",
     icon: CheckCircle,
-    color: 'bg-green-50 border-green-200'
+    color: "bg-green-50 border-green-200",
   },
   {
-    id: 'inspection',
-    category: 'Vehicle Info',
-    title: 'Vehicle Inspection',
-    message: 'I\'m conducting the pre-delivery vehicle inspection now. Everything looks good and I\'ll be starting the delivery shortly. ETA: [time]',
+    id: "inspection",
+    category: "Vehicle Info",
+    title: "Vehicle Inspection",
+    message:
+      "I'm conducting the pre-delivery vehicle inspection now. Everything looks good and I'll be starting the delivery shortly. ETA: [time]",
     icon: Truck,
-    color: 'bg-purple-50 border-purple-200'
+    color: "bg-purple-50 border-purple-200",
   },
   {
-    id: 'location_update',
-    category: 'Delivery Updates',
-    title: 'En Route Update',
-    message: 'I\'m currently en route with your vehicle. Current location: [location]. Estimated arrival: [time]. I\'ll update you again when I\'m close!',
+    id: "location_update",
+    category: "Delivery Updates",
+    title: "En Route Update",
+    message:
+      "I'm currently en route with your vehicle. Current location: [location]. Estimated arrival: [time]. I'll update you again when I'm close!",
     icon: MapPin,
-    color: 'bg-blue-50 border-blue-200'
+    color: "bg-blue-50 border-blue-200",
   },
   {
-    id: 'contact_info',
-    category: 'Professional',
-    title: 'Driver Introduction',
-    message: 'Hello! I\'m [driver name], your SwapRunn driver. I\'ll be handling your vehicle delivery today. You can reach me at this number if needed. Thanks!',
+    id: "contact_info",
+    category: "Professional",
+    title: "Driver Introduction",
+    message:
+      "Hello! I'm [driver name], your SwapRunn driver. I'll be handling your vehicle delivery today. You can reach me at this number if needed. Thanks!",
     icon: MessageSquare,
-    color: 'bg-gray-50 border-gray-200'
+    color: "bg-gray-50 border-gray-200",
   },
   {
-    id: 'thank_you',
-    category: 'Professional',
-    title: 'Thank You',
-    message: 'Thank you for your business! It was a pleasure serving you today. If you need any future vehicle deliveries, SwapRunn is here to help!',
+    id: "thank_you",
+    category: "Professional",
+    title: "Thank You",
+    message:
+      "Thank you for your business! It was a pleasure serving you today. If you need any future vehicle deliveries, SwapRunn is here to help!",
     icon: MessageSquare,
-    color: 'bg-green-50 border-green-200'
-  }
+    color: "bg-green-50 border-green-200",
+  },
 ];
 
-export function CommunicationTemplates({ 
-  onSendMessage, 
+export function CommunicationTemplates({
+  onSendMessage,
   customerPhone,
-  className 
+  className,
 }: CommunicationTemplatesProps) {
   const [showTemplates, setShowTemplates] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-  const [customMessage, setCustomMessage] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [customMessage, setCustomMessage] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
-  const categories = ['All', ...Array.from(new Set(messageTemplates.map(t => t.category)))];
+  const categories = [
+    "All",
+    ...Array.from(new Set(messageTemplates.map((t) => t.category))),
+  ];
 
-  const filteredTemplates = selectedCategory === 'All' 
-    ? messageTemplates 
-    : messageTemplates.filter(t => t.category === selectedCategory);
+  const filteredTemplates =
+    selectedCategory === "All"
+      ? messageTemplates
+      : messageTemplates.filter((t) => t.category === selectedCategory);
 
-  const handleTemplateSelect = (template: typeof messageTemplates[0]) => {
+  const handleTemplateSelect = (template: (typeof messageTemplates)[0]) => {
     setSelectedTemplate(template.id);
     setCustomMessage(template.message);
   };
@@ -112,11 +136,11 @@ export function CommunicationTemplates({
       }
       setShowTemplates(false);
       setSelectedTemplate(null);
-      setCustomMessage('');
+      setCustomMessage("");
     }
   };
 
-  const handleQuickSend = (template: typeof messageTemplates[0]) => {
+  const handleQuickSend = (template: (typeof messageTemplates)[0]) => {
     if (onSendMessage) {
       onSendMessage(template.message);
     } else if (customerPhone) {
@@ -149,7 +173,9 @@ export function CommunicationTemplates({
               {categories.map((category) => (
                 <Button
                   key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
+                  variant={
+                    selectedCategory === category ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => setSelectedCategory(category)}
                 >
@@ -163,8 +189,8 @@ export function CommunicationTemplates({
               <ScrollArea className="h-[400px]">
                 <div className="space-y-3">
                   {filteredTemplates.map((template) => (
-                    <Card 
-                      key={template.id} 
+                    <Card
+                      key={template.id}
                       className={`cursor-pointer hover:shadow-md transition-shadow ${template.color}`}
                     >
                       <CardContent className="p-4">
@@ -212,26 +238,26 @@ export function CommunicationTemplates({
                     size="sm"
                     onClick={() => {
                       setSelectedTemplate(null);
-                      setCustomMessage('');
+                      setCustomMessage("");
                     }}
                   >
                     Back to Templates
                   </Button>
                 </div>
-                
+
                 <Textarea
                   value={customMessage}
                   onChange={(e) => setCustomMessage(e.target.value)}
                   placeholder="Edit your message..."
                   className="min-h-[120px]"
                 />
-                
+
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
                     onClick={() => {
                       setSelectedTemplate(null);
-                      setCustomMessage('');
+                      setCustomMessage("");
                     }}
                     className="flex-1"
                   >

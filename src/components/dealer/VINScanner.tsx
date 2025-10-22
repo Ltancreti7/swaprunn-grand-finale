@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Camera, Loader2, CheckCircle2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { vinScannerService } from '@/services/vinScannerService';
-import { useMobileCapacitor } from '@/hooks/useMobileCapacitor';
-import { ImpactStyle } from '@capacitor/haptics';
-import { toast } from '@/hooks/use-toast';
-import { WebVINScanner } from './WebVINScanner';
+import { useState } from "react";
+import { Camera, Loader2, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { vinScannerService } from "@/services/vinScannerService";
+import { useMobileCapacitor } from "@/hooks/useMobileCapacitor";
+import { ImpactStyle } from "@capacitor/haptics";
+import { toast } from "@/hooks/use-toast";
+import { WebVINScanner } from "./WebVINScanner";
 
 interface VehicleInfo {
   vin: string;
@@ -37,11 +37,11 @@ export const VINScanner = ({ onVINScanned }: VINScannerProps) => {
       await triggerHaptic(ImpactStyle.Light);
 
       const vehicleInfo = await vinScannerService.scanAndDecodeVIN();
-      
+
       if (vehicleInfo) {
         setShowSuccess(true);
         await triggerHaptic(ImpactStyle.Medium);
-        
+
         onVINScanned({
           vin: vehicleInfo.vin,
           year: vehicleInfo.year,
@@ -50,9 +50,9 @@ export const VINScanner = ({ onVINScanned }: VINScannerProps) => {
           transmission: vehicleInfo.transmission,
           trim: vehicleInfo.trim,
         });
-        
+
         toast({
-          title: '✅ Vehicle info loaded',
+          title: "✅ Vehicle info loaded",
           description: `${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}`,
         });
 
@@ -61,9 +61,11 @@ export const VINScanner = ({ onVINScanned }: VINScannerProps) => {
     } catch (error: any) {
       await triggerHaptic(ImpactStyle.Heavy);
       toast({
-        title: 'Scan failed',
-        description: error.message || 'Could not scan VIN. Please try again or enter manually.',
-        variant: 'destructive',
+        title: "Scan failed",
+        description:
+          error.message ||
+          "Could not scan VIN. Please try again or enter manually.",
+        variant: "destructive",
       });
     } finally {
       setIsScanning(false);
@@ -85,16 +87,18 @@ export const VINScanner = ({ onVINScanned }: VINScannerProps) => {
           trim: vehicleInfo.trim,
         });
         toast({
-          title: '✅ Vehicle info loaded',
+          title: "✅ Vehicle info loaded",
           description: `${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}`,
         });
         setTimeout(() => setShowSuccess(false), 3000);
       }
     } catch (error: any) {
       toast({
-        title: 'Scan failed',
-        description: error?.message || 'Could not scan VIN. Please try again or enter manually.',
-        variant: 'destructive',
+        title: "Scan failed",
+        description:
+          error?.message ||
+          "Could not scan VIN. Please try again or enter manually.",
+        variant: "destructive",
       });
     } finally {
       setIsScanning(false);

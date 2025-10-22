@@ -1,11 +1,16 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Star } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Star } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RatingDialogProps {
   isOpen: boolean;
@@ -16,33 +21,50 @@ interface RatingDialogProps {
 }
 
 const ratingCategories = [
-  { key: 'on_time_delivery', label: 'On-Time Delivery', description: 'Driver arrived and completed delivery on schedule' },
-  { key: 'communication_quality', label: 'Communication', description: 'Professional and responsive communication' },
-  { key: 'professionalism', label: 'Professionalism', description: 'Courteous and professional behavior' },
-  { key: 'vehicle_condition', label: 'Vehicle Condition', description: 'Clean and well-maintained vehicle' }
+  {
+    key: "on_time_delivery",
+    label: "On-Time Delivery",
+    description: "Driver arrived and completed delivery on schedule",
+  },
+  {
+    key: "communication_quality",
+    label: "Communication",
+    description: "Professional and responsive communication",
+  },
+  {
+    key: "professionalism",
+    label: "Professionalism",
+    description: "Courteous and professional behavior",
+  },
+  {
+    key: "vehicle_condition",
+    label: "Vehicle Condition",
+    description: "Clean and well-maintained vehicle",
+  },
 ];
 
-export function RatingDialog({ 
-  isOpen, 
-  onClose, 
-  assignmentId, 
+export function RatingDialog({
+  isOpen,
+  onClose,
+  assignmentId,
   driverName = "Driver",
-  onRatingSubmitted 
+  onRatingSubmitted,
 }: RatingDialogProps) {
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [overallRating, setOverallRating] = useState(0);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleStarClick = (category: string, rating: number) => {
-    setRatings(prev => ({ ...prev, [category]: rating }));
-    
+    setRatings((prev) => ({ ...prev, [category]: rating }));
+
     // Update overall rating as average of category ratings
     const newRatings = { ...ratings, [category]: rating };
-    const validRatings = Object.values(newRatings).filter(r => r > 0);
+    const validRatings = Object.values(newRatings).filter((r) => r > 0);
     if (validRatings.length > 0) {
-      const avg = validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length;
+      const avg =
+        validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length;
       setOverallRating(Math.round(avg));
     }
   };
@@ -64,38 +86,38 @@ export function RatingDialog({
     setIsSubmitting(true);
     try {
       // Submit overall rating
-      const { error: ratingError } = await supabase
-        .from('ratings')
-        .insert({
-          assignment_id: assignmentId,
-          stars: overallRating,
-          comment: comment.trim() || null
-        });
+      const { error: ratingError } = await supabase.from("ratings").insert({
+        assignment_id: assignmentId,
+        stars: overallRating,
+        comment: comment.trim() || null,
+      });
 
       if (ratingError) throw ratingError;
 
       // Submit detailed category ratings
       if (Object.keys(ratings).length > 0) {
         const { data: assignment } = await supabase
-          .from('assignments')
-          .select('driver_id, job_id')
-          .eq('id', assignmentId)
+          .from("assignments")
+          .select("driver_id, job_id")
+          .eq("id", assignmentId)
           .single();
 
         if (assignment) {
-          const reputationMetrics = Object.entries(ratings).map(([category, score]) => ({
-            driver_id: assignment.driver_id,
-            metric_type: category,
-            score,
-            job_id: assignment.job_id
-          }));
+          const reputationMetrics = Object.entries(ratings).map(
+            ([category, score]) => ({
+              driver_id: assignment.driver_id,
+              metric_type: category,
+              score,
+              job_id: assignment.job_id,
+            }),
+          );
 
           const { error: metricsError } = await supabase
-            .from('reputation_metrics')
+            .from("reputation_metrics")
             .insert(reputationMetrics);
 
           if (metricsError) {
-            console.error('Error inserting reputation metrics:', metricsError);
+            console.error("Error inserting reputation metrics:", metricsError);
           }
         }
       }
@@ -107,13 +129,13 @@ export function RatingDialog({
 
       onRatingSubmitted?.();
       onClose();
-      
+
       // Reset form
       setRatings({});
       setOverallRating(0);
-      setComment('');
+      setComment("");
     } catch (error) {
-      console.error('Error submitting rating:', error);
+      console.error("Error submitting rating:", error);
       toast({
         title: "Error",
         description: "Failed to submit rating. Please try again.",
@@ -124,7 +146,11 @@ export function RatingDialog({
     }
   };
 
-  const renderStars = (currentRating: number, onStarClick: (rating: number) => void, size = "w-5 h-5") => {
+  const renderStars = (
+    currentRating: number,
+    onStarClick: (rating: number) => void,
+    size = "w-5 h-5",
+  ) => {
     return (
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
@@ -137,8 +163,8 @@ export function RatingDialog({
             <Star
               className={`${size} ${
                 star <= currentRating
-                  ? 'text-yellow-400 fill-yellow-400'
-                  : 'text-gray-300 hover:text-yellow-300'
+                  ? "text-yellow-400 fill-yellow-400"
+                  : "text-gray-300 hover:text-yellow-300"
               }`}
             />
           </button>
@@ -171,15 +197,21 @@ export function RatingDialog({
 
           {/* Category Ratings */}
           <div className="space-y-4">
-            <Label className="text-base font-semibold">Detailed Ratings (Optional)</Label>
+            <Label className="text-base font-semibold">
+              Detailed Ratings (Optional)
+            </Label>
             {ratingCategories.map((category) => (
               <div key={category.key} className="space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-medium text-sm">{category.label}</p>
-                    <p className="text-xs text-muted-foreground">{category.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {category.description}
+                    </p>
                   </div>
-                  {renderStars(ratings[category.key] || 0, (rating) => handleStarClick(category.key, rating))}
+                  {renderStars(ratings[category.key] || 0, (rating) =>
+                    handleStarClick(category.key, rating),
+                  )}
                 </div>
               </div>
             ))}
@@ -212,7 +244,7 @@ export function RatingDialog({
               disabled={isSubmitting || overallRating === 0}
               className="flex-1"
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Rating'}
+              {isSubmitting ? "Submitting..." : "Submit Rating"}
             </Button>
           </div>
         </div>

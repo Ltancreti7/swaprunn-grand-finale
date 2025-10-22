@@ -27,15 +27,15 @@ type DriverMetadata = {
 
 const extractDriverMetadata = (user: User | null): DriverMetadata => {
   const raw = user?.user_metadata;
-  if (raw && typeof raw === 'object') {
+  if (raw && typeof raw === "object") {
     return raw as DriverMetadata;
   }
   return {};
 };
 
-const SAVED_EMAIL_KEY = 'swaprunn_driver_saved_email';
-const SAVED_PASSWORD_KEY = 'swaprunn_driver_saved_password'; 
-const REMEMBER_ME_KEY = 'swaprunn_driver_remember_me';
+const SAVED_EMAIL_KEY = "swaprunn_driver_saved_email";
+const SAVED_PASSWORD_KEY = "swaprunn_driver_saved_password";
+const REMEMBER_ME_KEY = "swaprunn_driver_remember_me";
 
 const DriverAuth = () => {
   const location = useLocation();
@@ -53,8 +53,8 @@ const DriverAuth = () => {
   useEffect(() => {
     const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
     const savedPassword = localStorage.getItem(SAVED_PASSWORD_KEY);
-    const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
-    
+    const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === "true";
+
     if (savedEmail) {
       setEmail(savedEmail);
     }
@@ -66,11 +66,11 @@ const DriverAuth = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const mode = params.get('mode');
+    const mode = params.get("mode");
 
-    if (mode === 'signup') {
+    if (mode === "signup") {
       setIsSignUp(true);
-    } else if (mode === 'login') {
+    } else if (mode === "login") {
       setIsSignUp(false);
     }
   }, [location.search]);
@@ -85,15 +85,15 @@ const DriverAuth = () => {
       const resolvedPhoneInput = details?.phone ?? phoneNumber;
       const cleanedPhone = cleanPhoneNumber(resolvedPhoneInput);
 
-      const { error } = await supabase.rpc('create_profile_for_current_user', {
-        _user_type: 'driver',
+      const { error } = await supabase.rpc("create_profile_for_current_user", {
+        _user_type: "driver",
         _name: hasFullName ? resolvedFullName : null,
-        _phone: cleanedPhone
+        _phone: cleanedPhone,
       });
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error creating driver profile:', error);
+      console.error("Error creating driver profile:", error);
       throw error;
     }
   };
@@ -102,20 +102,26 @@ const DriverAuth = () => {
     if (!authUser) return;
 
     const metadata = extractDriverMetadata(authUser);
-    if (metadata.user_type !== 'driver') {
+    if (metadata.user_type !== "driver") {
       return;
     }
 
     const metadataFullName = (() => {
-      const direct = typeof metadata.full_name === 'string' ? metadata.full_name : '';
+      const direct =
+        typeof metadata.full_name === "string" ? metadata.full_name : "";
       if (direct.trim()) return direct.trim();
-      const first = typeof metadata.first_name === 'string' ? metadata.first_name : '';
-      const last = typeof metadata.last_name === 'string' ? metadata.last_name : '';
+      const first =
+        typeof metadata.first_name === "string" ? metadata.first_name : "";
+      const last =
+        typeof metadata.last_name === "string" ? metadata.last_name : "";
       return `${first} ${last}`.trim();
     })();
 
-    const metadataPhoneCandidate = [metadata.phone, metadata.phone_number, metadata.contact_phone]
-      .find((candidate) => typeof candidate === 'string' && candidate.trim());
+    const metadataPhoneCandidate = [
+      metadata.phone,
+      metadata.phone_number,
+      metadata.contact_phone,
+    ].find((candidate) => typeof candidate === "string" && candidate.trim());
 
     try {
       await createDriverProfile({
@@ -123,7 +129,7 @@ const DriverAuth = () => {
         phone: metadataPhoneCandidate ?? null,
       });
     } catch (repairError) {
-      console.error('Automatic driver profile repair failed:', repairError);
+      console.error("Automatic driver profile repair failed:", repairError);
     }
   };
 
@@ -134,76 +140,81 @@ const DriverAuth = () => {
     try {
       if (isSignUp) {
         // Log driver signup to database (background task)
-        const logSignup = async (status: 'success' | 'failure', errorMsg?: string) => {
+        const logSignup = async (
+          status: "success" | "failure",
+          errorMsg?: string,
+        ) => {
           try {
-            await supabase.from('form_submissions').insert({
-              form_type: 'driver_signup',
+            await supabase.from("form_submissions").insert({
+              form_type: "driver_signup",
               name: fullName,
               email: email,
               message: `Phone: ${phoneNumber}`,
               status,
               error_message: errorMsg,
               metadata: {
-                phone: phoneNumber
-              }
+                phone: phoneNumber,
+              },
             });
           } catch (err) {
-            console.error('Failed to log driver signup:', err);
+            console.error("Failed to log driver signup:", err);
           }
         };
 
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              full_name: fullName,
-              phone_number: cleanPhoneNumber(phoneNumber),
-              user_type: 'driver'
-            }
-          }
-        });
+        const { data: authData, error: signUpError } =
+          await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/`,
+              data: {
+                full_name: fullName,
+                phone_number: cleanPhoneNumber(phoneNumber),
+                user_type: "driver",
+              },
+            },
+          });
 
         if (signUpError) {
-          await logSignup('failure', signUpError.message);
+          await logSignup("failure", signUpError.message);
           throw signUpError;
         }
 
         if (authData.user) {
           try {
             await createDriverProfile();
-            await logSignup('success');
+            await logSignup("success");
           } catch (profileError) {
-            console.error('Profile creation failed:', profileError);
-            await logSignup('failure', 'Profile creation failed');
+            console.error("Profile creation failed:", profileError);
+            await logSignup("failure", "Profile creation failed");
           }
 
           if (!authData.user.email_confirmed_at) {
             toast({
               title: "Account created!",
-              description: "Check your email to verify your account, then sign in."
+              description:
+                "Check your email to verify your account, then sign in.",
             });
             setIsSignUp(false);
           } else {
             toast({
               title: "Account created!",
-              description: "Successfully logged in."
+              description: "Successfully logged in.",
             });
-            navigate('/driver/dashboard');
+            navigate("/driver/dashboard");
           }
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
-          password
+          password,
         });
 
         if (error) throw error;
 
         // CRITICAL: Verify user is actually a driver
         const { data: initialProfile } = await supabase
-          .rpc('get_user_profile')
+          .rpc("get_user_profile")
           .maybeSingle();
 
         let profile = initialProfile;
@@ -211,28 +222,33 @@ const DriverAuth = () => {
         if (!profile) {
           await tryRepairDriverProfile(data.user ?? null);
           const { data: repairedProfile } = await supabase
-            .rpc('get_user_profile')
+            .rpc("get_user_profile")
             .maybeSingle();
           profile = repairedProfile ?? null;
         }
 
-        if (profile?.user_type !== 'driver') {
+        if (profile?.user_type !== "driver") {
           await supabase.auth.signOut();
-          const metadataUserType = extractDriverMetadata(data.user ?? null).user_type;
-          const accountType = profile?.user_type || metadataUserType || 'different type';
+          const metadataUserType = extractDriverMetadata(
+            data.user ?? null,
+          ).user_type;
+          const accountType =
+            profile?.user_type || metadataUserType || "different type";
           throw new Error(
             `This is a driver login page. Your account is registered as a ${accountType}. Please use the correct login page: ${
-              accountType === 'dealer' ? '/dealer/auth' : 
-              accountType === 'swap_coordinator' ? '/swap-coordinator/auth' : 
-              '/'
-            }`
+              accountType === "dealer"
+                ? "/dealer/auth"
+                : accountType === "swap_coordinator"
+                  ? "/swap-coordinator/auth"
+                  : "/"
+            }`,
           );
         }
 
         // Save credentials based on "Remember Me" preference
         localStorage.setItem(SAVED_EMAIL_KEY, email);
         localStorage.setItem(REMEMBER_ME_KEY, rememberMe.toString());
-        
+
         if (rememberMe) {
           localStorage.setItem(SAVED_PASSWORD_KEY, password);
         } else {
@@ -241,16 +257,17 @@ const DriverAuth = () => {
 
         toast({
           title: "Welcome back!",
-          description: "Successfully logged in."
+          description: "Successfully logged in.",
         });
-        navigate('/driver/dashboard');
+        navigate("/driver/dashboard");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Please try again.';
+      const message =
+        error instanceof Error ? error.message : "Please try again.";
       toast({
         title: "Authentication failed",
         description: message,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -258,109 +275,127 @@ const DriverAuth = () => {
   };
 
   return (
-      <div 
-        className="min-h-screen relative" 
-        style={{
-          backgroundImage: `url(${mapBackgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        {/* Back Button */}
-        <BackButton />
-        
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
-      
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: `url(${mapBackgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Back Button */}
+      <BackButton />
+
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
+
       {/* Content */}
       <div className="relative z-10 container max-w-7xl mx-auto px-4 sm:px-6 pt-28">
         <div className="text-center mb-4">
           <h1 className="font-bold text-white mb-2 my-0 text-5xl">
-            {isSignUp ? 'Join as' : 'Driver'} <span className="text-[#E11900]">{isSignUp ? 'Driver' : 'Login'}</span>
+            {isSignUp ? "Join as" : "Driver"}{" "}
+            <span className="text-[#E11900]">
+              {isSignUp ? "Driver" : "Login"}
+            </span>
             <span className="text-[#E11900]">.</span>
           </h1>
           <p className="text-lg text-white/80 my-0">
-            {isSignUp ? 'Start earning with SwapRunn' : 'Sign in to access your dashboard'}
+            {isSignUp
+              ? "Start earning with SwapRunn"
+              : "Sign in to access your dashboard"}
           </p>
         </div>
 
         <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)] border-transparent">
-          
           <CardContent className="space-y-6">
             <form onSubmit={handleAuth} className="space-y-4">
               {isSignUp && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="fullName" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="fullName"
+                      className="text-white text-sm font-medium"
+                    >
                       Full Name
                     </Label>
-                    <Input 
-                      id="fullName" 
-                      type="text" 
-                      value={fullName} 
-                      onChange={(e) => setFullName(e.target.value)} 
-                      placeholder="Enter your full name" 
-                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
-                      required 
+                    <Input
+                      id="fullName"
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
+                      required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="phoneNumber" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="phoneNumber"
+                      className="text-white text-sm font-medium"
+                    >
                       Phone Number
                     </Label>
-                    <Input 
-                      id="phoneNumber" 
-                      type="tel" 
-                      value={phoneNumber} 
-                      onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))} 
-                      placeholder="(802) 444-4444" 
-                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
+                    <Input
+                      id="phoneNumber"
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) =>
+                        setPhoneNumber(formatPhoneNumber(e.target.value))
+                      }
+                      placeholder="(802) 444-4444"
+                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
                       maxLength={14}
-                      required 
+                      required
                     />
                   </div>
                 </>
               )}
-              
+
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="email"
+                  className="text-white text-sm font-medium"
+                >
                   Email Address
                 </Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  placeholder="Enter your email address" 
-                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
-                  required 
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
+                  required
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="password"
+                  className="text-white text-sm font-medium"
+                >
                   Password
                 </Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  placeholder="Enter your password" 
-                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
-                  required={isSignUp} 
-                  minLength={isSignUp ? 6 : undefined} 
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
+                  required={isSignUp}
+                  minLength={isSignUp ? 6 : undefined}
                 />
               </div>
-              
+
               {/* Remember Me Option - Only show for sign in */}
               {!isSignUp && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="remember-driver" 
+                      <Checkbox
+                        id="remember-driver"
                         checked={rememberMe}
                         onCheckedChange={(checked) => {
                           setRememberMe(checked as boolean);
@@ -370,15 +405,16 @@ const DriverAuth = () => {
                         }}
                         className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
-                      <Label 
-                        htmlFor="remember-driver" 
+                      <Label
+                        htmlFor="remember-driver"
                         className="text-sm text-white/80 cursor-pointer font-medium"
                       >
                         Remember my login details
                       </Label>
                     </div>
-                    
-                    {(localStorage.getItem(SAVED_EMAIL_KEY) || localStorage.getItem(SAVED_PASSWORD_KEY)) && (
+
+                    {(localStorage.getItem(SAVED_EMAIL_KEY) ||
+                      localStorage.getItem(SAVED_PASSWORD_KEY)) && (
                       <button
                         type="button"
                         onClick={() => {
@@ -390,7 +426,8 @@ const DriverAuth = () => {
                           setRememberMe(false);
                           toast({
                             title: "Cleared",
-                            description: "Saved login details have been cleared",
+                            description:
+                              "Saved login details have been cleared",
                           });
                         }}
                         className="text-xs text-white/50 hover:text-white/80 underline"
@@ -399,10 +436,11 @@ const DriverAuth = () => {
                       </button>
                     )}
                   </div>
-                  
+
                   {rememberMe && (
                     <p className="text-xs text-white/50 italic">
-                      Your email and password will be saved for faster login next time
+                      Your email and password will be saved for faster login
+                      next time
                     </p>
                   )}
 
@@ -418,23 +456,29 @@ const DriverAuth = () => {
                   </div>
                 </div>
               )}
-              
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl" 
+
+              <Button
+                type="submit"
+                className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                 disabled={loading}
               >
-                {loading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
+                {loading
+                  ? "Processing..."
+                  : isSignUp
+                    ? "Create Account"
+                    : "Sign In"}
               </Button>
             </form>
-            
+
             <div className="text-center pt-4 border-t border-white/20">
-              <button 
-                type="button" 
-                onClick={() => setIsSignUp(!isSignUp)} 
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
                 className="text-white/80 hover:text-white hover:underline transition-colors duration-200 font-medium"
               >
-                {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up here."}
+                {isSignUp
+                  ? "Already have an account? Sign in"
+                  : "Don't have an account? Sign up here."}
               </button>
             </div>
           </CardContent>

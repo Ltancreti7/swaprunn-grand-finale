@@ -1,14 +1,26 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, DollarSign, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import SiteHeader from '@/components/SiteHeader';
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Loader2,
+  DollarSign,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import SiteHeader from "@/components/SiteHeader";
 
 interface SubscriptionData {
   plan_name: string;
@@ -29,7 +41,9 @@ export default function BillingSettings() {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(
+    null,
+  );
   const [addOns, setAddOns] = useState({
     gps_tracking: false,
     signature_capture: false,
@@ -41,30 +55,34 @@ export default function BillingSettings() {
 
     try {
       const { data, error } = await supabase
-        .from('dealer_subscriptions')
-        .select('*')
-        .eq('dealer_id', userProfile.dealer_id)
+        .from("dealer_subscriptions")
+        .select("*")
+        .eq("dealer_id", userProfile.dealer_id)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== "PGRST116") throw error;
 
       if (data) {
-        const parsedAddOns = typeof data.add_ons === 'object' && data.add_ons !== null
-          ? data.add_ons as { gps_tracking: boolean; signature_capture: boolean }
-          : { gps_tracking: false, signature_capture: false };
-        
+        const parsedAddOns =
+          typeof data.add_ons === "object" && data.add_ons !== null
+            ? (data.add_ons as {
+                gps_tracking: boolean;
+                signature_capture: boolean;
+              })
+            : { gps_tracking: false, signature_capture: false };
+
         setSubscription({
           ...data,
-          add_ons: parsedAddOns
+          add_ons: parsedAddOns,
         } as SubscriptionData);
         setAddOns(parsedAddOns);
       }
     } catch (error) {
-      console.error('Error fetching subscription:', error);
+      console.error("Error fetching subscription:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to load billing information',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load billing information",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -80,7 +98,7 @@ export default function BillingSettings() {
 
     try {
       setLoading(true);
-      const response = await supabase.functions.invoke('stripe-billing', {
+      const response = await supabase.functions.invoke("stripe-billing", {
         body: {
           dealerId: userProfile.dealer_id,
           addOns: addOns,
@@ -92,22 +110,24 @@ export default function BillingSettings() {
       const { checkoutUrl } = response.data;
       window.location.href = checkoutUrl;
     } catch (error) {
-      console.error('Subscription error:', error);
+      console.error("Subscription error:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to start subscription',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to start subscription",
+        variant: "destructive",
       });
       setLoading(false);
     }
   };
 
-  const handleToggleAddOn = async (addonKey: 'gps_tracking' | 'signature_capture') => {
+  const handleToggleAddOn = async (
+    addonKey: "gps_tracking" | "signature_capture",
+  ) => {
     if (!subscription) {
       toast({
-        title: 'No Active Subscription',
-        description: 'Please subscribe to a plan first',
-        variant: 'destructive',
+        title: "No Active Subscription",
+        description: "Please subscribe to a plan first",
+        variant: "destructive",
       });
       return;
     }
@@ -118,24 +138,24 @@ export default function BillingSettings() {
 
     try {
       const { error } = await supabase
-        .from('dealer_subscriptions')
+        .from("dealer_subscriptions")
         .update({ add_ons: newAddOns })
-        .eq('dealer_id', userProfile?.dealer_id);
+        .eq("dealer_id", userProfile?.dealer_id);
 
       if (error) throw error;
 
       toast({
-        title: 'Add-on Updated',
-        description: `${addonKey.replace('_', ' ')} has been ${newAddOns[addonKey] ? 'enabled' : 'disabled'}`,
+        title: "Add-on Updated",
+        description: `${addonKey.replace("_", " ")} has been ${newAddOns[addonKey] ? "enabled" : "disabled"}`,
       });
 
       fetchSubscription();
     } catch (error) {
-      console.error('Error updating add-on:', error);
+      console.error("Error updating add-on:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to update add-on',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update add-on",
+        variant: "destructive",
       });
       setAddOns({ ...addOns });
     } finally {
@@ -150,7 +170,9 @@ export default function BillingSettings() {
       (addOns.signature_capture ? 1900 : 0)
     : 0;
 
-  const usagePercentage = subscription ? (subscription.swaps_this_period / 60) * 100 : 0;
+  const usagePercentage = subscription
+    ? (subscription.swaps_this_period / 60) * 100
+    : 0;
   const showWarning = usagePercentage >= 90;
 
   if (loading) {
@@ -175,16 +197,18 @@ export default function BillingSettings() {
           <Alert className="mb-6 border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
             <AlertTriangle className="h-4 w-4 text-yellow-600" />
             <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-              Your swap volume has exceeded 90% of expected usage. Consider reviewing your usage patterns.
+              Your swap volume has exceeded 90% of expected usage. Consider
+              reviewing your usage patterns.
             </AlertDescription>
           </Alert>
         )}
 
-        {subscription?.billing_status === 'past_due' && (
+        {subscription?.billing_status === "past_due" && (
           <Alert variant="destructive" className="mb-6">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Your account is past due. Please update your payment method to continue using SwapRunn.
+              Your account is past due. Please update your payment method to
+              continue using SwapRunn.
             </AlertDescription>
           </Alert>
         )}
@@ -196,7 +220,9 @@ export default function BillingSettings() {
                 <DollarSign className="h-5 w-5" />
                 Current Plan
               </CardTitle>
-              <CardDescription>Your active subscription details</CardDescription>
+              <CardDescription>
+                Your active subscription details
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {subscription ? (
@@ -206,7 +232,9 @@ export default function BillingSettings() {
                       <div className="text-3xl font-bold text-primary">
                         Hybrid Plan
                       </div>
-                      {subscription.stripe_subscription_id?.startsWith('test_') && (
+                      {subscription.stripe_subscription_id?.startsWith(
+                        "test_",
+                      ) && (
                         <span className="px-2 py-1 text-xs font-semibold bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded-full border border-yellow-500/30">
                           Test Mode
                         </span>
@@ -217,7 +245,7 @@ export default function BillingSettings() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {subscription.billing_status === 'active' ? (
+                    {subscription.billing_status === "active" ? (
                       <>
                         <CheckCircle className="h-4 w-4 text-green-600" />
                         <span className="text-sm text-green-600">Active</span>
@@ -234,7 +262,9 @@ export default function BillingSettings() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-muted-foreground">No active subscription</p>
+                  <p className="text-muted-foreground">
+                    No active subscription
+                  </p>
                   <Button onClick={handleSubscribe} className="w-full">
                     Subscribe Now
                   </Button>
@@ -252,7 +282,7 @@ export default function BillingSettings() {
               <CardDescription>
                 {subscription
                   ? `${new Date(subscription.billing_period_start).toLocaleDateString()} - ${new Date(subscription.billing_period_end).toLocaleDateString()}`
-                  : 'No active billing period'}
+                  : "No active billing period"}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -270,13 +300,18 @@ export default function BillingSettings() {
                     <div className="flex justify-between text-sm">
                       <span>Usage Fee</span>
                       <span className="font-medium">
-                        ${(subscription.swaps_this_period * subscription.per_swap_price_cents / 100).toFixed(2)}
+                        $
+                        {(
+                          (subscription.swaps_this_period *
+                            subscription.per_swap_price_cents) /
+                          100
+                        ).toFixed(2)}
                       </span>
                     </div>
                     <div className="h-2 bg-secondary rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all ${
-                          showWarning ? 'bg-yellow-500' : 'bg-primary'
+                          showWarning ? "bg-yellow-500" : "bg-primary"
                         }`}
                         style={{ width: `${Math.min(usagePercentage, 100)}%` }}
                       />
@@ -284,7 +319,9 @@ export default function BillingSettings() {
                   </div>
                 </div>
               ) : (
-                <p className="text-muted-foreground">Subscribe to track usage</p>
+                <p className="text-muted-foreground">
+                  Subscribe to track usage
+                </p>
               )}
             </CardContent>
           </Card>
@@ -301,7 +338,9 @@ export default function BillingSettings() {
             {subscription ? (
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
-                  <span className="text-muted-foreground">Base Subscription</span>
+                  <span className="text-muted-foreground">
+                    Base Subscription
+                  </span>
                   <span className="font-medium">
                     ${(subscription.base_price_cents / 100).toFixed(2)}
                   </span>
@@ -311,7 +350,12 @@ export default function BillingSettings() {
                     Usage Fee ({subscription.swaps_this_period} swaps @ $1.50)
                   </span>
                   <span className="font-medium">
-                    ${(subscription.swaps_this_period * subscription.per_swap_price_cents / 100).toFixed(2)}
+                    $
+                    {(
+                      (subscription.swaps_this_period *
+                        subscription.per_swap_price_cents) /
+                      100
+                    ).toFixed(2)}
                   </span>
                 </div>
                 {addOns.gps_tracking && (
@@ -322,7 +366,9 @@ export default function BillingSettings() {
                 )}
                 {addOns.signature_capture && (
                   <div className="flex justify-between items-start">
-                    <span className="text-muted-foreground">Signature Capture</span>
+                    <span className="text-muted-foreground">
+                      Signature Capture
+                    </span>
                     <span className="font-medium">$19.00</span>
                   </div>
                 )}
@@ -359,14 +405,17 @@ export default function BillingSettings() {
               <Switch
                 id="gps-tracking"
                 checked={addOns.gps_tracking}
-                onCheckedChange={() => handleToggleAddOn('gps_tracking')}
+                onCheckedChange={() => handleToggleAddOn("gps_tracking")}
                 disabled={updatingAddOns || !subscription}
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="signature-capture" className="text-base font-medium">
+                <Label
+                  htmlFor="signature-capture"
+                  className="text-base font-medium"
+                >
                   Signature Capture
                 </Label>
                 <p className="text-sm text-muted-foreground">
@@ -376,7 +425,7 @@ export default function BillingSettings() {
               <Switch
                 id="signature-capture"
                 checked={addOns.signature_capture}
-                onCheckedChange={() => handleToggleAddOn('signature_capture')}
+                onCheckedChange={() => handleToggleAddOn("signature_capture")}
                 disabled={updatingAddOns || !subscription}
               />
             </div>

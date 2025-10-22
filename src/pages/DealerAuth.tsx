@@ -6,7 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SiteHeader from "@/components/SiteHeader";
@@ -32,15 +38,15 @@ type DealerMetadata = {
 
 const extractDealerMetadata = (user: User | null): DealerMetadata => {
   const raw = user?.user_metadata;
-  if (raw && typeof raw === 'object') {
+  if (raw && typeof raw === "object") {
     return raw as DealerMetadata;
   }
   return {};
 };
 
-const SAVED_EMAIL_KEY = 'swaprunn_saved_email';
-const SAVED_PASSWORD_KEY = 'swaprunn_saved_password';
-const REMEMBER_ME_KEY = 'swaprunn_remember_me';
+const SAVED_EMAIL_KEY = "swaprunn_saved_email";
+const SAVED_PASSWORD_KEY = "swaprunn_saved_password";
+const REMEMBER_ME_KEY = "swaprunn_remember_me";
 
 const DealerAuth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -49,7 +55,9 @@ const DealerAuth = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [role, setRole] = useState<"salesperson" | "manager" | "owner">("salesperson");
+  const [role, setRole] = useState<"salesperson" | "manager" | "owner">(
+    "salesperson",
+  );
   const [rememberMe, setRememberMe] = useState(true);
   const [useBiometric, setUseBiometric] = useState(true);
 
@@ -60,14 +68,14 @@ const DealerAuth = () => {
 
   // Check for admin role in URL params
   const urlParams = new URLSearchParams(window.location.search);
-  const isAdminSignup = urlParams.get('role') === 'admin';
+  const isAdminSignup = urlParams.get("role") === "admin";
 
   // Load saved credentials on mount
   useEffect(() => {
     const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
     const savedPassword = localStorage.getItem(SAVED_PASSWORD_KEY);
-    const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
-    
+    const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === "true";
+
     if (savedEmail) {
       setEmail(savedEmail);
     }
@@ -82,7 +90,9 @@ const DealerAuth = () => {
       const credentials = await biometric.getCredentials();
       if (!credentials) return;
 
-      const verified = await biometric.authenticate('Use Face ID to sign in to SwapRunn');
+      const verified = await biometric.authenticate(
+        "Use Face ID to sign in to SwapRunn",
+      );
       if (!verified) return;
 
       // Auto-login with saved credentials
@@ -95,17 +105,17 @@ const DealerAuth = () => {
         toast({
           title: "Biometric login failed",
           description: "Please sign in manually",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
 
       toast({
         title: "Welcome back!",
-        description: "Signed in with Face ID"
+        description: "Signed in with Face ID",
       });
     } catch (error) {
-      console.error('Biometric login error:', error);
+      console.error("Biometric login error:", error);
     }
   }, [biometric, toast]);
 
@@ -122,25 +132,27 @@ const DealerAuth = () => {
     phone?: string | null;
   }) => {
     try {
-      const resolvedFullName = (details?.fullName ?? `${firstName} ${lastName}`.trim()).trim();
+      const resolvedFullName = (
+        details?.fullName ?? `${firstName} ${lastName}`.trim()
+      ).trim();
       const hasFullName = resolvedFullName.length > 0;
       const resolvedCompany = (details?.companyName ?? companyName).trim();
       const hasCompany = resolvedCompany.length > 0;
       const resolvedPhone = details?.phone?.trim() ?? undefined;
 
-      const {
-        data,
-        error
-      } = await supabase.rpc('create_profile_for_current_user', {
-        _user_type: 'dealer',
-        _company_name: hasCompany ? resolvedCompany : null,
-        _name: hasFullName ? resolvedFullName : null,
-        _phone: resolvedPhone ?? null
-      });
+      const { data, error } = await supabase.rpc(
+        "create_profile_for_current_user",
+        {
+          _user_type: "dealer",
+          _company_name: hasCompany ? resolvedCompany : null,
+          _name: hasFullName ? resolvedFullName : null,
+          _phone: resolvedPhone ?? null,
+        },
+      );
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error creating dealer profile:', error);
+      console.error("Error creating dealer profile:", error);
       throw error;
     }
   };
@@ -151,15 +163,18 @@ const DealerAuth = () => {
     const metadata = extractDealerMetadata(authUser);
     const metadataUserType = metadata.user_type;
 
-    if (metadataUserType !== 'dealer') {
+    if (metadataUserType !== "dealer") {
       return null;
     }
 
     const metadataFullName = (() => {
-      const direct = typeof metadata.full_name === 'string' ? metadata.full_name : '';
+      const direct =
+        typeof metadata.full_name === "string" ? metadata.full_name : "";
       if (direct?.trim()) return direct.trim();
-      const first = typeof metadata.first_name === 'string' ? metadata.first_name : '';
-      const last = typeof metadata.last_name === 'string' ? metadata.last_name : '';
+      const first =
+        typeof metadata.first_name === "string" ? metadata.first_name : "";
+      const last =
+        typeof metadata.last_name === "string" ? metadata.last_name : "";
       return `${first} ${last}`.trim();
     })();
 
@@ -168,10 +183,10 @@ const DealerAuth = () => {
         metadata.company_name,
         metadata.dealership_name,
         metadata.organization,
-        metadataFullName
+        metadataFullName,
       ];
       for (const candidate of companyCandidates) {
-        if (typeof candidate === 'string' && candidate.trim()) {
+        if (typeof candidate === "string" && candidate.trim()) {
           return candidate.trim();
         }
       }
@@ -179,9 +194,13 @@ const DealerAuth = () => {
     })();
 
     const metadataPhone = (() => {
-      const candidates = [metadata.phone, metadata.phone_number, metadata.contact_phone];
+      const candidates = [
+        metadata.phone,
+        metadata.phone_number,
+        metadata.contact_phone,
+      ];
       for (const candidate of candidates) {
-        if (typeof candidate === 'string' && candidate.trim()) {
+        if (typeof candidate === "string" && candidate.trim()) {
           return candidate.trim();
         }
       }
@@ -192,10 +211,10 @@ const DealerAuth = () => {
       return await createDealerProfile({
         fullName: metadataFullName || null,
         companyName: metadataCompany,
-        phone: metadataPhone
+        phone: metadataPhone,
       });
     } catch (repairError) {
-      console.error('Automatic dealer profile repair failed:', repairError);
+      console.error("Automatic dealer profile repair failed:", repairError);
       return null;
     }
   };
@@ -204,49 +223,48 @@ const DealerAuth = () => {
     setLoading(true);
     try {
       if (isSignUp) {
-        const {
-          data: authData,
-          error: signUpError
-        } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              first_name: firstName,
-              last_name: lastName,
-              full_name: `${firstName} ${lastName}`.trim(),
-              company_name: companyName,
-              user_type: 'dealer',
-              role: role
-            }
-          }
-        });
+        const { data: authData, error: signUpError } =
+          await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/`,
+              data: {
+                first_name: firstName,
+                last_name: lastName,
+                full_name: `${firstName} ${lastName}`.trim(),
+                company_name: companyName,
+                user_type: "dealer",
+                role: role,
+              },
+            },
+          });
         if (signUpError) throw signUpError;
         if (authData.user) {
           // Manually create dealer and profile records
           try {
             await createDealerProfile();
           } catch (profileError) {
-            console.error('Profile creation failed:', profileError);
+            console.error("Profile creation failed:", profileError);
             // Continue anyway - profile can be created later
           }
-          
+
           // Save email
           localStorage.setItem(SAVED_EMAIL_KEY, email);
-          
+
           if (!authData.user.email_confirmed_at) {
             toast({
               title: "Account created!",
-              description: "Check your email to verify your account, then sign in."
+              description:
+                "Check your email to verify your account, then sign in.",
             });
             setIsSignUp(false); // Switch to login mode
           } else {
             toast({
               title: "Account created!",
-              description: "Successfully logged in."
+              description: "Successfully logged in.",
             });
-            navigate(isAdminSignup ? '/dealer/admin' : '/dealer/dashboard');
+            navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard");
           }
         }
       } else {
@@ -254,12 +272,12 @@ const DealerAuth = () => {
           email,
           password,
         });
-        
+
         if (error) throw error;
 
         // CRITICAL: Verify user is actually a dealer
         const { data: initialProfile } = await supabase
-          .rpc('get_user_profile')
+          .rpc("get_user_profile")
           .maybeSingle();
 
         let profile = initialProfile;
@@ -267,32 +285,37 @@ const DealerAuth = () => {
         if (!profile) {
           await tryRepairDealerProfile(data.user ?? null);
           const { data: repairedProfile } = await supabase
-            .rpc('get_user_profile')
+            .rpc("get_user_profile")
             .maybeSingle();
           profile = repairedProfile ?? null;
         }
 
-        if (profile?.user_type !== 'dealer') {
+        if (profile?.user_type !== "dealer") {
           await supabase.auth.signOut();
-          const metadataUserType = extractDealerMetadata(data.user ?? null).user_type;
-          const accountType = profile?.user_type || metadataUserType || 'different type';
+          const metadataUserType = extractDealerMetadata(
+            data.user ?? null,
+          ).user_type;
+          const accountType =
+            profile?.user_type || metadataUserType || "different type";
           throw new Error(
             `This is a dealer login page. Your account is registered as a ${accountType}. Please use the correct login page: ${
-              accountType === 'driver' ? '/driver/auth' : 
-              accountType === 'swap_coordinator' ? '/swap-coordinator/auth' : 
-              '/'
-            }`
+              accountType === "driver"
+                ? "/driver/auth"
+                : accountType === "swap_coordinator"
+                  ? "/swap-coordinator/auth"
+                  : "/"
+            }`,
           );
         }
-        
+
         // Save credentials based on "Remember Me" preference
         localStorage.setItem(SAVED_EMAIL_KEY, email);
         localStorage.setItem(REMEMBER_ME_KEY, rememberMe.toString());
-        
+
         if (rememberMe) {
           // Save password securely in localStorage for convenience
           localStorage.setItem(SAVED_PASSWORD_KEY, password);
-          
+
           // Also save to biometric storage if available
           if (useBiometric && biometric.isAvailable) {
             await biometric.saveCredentials(email, password);
@@ -306,50 +329,59 @@ const DealerAuth = () => {
           // Clear saved password if remember me is unchecked
           localStorage.removeItem(SAVED_PASSWORD_KEY);
         }
-        
+
         toast({
           title: "Welcome back!",
-          description: "Successfully logged in."
+          description: "Successfully logged in.",
         });
 
-        navigate('/dealer/dashboard');
+        navigate("/dealer/dashboard");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Please try again.';
+      const message =
+        error instanceof Error ? error.message : "Please try again.";
       toast({
         title: "Authentication failed",
         description: message,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
-  return <div className="min-h-screen relative" style={{
-    backgroundImage: `url(${mapBackgroundImage})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center'
-  }}>
+  return (
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: `url(${mapBackgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       {/* Back Button */}
       <BackButton />
-      
+
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
-      
+
       {/* Content */}
       <div className="relative z-10 container max-w-7xl mx-auto px-4 sm:px-6 pt-28">
         <div className="text-center mb-4">
           <h1 className="font-bold text-white mb-2 my-0 text-5xl">
-            Dealer <span className="text-[#E11900]">{isSignUp ? 'Sign Up' : 'Sign In'}</span>
+            Dealer{" "}
+            <span className="text-[#E11900]">
+              {isSignUp ? "Sign Up" : "Sign In"}
+            </span>
             <span className="text-[#E11900]">.</span>
           </h1>
           <p className="text-lg text-white/80 my-0">
-            {isSignUp ? 'Create your dealer account' : 'Access the Dealer Portal'}
+            {isSignUp
+              ? "Create your dealer account"
+              : "Access the Dealer Portal"}
           </p>
         </div>
 
         <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)] border-transparent">
-          
           <CardContent className="space-y-6">
             {isAdminSignup && (
               <div className="flex items-center justify-center gap-2">
@@ -365,69 +397,92 @@ const DealerAuth = () => {
               {isSignUp && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="firstName"
+                      className="text-white text-sm font-medium"
+                    >
                       First Name
                     </Label>
-                    <Input 
-                      id="firstName" 
-                      type="text" 
-                      value={firstName} 
-                      onChange={e => setFirstName(e.target.value)} 
-                      placeholder="Enter your first name" 
-                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
-                      required 
+                    <Input
+                      id="firstName"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Enter your first name"
+                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
+                      required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="lastName"
+                      className="text-white text-sm font-medium"
+                    >
                       Last Name
                     </Label>
-                    <Input 
-                      id="lastName" 
-                      type="text" 
-                      value={lastName} 
-                      onChange={e => setLastName(e.target.value)} 
-                      placeholder="Enter your last name" 
-                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
-                      required 
+                    <Input
+                      id="lastName"
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Enter your last name"
+                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
+                      required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="company" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="company"
+                      className="text-white text-sm font-medium"
+                    >
                       Company Name
                     </Label>
-                    <Input 
-                      id="company" 
-                      type="text" 
-                      value={companyName} 
-                      onChange={e => setCompanyName(e.target.value)} 
-                      placeholder="Enter your company name" 
-                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
-                      required 
+                    <Input
+                      id="company"
+                      type="text"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="Enter your company name"
+                      className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
+                      required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="role" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="role"
+                      className="text-white text-sm font-medium"
+                    >
                       Your Role
                     </Label>
                     <Select
                       value={role}
-                      onValueChange={(value: "salesperson" | "manager" | "owner") => setRole(value)}
+                      onValueChange={(
+                        value: "salesperson" | "manager" | "owner",
+                      ) => setRole(value)}
                     >
                       <SelectTrigger className="h-12 bg-white border-gray-300 text-gray-900 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20">
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-gray-200">
-                        <SelectItem value="salesperson" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                        <SelectItem
+                          value="salesperson"
+                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+                        >
                           Sales
                         </SelectItem>
-                        <SelectItem value="manager" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                        <SelectItem
+                          value="manager"
+                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+                        >
                           Swap Manager
                         </SelectItem>
-                        <SelectItem value="owner" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                        <SelectItem
+                          value="owner"
+                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+                        >
                           Admin/Owner
                         </SelectItem>
                       </SelectContent>
@@ -435,47 +490,53 @@ const DealerAuth = () => {
                   </div>
                 </>
               )}
-              
+
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="email"
+                  className="text-white text-sm font-medium"
+                >
                   Email Address
                 </Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={email} 
-                  onChange={e => setEmail(e.target.value)} 
-                  placeholder="Enter your email address" 
-                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
-                  required 
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
+                  required
                 />
               </div>
-              
+
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="password"
+                  className="text-white text-sm font-medium"
+                >
                   Password
                 </Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)} 
-                  placeholder="Enter your password" 
-                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20" 
-                  required={isSignUp} 
-                  minLength={isSignUp ? 6 : undefined} 
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
+                  required={isSignUp}
+                  minLength={isSignUp ? 6 : undefined}
                 />
               </div>
-              
+
               {/* Remember Me & Biometric Options - Only show for sign in */}
               {!isSignUp && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="remember" 
+                      <Checkbox
+                        id="remember"
                         checked={rememberMe}
                         onCheckedChange={(checked) => {
                           setRememberMe(checked as boolean);
@@ -486,16 +547,17 @@ const DealerAuth = () => {
                         }}
                         className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
-                      <Label 
-                        htmlFor="remember" 
+                      <Label
+                        htmlFor="remember"
                         className="text-sm text-white/80 cursor-pointer font-medium"
                       >
                         Remember my login details
                       </Label>
                     </div>
-                    
+
                     {/* Clear saved data button */}
-                    {(localStorage.getItem(SAVED_EMAIL_KEY) || localStorage.getItem(SAVED_PASSWORD_KEY)) && (
+                    {(localStorage.getItem(SAVED_EMAIL_KEY) ||
+                      localStorage.getItem(SAVED_PASSWORD_KEY)) && (
                       <button
                         type="button"
                         onClick={() => {
@@ -507,7 +569,8 @@ const DealerAuth = () => {
                           setRememberMe(false);
                           toast({
                             title: "Cleared",
-                            description: "Saved login details have been cleared",
+                            description:
+                              "Saved login details have been cleared",
                           });
                         }}
                         className="text-xs text-white/50 hover:text-white/80 underline"
@@ -516,28 +579,34 @@ const DealerAuth = () => {
                       </button>
                     )}
                   </div>
-                  
+
                   {biometric.isAvailable && (
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="biometric" 
+                      <Checkbox
+                        id="biometric"
                         checked={useBiometric}
-                        onCheckedChange={(checked) => setUseBiometric(checked as boolean)}
+                        onCheckedChange={(checked) =>
+                          setUseBiometric(checked as boolean)
+                        }
                         className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
-                      <Label 
-                        htmlFor="biometric" 
+                      <Label
+                        htmlFor="biometric"
                         className="text-sm text-white/80 cursor-pointer flex items-center gap-2 font-medium"
                       >
                         <Fingerprint className="w-4 h-4" />
-                        Enable {biometric.biometryType === 'face' ? 'Face ID' : 'Touch ID'}
+                        Enable{" "}
+                        {biometric.biometryType === "face"
+                          ? "Face ID"
+                          : "Touch ID"}
                       </Label>
                     </div>
                   )}
-                  
+
                   {rememberMe && (
                     <p className="text-xs text-white/50 italic">
-                      Your email and password will be saved for faster login next time
+                      Your email and password will be saved for faster login
+                      next time
                     </p>
                   )}
 
@@ -553,31 +622,38 @@ const DealerAuth = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Submit Button */}
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl" 
+              <Button
+                type="submit"
+                className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                 disabled={loading}
               >
-                {loading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
+                {loading
+                  ? "Processing..."
+                  : isSignUp
+                    ? "Create Account"
+                    : "Sign In"}
               </Button>
             </form>
-            
+
             {/* Toggle Link */}
             <div className="text-center pt-4 border-t border-white/20">
-              <button 
-                type="button" 
-                onClick={() => setIsSignUp(!isSignUp)} 
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
                 className="text-white/80 hover:text-white hover:underline transition-colors duration-200 font-medium"
               >
-                {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up here."}
+                {isSignUp
+                  ? "Already have an account? Sign in"
+                  : "Don't have an account? Sign up here."}
               </button>
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default DealerAuth;

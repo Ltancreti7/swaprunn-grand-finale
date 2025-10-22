@@ -3,9 +3,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { driveTrackingService, DriveStats } from "@/services/driveTrackingService";
+import {
+  driveTrackingService,
+  DriveStats,
+} from "@/services/driveTrackingService";
 import { ChatButton } from "@/components/chat/ChatButton";
-import { Calendar, MapPin, Play, CheckCircle, Clock, Navigation } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Play,
+  CheckCircle,
+  Clock,
+  Navigation,
+} from "lucide-react";
 import { format } from "date-fns";
 import VehicleInspectionModal from "./VehicleInspectionModal";
 
@@ -30,7 +40,12 @@ interface DriveTrackingCardProps {
   onDriveComplete: () => void;
 }
 
-export function DriveTrackingCard({ job, assignmentId, driverId, onDriveComplete }: DriveTrackingCardProps) {
+export function DriveTrackingCard({
+  job,
+  assignmentId,
+  driverId,
+  onDriveComplete,
+}: DriveTrackingCardProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [driveStats, setDriveStats] = useState<DriveStats | null>(null);
@@ -69,10 +84,10 @@ export function DriveTrackingCard({ job, assignmentId, driverId, onDriveComplete
 
   const getStatusBadge = (status: string) => {
     const colors = {
-      'assigned': 'bg-blue-100 text-blue-800',
-      'in_progress': 'bg-yellow-100 text-yellow-800',
-      'completed': 'bg-green-100 text-green-800',
-      'open': 'bg-gray-100 text-gray-800'
+      assigned: "bg-blue-100 text-blue-800",
+      in_progress: "bg-yellow-100 text-yellow-800",
+      completed: "bg-green-100 text-green-800",
+      open: "bg-gray-100 text-gray-800",
     };
     return colors[status as keyof typeof colors] || colors.open;
   };
@@ -84,20 +99,23 @@ export function DriveTrackingCard({ job, assignmentId, driverId, onDriveComplete
   const handleInspectionComplete = async (photoUrls: string[]) => {
     setShowInspectionModal(false);
     setIsLoading(true);
-    
+
     try {
       await driveTrackingService.startDrive(assignmentId, job.id, driverId);
       setIsTracking(true);
-      
+
       toast({
         title: "Drive Started",
         description: "Vehicle inspection complete. GPS tracking is now active!",
       });
     } catch (error) {
-      console.error('Error starting drive:', error);
+      console.error("Error starting drive:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to start drive tracking",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to start drive tracking",
         variant: "destructive",
       });
     } finally {
@@ -111,18 +129,19 @@ export function DriveTrackingCard({ job, assignmentId, driverId, onDriveComplete
       await driveTrackingService.completeDrive();
       setIsTracking(false);
       setDriveStats(null);
-      
+
       toast({
         title: "Drive Completed",
         description: "Great job! Your drive has been successfully completed.",
       });
-      
+
       onDriveComplete();
     } catch (error) {
-      console.error('Error completing drive:', error);
+      console.error("Error completing drive:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to complete drive",
+        description:
+          error instanceof Error ? error.message : "Failed to complete drive",
         variant: "destructive",
       });
     } finally {
@@ -137,17 +156,17 @@ export function DriveTrackingCard({ job, assignmentId, driverId, onDriveComplete
           <div>
             <h3 className="font-semibold">{formatJobTitle(job)}</h3>
             <Badge className={getStatusBadge(job.status)}>
-              {isTracking ? 'In Progress' : job.status}
+              {isTracking ? "In Progress" : job.status}
             </Badge>
           </div>
           <div className="text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              {format(new Date(job.created_at), 'MMM d, yyyy')}
+              {format(new Date(job.created_at), "MMM d, yyyy")}
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <div className="flex items-start gap-2">
             <MapPin className="w-4 h-4 text-green-600 mt-0.5" />
@@ -185,15 +204,17 @@ export function DriveTrackingCard({ job, assignmentId, driverId, onDriveComplete
               </div>
               <div>
                 <span className="text-muted-foreground">Distance:</span>
-                <div className="font-semibold">{driveStats.totalDistance.toFixed(1)} mi</div>
+                <div className="font-semibold">
+                  {driveStats.totalDistance.toFixed(1)} mi
+                </div>
               </div>
             </div>
           </div>
         )}
-        
+
         <div className="mt-4 pt-4 border-t space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <Button 
+            <Button
               onClick={handleStartDrive}
               variant="success"
               disabled={isLoading || isTracking}
@@ -202,7 +223,7 @@ export function DriveTrackingCard({ job, assignmentId, driverId, onDriveComplete
               <Play className="w-4 h-4 mr-2" />
               {isLoading && !isTracking ? "Starting..." : "Start Drive"}
             </Button>
-            <Button 
+            <Button
               onClick={handleCompleteDrive}
               variant="default"
               disabled={isLoading || !isTracking}
@@ -212,10 +233,10 @@ export function DriveTrackingCard({ job, assignmentId, driverId, onDriveComplete
               {isLoading && isTracking ? "Completing..." : "Complete Drive"}
             </Button>
           </div>
-          
+
           {/* Chat Button */}
           <div className="flex justify-center">
-            <ChatButton 
+            <ChatButton
               jobId={job.id}
               assignmentId={assignmentId}
               currentUserType="driver"
@@ -235,7 +256,7 @@ export function DriveTrackingCard({ job, assignmentId, driverId, onDriveComplete
         vehicleInfo={{
           make: job.make,
           model: job.model,
-          year: job.year
+          year: job.year,
         }}
       />
     </Card>

@@ -17,7 +17,7 @@ export function MessagesButton({ onClick, unreadCount }: MessagesButtonProps) {
       <MessageCircle className="h-5 w-5 text-white" />
       {unreadCount > 0 && (
         <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#E11900] text-xs font-bold text-white border-2 border-black">
-          {unreadCount > 9 ? '9+' : unreadCount}
+          {unreadCount > 9 ? "9+" : unreadCount}
         </span>
       )}
     </Button>

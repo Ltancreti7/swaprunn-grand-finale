@@ -13,10 +13,10 @@ class SubscriptionService {
     try {
       // Get dealer subscription
       const { data: subscription, error } = await supabase
-        .from('dealer_subscriptions')
-        .select('*')
-        .eq('dealer_id', dealerId)
-        .eq('status', 'active')
+        .from("dealer_subscriptions")
+        .select("*")
+        .eq("dealer_id", dealerId)
+        .eq("status", "active")
         .single();
 
       if (error || !subscription) {
@@ -25,8 +25,8 @@ class SubscriptionService {
           canCreateJob: false,
           currentUsage: 0,
           monthlyLimit: 20,
-          planName: 'starter',
-          upgradeRequired: true
+          planName: "starter",
+          upgradeRequired: true,
         };
       }
 
@@ -36,9 +36,9 @@ class SubscriptionService {
       startOfMonth.setHours(0, 0, 0, 0);
 
       const { data: jobs, error: jobsError } = await supabase
-        .from('jobs')
-        .select('id')
-        .gte('created_at', startOfMonth.toISOString());
+        .from("jobs")
+        .select("id")
+        .gte("created_at", startOfMonth.toISOString());
 
       const currentUsage = jobs?.length || 0;
       const monthlyLimit = subscription.monthly_runs_limit;
@@ -49,17 +49,16 @@ class SubscriptionService {
         currentUsage,
         monthlyLimit,
         planName: subscription.plan_name,
-        upgradeRequired: !canCreateJob && monthlyLimit !== -1
+        upgradeRequired: !canCreateJob && monthlyLimit !== -1,
       };
-
     } catch (error) {
-      console.error('Error checking subscription limits:', error);
+      console.error("Error checking subscription limits:", error);
       return {
         canCreateJob: false,
         currentUsage: 0,
         monthlyLimit: 20,
-        planName: 'starter',
-        upgradeRequired: true
+        planName: "starter",
+        upgradeRequired: true,
       };
     }
   }
@@ -68,31 +67,31 @@ class SubscriptionService {
     try {
       // First get current usage
       const { data: subscription, error: fetchError } = await supabase
-        .from('dealer_subscriptions')
-        .select('runs_used_this_month')
-        .eq('dealer_id', dealerId)
-        .eq('status', 'active')
+        .from("dealer_subscriptions")
+        .select("runs_used_this_month")
+        .eq("dealer_id", dealerId)
+        .eq("status", "active")
         .single();
 
       if (fetchError || !subscription) {
-        console.error('Error fetching subscription:', fetchError);
+        console.error("Error fetching subscription:", fetchError);
         return;
       }
 
       // Increment usage
       const { error } = await supabase
-        .from('dealer_subscriptions')
+        .from("dealer_subscriptions")
         .update({
-          runs_used_this_month: (subscription.runs_used_this_month || 0) + 1
+          runs_used_this_month: (subscription.runs_used_this_month || 0) + 1,
         })
-        .eq('dealer_id', dealerId)
-        .eq('status', 'active');
+        .eq("dealer_id", dealerId)
+        .eq("status", "active");
 
       if (error) {
-        console.error('Error incrementing usage:', error);
+        console.error("Error incrementing usage:", error);
       }
     } catch (error) {
-      console.error('Error incrementing usage:', error);
+      console.error("Error incrementing usage:", error);
     }
   }
 }

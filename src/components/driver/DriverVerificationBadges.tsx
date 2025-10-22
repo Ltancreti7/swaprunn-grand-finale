@@ -1,6 +1,18 @@
-import { Shield, Mail, Phone, FileCheck, User, CheckCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Shield,
+  Mail,
+  Phone,
+  FileCheck,
+  User,
+  CheckCircle,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface VerificationBadgesProps {
   emailVerified?: boolean;
@@ -17,39 +29,49 @@ export function DriverVerificationBadges({
   backgroundCheckVerified = false,
   profileCompletionPercentage = 0,
   trustScore = 5.0,
-  className = ""
+  className = "",
 }: VerificationBadgesProps) {
   const verifications = [
     {
-      label: 'Email Verified',
+      label: "Email Verified",
       verified: emailVerified,
       icon: Mail,
-      color: emailVerified ? 'bg-green-500/10 text-green-600 border-green-500/20' : 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+      color: emailVerified
+        ? "bg-green-500/10 text-green-600 border-green-500/20"
+        : "bg-gray-500/10 text-gray-500 border-gray-500/20",
     },
     {
-      label: 'Phone Verified',
+      label: "Phone Verified",
       verified: phoneVerified,
       icon: Phone,
-      color: phoneVerified ? 'bg-green-500/10 text-green-600 border-green-500/20' : 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+      color: phoneVerified
+        ? "bg-green-500/10 text-green-600 border-green-500/20"
+        : "bg-gray-500/10 text-gray-500 border-gray-500/20",
     },
     {
-      label: 'Background Check',
+      label: "Background Check",
       verified: backgroundCheckVerified,
       icon: Shield,
-      color: backgroundCheckVerified ? 'bg-green-500/10 text-green-600 border-green-500/20' : 'bg-gray-500/10 text-gray-500 border-gray-500/20'
-    }
+      color: backgroundCheckVerified
+        ? "bg-green-500/10 text-green-600 border-green-500/20"
+        : "bg-gray-500/10 text-gray-500 border-gray-500/20",
+    },
   ];
 
   const getTrustScoreColor = (score: number) => {
-    if (score >= 4.5) return 'bg-green-500/10 text-green-600 border-green-500/20';
-    if (score >= 3.5) return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20';
-    return 'bg-red-500/10 text-red-600 border-red-500/20';
+    if (score >= 4.5)
+      return "bg-green-500/10 text-green-600 border-green-500/20";
+    if (score >= 3.5)
+      return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
+    return "bg-red-500/10 text-red-600 border-red-500/20";
   };
 
   const getProfileCompletionColor = (percentage: number) => {
-    if (percentage >= 90) return 'bg-green-500/10 text-green-600 border-green-500/20';
-    if (percentage >= 70) return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20';
-    return 'bg-red-500/10 text-red-600 border-red-500/20';
+    if (percentage >= 90)
+      return "bg-green-500/10 text-green-600 border-green-500/20";
+    if (percentage >= 70)
+      return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
+    return "bg-red-500/10 text-red-600 border-red-500/20";
   };
 
   return (
@@ -100,7 +122,10 @@ export function DriverVerificationBadges({
               </Badge>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{verification.label}: {verification.verified ? 'Verified' : 'Not Verified'}</p>
+              <p>
+                {verification.label}:{" "}
+                {verification.verified ? "Verified" : "Not Verified"}
+              </p>
             </TooltipContent>
           </Tooltip>
         ))}

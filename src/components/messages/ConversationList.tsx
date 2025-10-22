@@ -20,7 +20,12 @@ interface ConversationListProps {
   currentUserId: string;
 }
 
-export function ConversationList({ status, onSelectConversation, userType, currentUserId }: ConversationListProps) {
+export function ConversationList({
+  status,
+  onSelectConversation,
+  userType,
+  currentUserId,
+}: ConversationListProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,18 +37,20 @@ export function ConversationList({ status, onSelectConversation, userType, curre
     setLoading(true);
     try {
       const localConversations = getConversations(currentUserId);
-      
-      const formattedConversations: Conversation[] = localConversations.map((conv) => ({
-        id: conv.otherUserId,
-        otherPartyName: conv.otherUserId,
-        lastMessage: conv.lastMessage.messageText,
-        lastMessageTime: conv.lastMessage.timestamp,
-        unread: conv.unreadCount > 0,
-      }));
+
+      const formattedConversations: Conversation[] = localConversations.map(
+        (conv) => ({
+          id: conv.otherUserId,
+          otherPartyName: conv.otherUserId,
+          lastMessage: conv.lastMessage.messageText,
+          lastMessageTime: conv.lastMessage.timestamp,
+          unread: conv.unreadCount > 0,
+        }),
+      );
 
       setConversations(formattedConversations);
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      console.error("Error fetching conversations:", error);
     } finally {
       setLoading(false);
     }
@@ -52,7 +59,7 @@ export function ConversationList({ status, onSelectConversation, userType, curre
   if (loading) {
     return (
       <div className="space-y-4">
-        {[1, 2, 3].map(i => (
+        {[1, 2, 3].map((i) => (
           <div key={i} className="h-20 bg-white/10 rounded-2xl animate-pulse" />
         ))}
       </div>
@@ -69,7 +76,7 @@ export function ConversationList({ status, onSelectConversation, userType, curre
 
   return (
     <div className="space-y-3 pb-6">
-      {conversations.map(conv => (
+      {conversations.map((conv) => (
         <button
           key={conv.id}
           onClick={() => onSelectConversation(conv.id)}
@@ -79,16 +86,22 @@ export function ConversationList({ status, onSelectConversation, userType, curre
             <div className="h-12 w-12 bg-[#E11900]/30 rounded-full flex items-center justify-center flex-shrink-0">
               <User className="h-6 w-6 text-white" />
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">
-                <h3 className="font-semibold text-white truncate">{conv.otherPartyName}</h3>
+                <h3 className="font-semibold text-white truncate">
+                  {conv.otherPartyName}
+                </h3>
                 <span className="text-xs text-white/60 whitespace-nowrap ml-2">
-                  {formatDistanceToNow(new Date(conv.lastMessageTime), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(conv.lastMessageTime), {
+                    addSuffix: true,
+                  })}
                 </span>
               </div>
-              
-              <p className={`text-sm truncate ${conv.unread ? 'text-white font-medium' : 'text-white/70'}`}>
+
+              <p
+                className={`text-sm truncate ${conv.unread ? "text-white font-medium" : "text-white/70"}`}
+              >
                 {conv.lastMessage}
               </p>
             </div>

@@ -23,9 +23,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, role, dealershipName, inviterName, inviteToken }: StaffInvitationRequest = await req.json();
+    const {
+      email,
+      role,
+      dealershipName,
+      inviterName,
+      inviteToken,
+    }: StaffInvitationRequest = await req.json();
 
-    const inviteLink = `${req.headers.get('origin') || 'https://swaprunn.lovable.app'}/accept-invitation/${inviteToken}`;
+    const inviteLink = `${req.headers.get("origin") || "https://swaprunn.lovable.app"}/accept-invitation/${inviteToken}`;
 
     const emailResponse = await resend.emails.send({
       from: "SwapRunn <noreply@swaprunn.com>",
@@ -85,7 +91,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
                 </p>
                 <ul style="font-size: 14px; color: #6b7280; margin: 0; padding-left: 20px;">
                   <li>You'll have access to ${dealershipName}'s SwapRunn dashboard</li>
-                  <li>You can ${role === 'manager' ? 'manage jobs and invite other staff' : 'view and work with vehicle delivery jobs'}</li>
+                  <li>You can ${role === "manager" ? "manage jobs and invite other staff" : "view and work with vehicle delivery jobs"}</li>
                   <li>Your activity will be tracked under the ${dealershipName} account</li>
                 </ul>
               </div>
@@ -118,11 +124,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-staff-invitation function:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error",
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      },
     );
   }
 });

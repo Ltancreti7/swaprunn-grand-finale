@@ -10,9 +10,17 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
   const [submitted, setSubmitted] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    message?: string;
+  }>({});
   const [submitError, setSubmitError] = useState<string>("");
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isPageReady, setIsPageReady] = useState(false);
@@ -22,10 +30,10 @@ const Contact = () => {
     // Preload background image with optimization
     const img = new Image();
     img.src = mapBackgroundImage;
-    
+
     // Set lower quality for faster loading
-    img.loading = 'eager';
-    
+    img.loading = "eager";
+
     img.onload = () => {
       setIsImageLoaded(true);
       // Delay form rendering slightly to ensure smooth transition
@@ -33,12 +41,12 @@ const Contact = () => {
         setIsFormReady(true);
       });
     };
-    
+
     img.onerror = () => {
       setIsImageLoaded(true); // Still show page even if image fails
       setIsFormReady(true);
     };
-    
+
     // Ensure component is ready
     setIsPageReady(true);
   }, []);
@@ -51,32 +59,35 @@ const Contact = () => {
 
   const handleEmailBlur = () => {
     if (formData.email.trim() && !validateEmail(formData.email)) {
-      setErrors(prev => ({ ...prev, email: "Please enter a valid email address" }));
+      setErrors((prev) => ({
+        ...prev,
+        email: "Please enter a valid email address",
+      }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newErrors: { name?: string; email?: string; message?: string } = {};
-    
+
     // Validate name
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     // Validate email - check if empty first, then check format
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!validateEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
-    
+
     // Validate message
     if (!formData.message.trim()) {
       newErrors.message = "Message is required";
     }
-    
+
     // Prevent submission if any errors exist
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -86,43 +97,50 @@ const Contact = () => {
     // Create mailto link using anchor element to avoid navigation issues
     try {
       // Log to Supabase in background (doesn't block user experience)
-      void supabase.from('form_submissions').insert({
-        form_type: 'contact',
-        name: formData.name,
-        email: formData.email,
-        message: formData.message,
-        status: 'success'
-      }).then(({ error }) => {
-        if (error) {
-          console.error('Failed to log form submission:', error);
-        } else {
-          console.log('Form submission logged successfully');
-        }
-      });
+      void supabase
+        .from("form_submissions")
+        .insert({
+          form_type: "contact",
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          status: "success",
+        })
+        .then(({ error }) => {
+          if (error) {
+            console.error("Failed to log form submission:", error);
+          } else {
+            console.log("Form submission logged successfully");
+          }
+        });
 
       const subject = encodeURIComponent(`Contact Form: ${formData.name}`);
-      const body = encodeURIComponent(`From: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`);
+      const body = encodeURIComponent(
+        `From: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`,
+      );
       const mailtoLink = `mailto:support@swaprunn.com?subject=${subject}&body=${body}`;
-      
-      const anchor = document.createElement('a');
+
+      const anchor = document.createElement("a");
       anchor.href = mailtoLink;
-      anchor.target = '_blank';
+      anchor.target = "_blank";
       anchor.click();
-      
+
       setSubmitted(true);
       setSubmitError("");
       setFormData({ name: "", email: "", message: "" });
       setErrors({});
     } catch (error) {
       console.error("Error sending message:", error);
-      setSubmitError("There was an issue sending your message. Please try again later.");
+      setSubmitError(
+        "There was an issue sending your message. Please try again later.",
+      );
     }
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field as keyof typeof errors]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -139,26 +157,29 @@ const Contact = () => {
   }
 
   return (
-    <div 
-      className="min-h-screen relative bg-black animate-fade-in" 
+    <div
+      className="min-h-screen relative bg-black animate-fade-in"
       style={{
-        backgroundImage: isImageLoaded ? `url(${mapBackgroundImage})` : 'none',
-        backgroundColor: '#000',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        transition: 'background-image 0.3s ease-in-out',
-        willChange: 'background-image'
+        backgroundImage: isImageLoaded ? `url(${mapBackgroundImage})` : "none",
+        backgroundColor: "#000",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+        transition: "background-image 0.3s ease-in-out",
+        willChange: "background-image",
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
-      
+
       <div className="relative z-10 container mx-auto px-6 py-24">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 text-center animate-fade-in">
             Get in Touch
           </h1>
-          <p className="text-white/70 text-center mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <p
+            className="text-white/70 text-center mb-8 animate-fade-in"
+            style={{ animationDelay: "100ms" }}
+          >
             Have questions? We&apos;d love to hear from you.
           </p>
 
@@ -166,7 +187,9 @@ const Contact = () => {
             <Card className="bg-white/10 backdrop-blur-sm border-white/20 animate-scale-in">
               <CardContent className="p-8 text-center">
                 <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-white mb-2">✅ Message sent!</h2>
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  ✅ Message sent!
+                </h2>
                 <p className="text-green-400 text-lg font-semibold mb-2">
                   We&apos;ll reply within 24 hours.
                 </p>
@@ -182,7 +205,10 @@ const Contact = () => {
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-white border-gray-200 shadow-lg animate-scale-in" style={{ animationDelay: '200ms' }}>
+            <Card
+              className="bg-white border-gray-200 shadow-lg animate-scale-in"
+              style={{ animationDelay: "200ms" }}
+            >
               <CardHeader>
                 <CardTitle className="text-gray-900">Contact Form</CardTitle>
               </CardHeader>
@@ -193,7 +219,10 @@ const Contact = () => {
                   </div>
                 )}
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "300ms" }}
+                  >
                     <Label htmlFor="name" className="text-gray-900 font-medium">
                       Name <span className="text-[#E11900]">*</span>
                     </Label>
@@ -206,12 +235,20 @@ const Contact = () => {
                       autoComplete="name"
                     />
                     {errors.name && (
-                      <p className="text-[#E11900] text-sm mt-1">{errors.name}</p>
+                      <p className="text-[#E11900] text-sm mt-1">
+                        {errors.name}
+                      </p>
                     )}
                   </div>
 
-                  <div className="animate-fade-in" style={{ animationDelay: '350ms' }}>
-                    <Label htmlFor="email" className="text-gray-900 font-medium">
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "350ms" }}
+                  >
+                    <Label
+                      htmlFor="email"
+                      className="text-gray-900 font-medium"
+                    >
                       Email <span className="text-[#E11900]">*</span>
                     </Label>
                     <Input
@@ -225,12 +262,20 @@ const Contact = () => {
                       autoComplete="email"
                     />
                     {errors.email && (
-                      <p className="text-[#E11900] text-sm mt-1">{errors.email}</p>
+                      <p className="text-[#E11900] text-sm mt-1">
+                        {errors.email}
+                      </p>
                     )}
                   </div>
 
-                  <div className="animate-fade-in" style={{ animationDelay: '400ms' }}>
-                    <Label htmlFor="message" className="text-gray-900 font-medium">
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "400ms" }}
+                  >
+                    <Label
+                      htmlFor="message"
+                      className="text-gray-900 font-medium"
+                    >
                       Message <span className="text-[#E11900]">*</span>
                     </Label>
                     <Textarea
@@ -242,12 +287,17 @@ const Contact = () => {
                       className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20 transition-all resize-none"
                     />
                     {errors.message && (
-                      <p className="text-[#E11900] text-sm mt-1">{errors.message}</p>
+                      <p className="text-[#E11900] text-sm mt-1">
+                        {errors.message}
+                      </p>
                     )}
                   </div>
 
-                  <div className="animate-fade-in" style={{ animationDelay: '450ms' }}>
-                    <Button 
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "450ms" }}
+                  >
+                    <Button
                       type="submit"
                       className="w-full bg-[#E11900] hover:bg-[#B51400] text-white h-12 rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all hover-scale"
                     >

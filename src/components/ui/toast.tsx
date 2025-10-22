@@ -12,11 +12,13 @@ const ToastViewport = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
 >(({ className, ...props }, ref) => {
   const [headerOffset, setHeaderOffset] = React.useState<number>(8);
-  const [isSmall, setIsSmall] = React.useState<boolean>(typeof window !== "undefined" ? window.innerWidth < 640 : true);
+  const [isSmall, setIsSmall] = React.useState<boolean>(
+    typeof window !== "undefined" ? window.innerWidth < 640 : true,
+  );
 
   React.useEffect(() => {
     const computeOffset = () => {
-      const header = document.querySelector('.sr-header') as HTMLElement | null;
+      const header = document.querySelector(".sr-header") as HTMLElement | null;
       const height = header?.getBoundingClientRect().height ?? 0;
       setHeaderOffset(height + 8);
     };
@@ -26,11 +28,19 @@ const ToastViewport = React.forwardRef<
     };
 
     computeOffset();
-    window.addEventListener('resize', handleResize as any, { passive: true } as any);
-    window.addEventListener('scroll', computeOffset as any, { passive: true } as any);
+    window.addEventListener(
+      "resize",
+      handleResize as any,
+      { passive: true } as any,
+    );
+    window.addEventListener(
+      "scroll",
+      computeOffset as any,
+      { passive: true } as any,
+    );
     return () => {
-      window.removeEventListener('resize', handleResize as any);
-      window.removeEventListener('scroll', computeOffset as any);
+      window.removeEventListener("resize", handleResize as any);
+      window.removeEventListener("scroll", computeOffset as any);
     };
   }, []);
 
@@ -61,7 +71,8 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: "border bg-background text-foreground",
-        destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
+        destructive:
+          "destructive group border-destructive bg-destructive text-destructive-foreground",
       },
     },
     defaultVariants: {
@@ -72,9 +83,16 @@ const toastVariants = cva(
 
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & VariantProps<typeof toastVariants>
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
+    VariantProps<typeof toastVariants>
 >(({ className, variant, ...props }, ref) => {
-  return <ToastPrimitives.Root ref={ref} className={cn(toastVariants({ variant }), className)} {...props} />;
+  return (
+    <ToastPrimitives.Root
+      ref={ref}
+      className={cn(toastVariants({ variant }), className)}
+      {...props}
+    />
+  );
 });
 Toast.displayName = ToastPrimitives.Root.displayName;
 
@@ -115,7 +133,11 @@ const ToastTitle = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Title>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
 >(({ className, ...props }, ref) => (
-  <ToastPrimitives.Title ref={ref} className={cn("text-sm font-semibold", className)} {...props} />
+  <ToastPrimitives.Title
+    ref={ref}
+    className={cn("text-sm font-semibold", className)}
+    {...props}
+  />
 ));
 ToastTitle.displayName = ToastPrimitives.Title.displayName;
 
@@ -123,7 +145,11 @@ const ToastDescription = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Description>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
 >(({ className, ...props }, ref) => (
-  <ToastPrimitives.Description ref={ref} className={cn("text-sm opacity-90", className)} {...props} />
+  <ToastPrimitives.Description
+    ref={ref}
+    className={cn("text-sm opacity-90", className)}
+    {...props}
+  />
 ));
 ToastDescription.displayName = ToastPrimitives.Description.displayName;
 

@@ -12,7 +12,7 @@ interface ElasticScrollContainerProps {
 export function ElasticScrollContainer({
   children,
   className,
-  maxPullDistance = 100
+  maxPullDistance = 100,
 }: ElasticScrollContainerProps) {
   const [pullDistance, setPullDistance] = useState(0);
   const [isReleasing, setIsReleasing] = useState(false);
@@ -20,9 +20,9 @@ export function ElasticScrollContainer({
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const location = useLocation();
-  
+
   // Disable elastic scroll on homepage to prevent click interference
-  const isHomepage = location.pathname === '/';
+  const isHomepage = location.pathname === "/";
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!isMobile || isHomepage) return;
@@ -35,7 +35,7 @@ export function ElasticScrollContainer({
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isMobile || isHomepage || touchStartY.current === 0) return;
-    
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -45,10 +45,10 @@ export function ElasticScrollContainer({
     // Only allow pull down when at the top
     if (distance > 0 && container.scrollTop === 0) {
       // Add resistance - the further you pull, the harder it gets
-      const resistance = Math.max(0.3, 1 - (distance / maxPullDistance));
+      const resistance = Math.max(0.3, 1 - distance / maxPullDistance);
       const pullDist = Math.min(distance * resistance, maxPullDistance);
       setPullDistance(pullDist);
-      
+
       // Prevent default scroll only when pulling
       if (pullDist > 5) {
         e.preventDefault();
@@ -58,7 +58,7 @@ export function ElasticScrollContainer({
 
   const handleTouchEnd = () => {
     if (!isMobile || isHomepage) return;
-    
+
     if (pullDistance > 0) {
       setIsReleasing(true);
       // Bounce back animation
@@ -93,26 +93,28 @@ export function ElasticScrollContainer({
       onTouchEnd={handleTouchEnd}
       style={{
         transform: `translateY(${pullDistance}px)`,
-        transition: isReleasing ? 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)' : 'none',
-        WebkitOverflowScrolling: 'touch'
+        transition: isReleasing
+          ? "transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)"
+          : "none",
+        WebkitOverflowScrolling: "touch",
       }}
     >
       {/* Subtle visual indicator at top */}
       {pullDistance > 10 && (
-        <div 
+        <div
           className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none"
           style={{
             transform: `translateY(-${Math.min(pullDistance, 40)}px)`,
             opacity: Math.min(pullDistance / 50, 0.6),
-            transition: isReleasing ? 'opacity 0.2s ease-out' : 'none'
+            transition: isReleasing ? "opacity 0.2s ease-out" : "none",
           }}
         >
           <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-            <div 
+            <div
               className="w-1 h-1 rounded-full bg-white/60"
               style={{
                 transform: `scale(${Math.min(pullDistance / 30, 1.5)})`,
-                transition: 'transform 0.1s ease-out'
+                transition: "transform 0.1s ease-out",
               }}
             />
           </div>

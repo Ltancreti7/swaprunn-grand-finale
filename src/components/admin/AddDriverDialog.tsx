@@ -1,12 +1,24 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { UserPlus } from 'lucide-react';
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { UserPlus } from "lucide-react";
 
 interface AddDriverDialogProps {
   open: boolean;
@@ -14,16 +26,20 @@ interface AddDriverDialogProps {
   onDriverAdded?: () => void;
 }
 
-export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriverDialogProps) {
+export function AddDriverDialog({
+  open,
+  onOpenChange,
+  onDriverAdded,
+}: AddDriverDialogProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    checkr_status: 'pending' as const,
-    available: true
+    name: "",
+    email: "",
+    phone: "",
+    checkr_status: "pending" as const,
+    available: true,
   });
-  
+
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,7 +48,7 @@ export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriver
       toast({
         title: "Error",
         description: "Name and email are required",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -40,7 +56,7 @@ export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriver
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('drivers')
+        .from("drivers")
         .insert([formData])
         .select()
         .single();
@@ -49,26 +65,26 @@ export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriver
 
       toast({
         title: "Success",
-        description: "Driver added successfully"
+        description: "Driver added successfully",
       });
 
       // Reset form
       setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        checkr_status: 'pending',
-        available: true
+        name: "",
+        email: "",
+        phone: "",
+        checkr_status: "pending",
+        available: true,
       });
 
       onOpenChange(false);
       onDriverAdded?.();
     } catch (error: any) {
-      console.error('Error adding driver:', error);
+      console.error("Error adding driver:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to add driver",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -76,7 +92,7 @@ export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriver
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -88,17 +104,18 @@ export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriver
             Add New Driver
           </DialogTitle>
           <DialogDescription>
-            Add a new driver to the SwapRunn platform. They'll be able to accept delivery jobs.
+            Add a new driver to the SwapRunn platform. They'll be able to accept
+            delivery jobs.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name *</Label>
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              onChange={(e) => handleInputChange("name", e.target.value)}
               placeholder="Enter driver's full name"
               required
             />
@@ -110,7 +127,7 @@ export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriver
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
+              onChange={(e) => handleInputChange("email", e.target.value)}
               placeholder="Enter email address"
               required
             />
@@ -122,16 +139,18 @@ export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriver
               id="phone"
               type="tel"
               value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
+              onChange={(e) => handleInputChange("phone", e.target.value)}
               placeholder="Enter phone number"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="checkr_status">Background Check Status</Label>
-            <Select 
-              value={formData.checkr_status} 
-              onValueChange={(value) => handleInputChange('checkr_status', value)}
+            <Select
+              value={formData.checkr_status}
+              onValueChange={(value) =>
+                handleInputChange("checkr_status", value)
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -147,9 +166,11 @@ export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriver
 
           <div className="space-y-2">
             <Label htmlFor="available">Availability Status</Label>
-            <Select 
-              value={formData.available.toString()} 
-              onValueChange={(value) => handleInputChange('available', value === 'true')}
+            <Select
+              value={formData.available.toString()}
+              onValueChange={(value) =>
+                handleInputChange("available", value === "true")
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -162,16 +183,16 @@ export function AddDriverDialog({ open, onOpenChange, onDriverAdded }: AddDriver
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Driver'}
+              {loading ? "Adding..." : "Add Driver"}
             </Button>
           </div>
         </form>

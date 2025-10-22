@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Camera, Upload, X, CheckCircle, AlertTriangle } from 'lucide-react';
-import { mobileCameraService } from '@/services/mobileCameraService';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Camera, Upload, X, CheckCircle, AlertTriangle } from "lucide-react";
+import { mobileCameraService } from "@/services/mobileCameraService";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface VehicleInspectionModalProps {
   isOpen: boolean;
@@ -29,12 +35,42 @@ interface PhotoSlot {
 }
 
 const PHOTO_SLOTS: PhotoSlot[] = [
-  { id: 'front', label: 'Front View', description: 'Full front of vehicle', required: true },
-  { id: 'rear', label: 'Rear View', description: 'Full rear of vehicle', required: true },
-  { id: 'left', label: 'Left Side', description: 'Driver side of vehicle', required: true },
-  { id: 'right', label: 'Right Side', description: 'Passenger side of vehicle', required: true },
-  { id: 'interior', label: 'Interior', description: 'Dashboard and seats', required: false },
-  { id: 'odometer', label: 'Odometer', description: 'Current mileage reading', required: false },
+  {
+    id: "front",
+    label: "Front View",
+    description: "Full front of vehicle",
+    required: true,
+  },
+  {
+    id: "rear",
+    label: "Rear View",
+    description: "Full rear of vehicle",
+    required: true,
+  },
+  {
+    id: "left",
+    label: "Left Side",
+    description: "Driver side of vehicle",
+    required: true,
+  },
+  {
+    id: "right",
+    label: "Right Side",
+    description: "Passenger side of vehicle",
+    required: true,
+  },
+  {
+    id: "interior",
+    label: "Interior",
+    description: "Dashboard and seats",
+    required: false,
+  },
+  {
+    id: "odometer",
+    label: "Odometer",
+    description: "Current mileage reading",
+    required: false,
+  },
 ];
 
 export default function VehicleInspectionModal({
@@ -43,7 +79,7 @@ export default function VehicleInspectionModal({
   onComplete,
   jobId,
   assignmentId,
-  vehicleInfo
+  vehicleInfo,
 }: VehicleInspectionModalProps) {
   const [photos, setPhotos] = useState<PhotoSlot[]>(PHOTO_SLOTS);
   const [isUploading, setIsUploading] = useState(false);
@@ -56,23 +92,25 @@ export default function VehicleInspectionModal({
         toast({
           title: "Permission Required",
           description: "Camera access is needed to take photos",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
 
       const photoDataUrl = await mobileCameraService.takePhoto();
       if (photoDataUrl) {
-        setPhotos(prev => prev.map(slot => 
-          slot.id === slotId ? { ...slot, photo: photoDataUrl } : slot
-        ));
+        setPhotos((prev) =>
+          prev.map((slot) =>
+            slot.id === slotId ? { ...slot, photo: photoDataUrl } : slot,
+          ),
+        );
       }
     } catch (error) {
-      console.error('Error taking photo:', error);
+      console.error("Error taking photo:", error);
       toast({
         title: "Camera Error",
         description: "Failed to take photo. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -81,63 +119,70 @@ export default function VehicleInspectionModal({
     try {
       const photoDataUrl = await mobileCameraService.selectPhoto();
       if (photoDataUrl) {
-        setPhotos(prev => prev.map(slot => 
-          slot.id === slotId ? { ...slot, photo: photoDataUrl } : slot
-        ));
+        setPhotos((prev) =>
+          prev.map((slot) =>
+            slot.id === slotId ? { ...slot, photo: photoDataUrl } : slot,
+          ),
+        );
       }
     } catch (error) {
-      console.error('Error selecting photo:', error);
+      console.error("Error selecting photo:", error);
       toast({
         title: "Upload Error",
         description: "Failed to select photo. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const removePhoto = (slotId: string) => {
-    setPhotos(prev => prev.map(slot => 
-      slot.id === slotId ? { ...slot, photo: undefined } : slot
-    ));
+    setPhotos((prev) =>
+      prev.map((slot) =>
+        slot.id === slotId ? { ...slot, photo: undefined } : slot,
+      ),
+    );
   };
 
-  const uploadPhoto = async (photoDataUrl: string, filename: string): Promise<string | null> => {
+  const uploadPhoto = async (
+    photoDataUrl: string,
+    filename: string,
+  ): Promise<string | null> => {
     try {
       // Convert data URL to blob
       const response = await fetch(photoDataUrl);
       const blob = await response.blob();
-      
+
       const filePath = `vehicle-inspections/${assignmentId}/${filename}`;
-      
+
       const { error } = await supabase.storage
-        .from('vehicle-photos')
+        .from("vehicle-photos")
         .upload(filePath, blob, {
           contentType: blob.type,
-          upsert: true
+          upsert: true,
         });
 
       if (error) throw error;
 
       const { data } = supabase.storage
-        .from('vehicle-photos')
+        .from("vehicle-photos")
         .getPublicUrl(filePath);
 
       return data.publicUrl;
     } catch (error) {
-      console.error('Error uploading photo:', error);
+      console.error("Error uploading photo:", error);
       return null;
     }
   };
 
   const handleComplete = async () => {
-    const requiredPhotos = photos.filter(p => p.required);
-    const missingRequired = requiredPhotos.filter(p => !p.photo);
-    
+    const requiredPhotos = photos.filter((p) => p.required);
+    const missingRequired = requiredPhotos.filter((p) => !p.photo);
+
     if (missingRequired.length > 0) {
       toast({
         title: "Missing Required Photos",
-        description: `Please take photos for: ${missingRequired.map(p => p.label).join(', ')}`,
-        variant: "destructive"
+        description: `Please take photos for: ${missingRequired.map((p) => p.label).join(", ")}`,
+        variant: "destructive",
       });
       return;
     }
@@ -147,7 +192,7 @@ export default function VehicleInspectionModal({
 
     try {
       const uploadedUrls: string[] = [];
-      
+
       for (const photo of photos) {
         if (photo.photo) {
           const filename = `${photo.id}_${Date.now()}.jpg`;
@@ -159,14 +204,14 @@ export default function VehicleInspectionModal({
       }
 
       // Save inspection record to database
-      const { error } = await supabase
-        .from('vehicle_inspections')
-        .insert([{
+      const { error } = await supabase.from("vehicle_inspections").insert([
+        {
           job_id: jobId,
           assignment_id: assignmentId,
           photo_urls: uploadedUrls,
-          inspection_type: 'pre_drive'
-        }]);
+          inspection_type: "pre_drive",
+        },
+      ]);
 
       if (error) throw error;
 
@@ -177,11 +222,11 @@ export default function VehicleInspectionModal({
 
       onComplete(uploadedUrls);
     } catch (error) {
-      console.error('Error completing inspection:', error);
+      console.error("Error completing inspection:", error);
       toast({
         title: "Upload Failed",
         description: "Failed to save vehicle inspection. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsUploading(false);
@@ -189,8 +234,10 @@ export default function VehicleInspectionModal({
     }
   };
 
-  const requiredComplete = photos.filter(p => p.required).every(p => p.photo);
-  const totalPhotos = photos.filter(p => p.photo).length;
+  const requiredComplete = photos
+    .filter((p) => p.required)
+    .every((p) => p.photo);
+  const totalPhotos = photos.filter((p) => p.photo).length;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -202,7 +249,9 @@ export default function VehicleInspectionModal({
           </DialogTitle>
           <div className="text-sm text-muted-foreground">
             {vehicleInfo && (
-              <p>{vehicleInfo.year} {vehicleInfo.make} {vehicleInfo.model}</p>
+              <p>
+                {vehicleInfo.year} {vehicleInfo.make} {vehicleInfo.model}
+              </p>
             )}
             <p>Document the vehicle condition before starting the drive</p>
           </div>
@@ -216,13 +265,18 @@ export default function VehicleInspectionModal({
             </div>
             <span className="text-sm">
               {totalPhotos}/{photos.length} photos taken
-              {requiredComplete && <CheckCircle className="w-4 h-4 text-success ml-2 inline" />}
+              {requiredComplete && (
+                <CheckCircle className="w-4 h-4 text-success ml-2 inline" />
+              )}
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {photos.map((slot) => (
-              <Card key={slot.id} className={`${slot.required && !slot.photo ? 'border-warning' : ''}`}>
+              <Card
+                key={slot.id}
+                className={`${slot.required && !slot.photo ? "border-warning" : ""}`}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium">{slot.label}</h3>
@@ -230,12 +284,14 @@ export default function VehicleInspectionModal({
                       <span className="text-xs text-warning">Required</span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground mb-3">{slot.description}</p>
-                  
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {slot.description}
+                  </p>
+
                   {slot.photo ? (
                     <div className="relative">
-                      <img 
-                        src={slot.photo} 
+                      <img
+                        src={slot.photo}
                         alt={slot.label}
                         className="w-full h-32 object-cover rounded-lg"
                       />
@@ -280,8 +336,8 @@ export default function VehicleInspectionModal({
           <Button variant="outline" onClick={onClose} disabled={isCompleting}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleComplete} 
+          <Button
+            onClick={handleComplete}
             disabled={!requiredComplete || isCompleting}
             className="min-w-32"
           >

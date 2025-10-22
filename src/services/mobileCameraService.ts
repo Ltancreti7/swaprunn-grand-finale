@@ -1,5 +1,5 @@
-import { Capacitor } from '@capacitor/core';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from "@capacitor/core";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 
 class MobileCameraService {
   private isNative = false;
@@ -14,7 +14,7 @@ class MobileCameraService {
         // Request permissions before accessing camera
         const hasPermission = await this.requestPermissions();
         if (!hasPermission) {
-          console.error('Camera permission denied');
+          console.error("Camera permission denied");
           return null;
         }
 
@@ -22,18 +22,18 @@ class MobileCameraService {
           quality: 80,
           allowEditing: false,
           resultType: CameraResultType.Uri,
-          source: CameraSource.Camera
+          source: CameraSource.Camera,
         });
 
         return image.webPath || null;
       } else {
         // Fallback to web file input
         return new Promise((resolve) => {
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.accept = 'image/*';
-          input.capture = 'environment';
-          
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = "image/*";
+          input.capture = "environment";
+
           input.onchange = (event) => {
             const file = (event.target as HTMLInputElement).files?.[0];
             if (file) {
@@ -44,12 +44,12 @@ class MobileCameraService {
               resolve(null);
             }
           };
-          
+
           input.click();
         });
       }
     } catch (error) {
-      console.error('Error taking photo:', error);
+      console.error("Error taking photo:", error);
       return null;
     }
   }
@@ -60,7 +60,7 @@ class MobileCameraService {
         // Request permissions before accessing photos
         const hasPermission = await this.requestPermissions();
         if (!hasPermission) {
-          console.error('Camera/Photos permission denied');
+          console.error("Camera/Photos permission denied");
           return null;
         }
 
@@ -68,17 +68,17 @@ class MobileCameraService {
           quality: 80,
           allowEditing: false,
           resultType: CameraResultType.Uri,
-          source: CameraSource.Photos
+          source: CameraSource.Photos,
         });
 
         return image.webPath || null;
       } else {
         // Fallback to web file input
         return new Promise((resolve) => {
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.accept = 'image/*';
-          
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = "image/*";
+
           input.onchange = (event) => {
             const file = (event.target as HTMLInputElement).files?.[0];
             if (file) {
@@ -89,12 +89,12 @@ class MobileCameraService {
               resolve(null);
             }
           };
-          
+
           input.click();
         });
       }
     } catch (error) {
-      console.error('Error selecting photo:', error);
+      console.error("Error selecting photo:", error);
       return null;
     }
   }
@@ -102,11 +102,15 @@ class MobileCameraService {
   async requestPermissions(): Promise<boolean> {
     if (this.isNative) {
       try {
-        const permissions = await Camera.requestPermissions({ permissions: ['camera', 'photos'] });
-        console.log('Camera permission status:', permissions);
-        return permissions.camera === 'granted' || permissions.photos === 'granted';
+        const permissions = await Camera.requestPermissions({
+          permissions: ["camera", "photos"],
+        });
+        console.log("Camera permission status:", permissions);
+        return (
+          permissions.camera === "granted" || permissions.photos === "granted"
+        );
       } catch (error) {
-        console.error('Error requesting camera permissions:', error);
+        console.error("Error requesting camera permissions:", error);
         return false;
       }
     }

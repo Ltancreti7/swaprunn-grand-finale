@@ -1,8 +1,13 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Car, MapPin, DollarSign } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Car, MapPin, DollarSign } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface NewRequestModalProps {
   isOpen: boolean;
@@ -19,7 +24,11 @@ interface NewRequestModalProps {
   } | null;
 }
 
-export function NewRequestModal({ isOpen, onDismiss, job }: NewRequestModalProps) {
+export function NewRequestModal({
+  isOpen,
+  onDismiss,
+  job,
+}: NewRequestModalProps) {
   const navigate = useNavigate();
 
   if (!job) return null;
@@ -27,7 +36,7 @@ export function NewRequestModal({ isOpen, onDismiss, job }: NewRequestModalProps
   const handleViewNow = () => {
     onDismiss();
     // Navigate to the new requests tab
-    navigate('/driver/dashboard#new-requests');
+    navigate("/driver/dashboard#new-requests");
   };
 
   return (
@@ -61,7 +70,9 @@ export function NewRequestModal({ isOpen, onDismiss, job }: NewRequestModalProps
                 <MapPin className="h-5 w-5 text-blue-400" />
                 <p className="text-white/60 text-sm font-medium">Distance</p>
               </div>
-              <p className="text-white text-xl font-bold">{job.distance_miles || 0} mi</p>
+              <p className="text-white text-xl font-bold">
+                {job.distance_miles || 0} mi
+              </p>
             </div>
 
             <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
