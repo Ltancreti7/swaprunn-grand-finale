@@ -34,7 +34,8 @@ export function VehicleInspectionPhotos({
 
   const fetchInspections = async () => {
     try {
-      const { data, error } = await supabase
+      // Use a loose any cast here to avoid deep generated typings from Postgrest
+      const { data, error } = await (supabase as any)
         .from("vehicle_inspections")
         .select("*")
         .eq("assignment_id", assignmentId)
@@ -43,8 +44,8 @@ export function VehicleInspectionPhotos({
       if (error) throw error;
 
       // Type-safe mapping
-      const typedInspections: Inspection[] = (data || []).map((item) => ({
-        id: item.id,
+      const typedInspections: Inspection[] = (data || []).map((item: any) => ({
+        id: String(item.id),
         inspection_type: item.inspection_type as "pre_drive" | "post_drive",
         photo_urls: item.photo_urls as string[],
         created_at: item.created_at,
