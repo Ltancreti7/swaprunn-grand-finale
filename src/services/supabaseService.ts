@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface Job {
   id: string;
-  type: 'delivery' | 'swap';
+  type: "delivery" | "swap";
   vin?: string | null;
   year?: number | null;
   make?: string | null;
@@ -58,7 +58,7 @@ export interface Driver {
 }
 
 export interface CreateJobData {
-  type: 'delivery' | 'swap';
+  type: "delivery" | "swap";
   vin?: string;
   year?: number;
   make?: string;
@@ -107,8 +107,9 @@ class SupabaseService {
   // Job Management
   async listJobs(): Promise<Job[]> {
     const { data, error } = await supabase
-      .from('jobs')
-      .select(`
+      .from("jobs")
+      .select(
+        `
         *,
         assignments (
           id,
@@ -120,12 +121,13 @@ class SupabaseService {
             name
           )
         )
-      `)
-      .order('created_at', { ascending: false });
+      `,
+      )
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
 
-    return data.map(job => ({
+    return data.map((job) => ({
       ...job,
       assignment_id: job.assignments?.[0]?.id,
       driver_id: job.assignments?.[0]?.driver_id,
@@ -137,23 +139,18 @@ class SupabaseService {
   }
 
   async createJob(jobData: CreateJobData): Promise<Job> {
-    const {
-      dealerId,
-      createdBy,
-      distance_miles,
-      requires_two,
-      ...columns
-    } = jobData;
+    const { dealerId, createdBy, distance_miles, requires_two, ...columns } =
+      jobData;
 
     const { data, error } = await supabase
-      .from('jobs')
+      .from("jobs")
       .insert({
         ...columns,
         dealer_id: dealerId,
         created_by: createdBy,
         distance_miles: distance_miles ?? 25,
         requires_two: requires_two ?? false,
-        status: 'open'
+        status: "open",
       })
       .select()
       .single();
@@ -164,8 +161,9 @@ class SupabaseService {
 
   async getJobById(id: string): Promise<Job | null> {
     const { data, error } = await supabase
-      .from('jobs')
-      .select(`
+      .from("jobs")
+      .select(
+        `
         *,
         assignments (
           id,
@@ -177,8 +175,9 @@ class SupabaseService {
             name
           )
         )
-      `)
-      .eq('id', id)
+      `,
+      )
+      .eq("id", id)
       .maybeSingle();
 
     if (error) throw error;
@@ -197,14 +196,15 @@ class SupabaseService {
 
   async getJobByTrackingToken(token: string): Promise<Job | null> {
     // Use the secure tracking function that only exposes safe data
-    const { data, error } = await supabase
-      .rpc('get_job_by_tracking_token', { token });
+    const { data, error } = await supabase.rpc("get_job_by_tracking_token", {
+      token,
+    });
 
     if (error) throw error;
     if (!data || data.length === 0) return null;
 
     const jobData = data[0];
-    
+
     // For tracking, we only return limited safe information
     // No customer personal information is exposed
     return {
@@ -238,14 +238,14 @@ class SupabaseService {
   async acceptJob(jobId: string, driverId: string): Promise<Job | null> {
     // Check if job is already assigned
     const { data: existingAssignment } = await supabase
-      .from('assignments')
-      .select('driver_id')
-      .eq('job_id', jobId)
+      .from("assignments")
+      .select("driver_id")
+      .eq("job_id", jobId)
       .maybeSingle();
 
     // If job is already assigned to a different driver, throw specific error
     if (existingAssignment && existingAssignment.driver_id !== driverId) {
-      throw new Error('JOB_ALREADY_TAKEN');
+      throw new Error("JOB_ALREADY_TAKEN");
     }
 
     // If job is already assigned to this driver, return the job
@@ -255,28 +255,28 @@ class SupabaseService {
 
     // Create assignment for this driver
     const { data: assignment, error: assignmentError } = await supabase
-      .from('assignments')
+      .from("assignments")
       .insert({
         job_id: jobId,
         driver_id: driverId,
-        accepted_at: new Date().toISOString()
+        accepted_at: new Date().toISOString(),
       })
       .select()
       .single();
 
     if (assignmentError) {
       // Handle unique constraint violation specifically
-      if (assignmentError.code === '23505') {
-        throw new Error('JOB_ALREADY_TAKEN');
+      if (assignmentError.code === "23505") {
+        throw new Error("JOB_ALREADY_TAKEN");
       }
       throw assignmentError;
     }
 
     // Update job status
     const { error: jobError } = await supabase
-      .from('jobs')
-      .update({ status: 'assigned' })
-      .eq('id', jobId);
+      .from("jobs")
+      .update({ status: "assigned" })
+      .eq("id", jobId);
 
     if (jobError) throw jobError;
 
@@ -286,17 +286,17 @@ class SupabaseService {
   async clockIn(jobId: string, assignmentId: string): Promise<Job | null> {
     // Update assignment start time
     const { error: assignmentError } = await supabase
-      .from('assignments')
+      .from("assignments")
       .update({ started_at: new Date().toISOString() })
-      .eq('id', assignmentId);
+      .eq("id", assignmentId);
 
     if (assignmentError) throw assignmentError;
 
     // Update job status
     const { error: jobError } = await supabase
-      .from('jobs')
-      .update({ status: 'in_progress' })
-      .eq('id', jobId);
+      .from("jobs")
+      .update({ status: "in_progress" })
+      .eq("id", jobId);
 
     if (jobError) throw jobError;
 
@@ -306,17 +306,17 @@ class SupabaseService {
   async clockOut(jobId: string, assignmentId: string): Promise<Job | null> {
     // Update assignment end time
     const { error: assignmentError } = await supabase
-      .from('assignments')
+      .from("assignments")
       .update({ ended_at: new Date().toISOString() })
-      .eq('id', assignmentId);
+      .eq("id", assignmentId);
 
     if (assignmentError) throw assignmentError;
 
     // Update job status
     const { error: jobError } = await supabase
-      .from('jobs')
-      .update({ status: 'completed' })
-      .eq('id', jobId);
+      .from("jobs")
+      .update({ status: "completed" })
+      .eq("id", jobId);
 
     if (jobError) throw jobError;
 
@@ -326,9 +326,9 @@ class SupabaseService {
   // Driver Management
   async getDrivers(): Promise<Driver[]> {
     const { data, error } = await supabase
-      .from('drivers')
-      .select('*')
-      .order('name');
+      .from("drivers")
+      .select("*")
+      .order("name");
 
     if (error) throw error;
     return data || [];
@@ -336,9 +336,9 @@ class SupabaseService {
 
   async getDriver(id: string): Promise<Driver | null> {
     const { data, error } = await supabase
-      .from('drivers')
-      .select('*')
-      .eq('id', id)
+      .from("drivers")
+      .select("*")
+      .eq("id", id)
       .maybeSingle();
 
     if (error) throw error;
@@ -347,44 +347,43 @@ class SupabaseService {
 
   // Get open jobs for drivers (secure - no customer personal info)
   async getOpenJobsForDrivers(): Promise<DriverOpenJob[]> {
-    const { data, error } = await supabase
-      .rpc('get_open_jobs_for_drivers');
+    const { data, error } = await supabase.rpc("get_open_jobs_for_drivers");
 
     if (error) throw error;
-    
+
     return (data ?? []) as DriverOpenJob[];
   }
 
   // History
   async getCompletedJobs(): Promise<Job[]> {
     const jobs = await this.listJobs();
-    return jobs.filter(job => job.status === 'completed')
-                .sort((a, b) => {
-                  const aTime = new Date(a.ended_at || a.created_at).getTime();
-                  const bTime = new Date(b.ended_at || b.created_at).getTime();
-                  return bTime - aTime;
-                });
+    return jobs
+      .filter((job) => job.status === "completed")
+      .sort((a, b) => {
+        const aTime = new Date(a.ended_at || a.created_at).getTime();
+        const bTime = new Date(b.ended_at || b.created_at).getTime();
+        return bTime - aTime;
+      });
   }
-
 
   // Create test job
   async createTestJob(dealerId: string, createdBy: string): Promise<Job> {
     return this.createJob({
-      type: 'delivery',
-      vin: 'TESTVIN123',
+      type: "delivery",
+      vin: "TESTVIN123",
       year: 2023,
-      make: 'Toyota',
-      model: 'Camry',
-      customer_name: 'Test Customer',
-      customer_phone: '(555) 123-4567',
-      pickup_address: '168 Charlestown Rd, Claremont, NH 03743',
-      delivery_address: '456 Oak Ave, Cambridge, MA',
+      make: "Toyota",
+      model: "Camry",
+      customer_name: "Test Customer",
+      customer_phone: "(555) 123-4567",
+      pickup_address: "168 Charlestown Rd, Claremont, NH 03743",
+      delivery_address: "456 Oak Ave, Cambridge, MA",
       distance_miles: 45,
-      timeframe: 'asap',
-      transmission: 'automatic',
-      notes: 'Test delivery job - please handle with care',
+      timeframe: "asap",
+      transmission: "automatic",
+      notes: "Test delivery job - please handle with care",
       dealerId,
-      createdBy
+      createdBy,
     });
   }
 }

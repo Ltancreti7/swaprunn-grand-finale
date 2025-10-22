@@ -1,13 +1,15 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: 'com.swaprunn.app',
-  appName: 'SwapRunn',
-  webDir: 'dist',
+  appId: "com.swaprunn.app",
+  appName: "SwapRunn",
+  webDir: "dist",
   server: {
-    url: 'https://8d6c882b-4c9b-4fef-b7b8-ef9a044dc4f6.lovableproject.com?forceHideBadge=true&v=20251001-5',
+    url: "https://8d6c882b-4c9b-4fef-b7b8-ef9a044dc4f6.lovableproject.com?forceHideBadge=true&v=20251001-5",
     cleartext: true,
-    allowNavigation: ['8d6c882b-4c9b-4fef-b7b8-ef9a044dc4f6.lovableproject.com']
+    allowNavigation: [
+      "8d6c882b-4c9b-4fef-b7b8-ef9a044dc4f6.lovableproject.com",
+    ],
   },
   plugins: {
     SplashScreen: {
@@ -25,10 +27,10 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: "default",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#ffffff",
     },
     PushNotifications: {
-      presentationOptions: ["badge", "sound", "alert"]
+      presentationOptions: ["badge", "sound", "alert"],
     },
     NativeBiometric: {
       // Face ID / Touch ID configuration
@@ -38,8 +40,8 @@ const config: CapacitorConfig = {
     },
     BarcodeScanner: {
       // Barcode scanner configuration
-    }
-  }
+    },
+  },
 };
 
 export default config;

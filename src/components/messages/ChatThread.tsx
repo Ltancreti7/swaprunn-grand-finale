@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { getConversationMessages, addMessage, Message } from "@/services/messages-data";
+import {
+  getConversationMessages,
+  addMessage,
+  Message,
+} from "@/services/messages-data";
 
 interface ChatThreadProps {
   conversationId: string;
@@ -13,7 +17,12 @@ interface ChatThreadProps {
   currentUserId: string;
 }
 
-export function ChatThread({ conversationId, onBack, userType, currentUserId }: ChatThreadProps) {
+export function ChatThread({
+  conversationId,
+  onBack,
+  userType,
+  currentUserId,
+}: ChatThreadProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -28,11 +37,14 @@ export function ChatThread({ conversationId, onBack, userType, currentUserId }: 
   const fetchMessages = () => {
     setLoading(true);
     try {
-      const conversationMessages = getConversationMessages(currentUserId, conversationId);
+      const conversationMessages = getConversationMessages(
+        currentUserId,
+        conversationId,
+      );
       setMessages(conversationMessages);
       scrollToBottom();
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error("Error fetching messages:", error);
     } finally {
       setLoading(false);
     }
@@ -40,7 +52,7 @@ export function ChatThread({ conversationId, onBack, userType, currentUserId }: 
 
   const scrollToBottom = () => {
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
@@ -61,11 +73,11 @@ export function ChatThread({ conversationId, onBack, userType, currentUserId }: 
       setNewMessage("");
       scrollToBottom();
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
       toast({
         title: "Error",
         description: "Failed to send message",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setSending(false);
@@ -97,22 +109,26 @@ export function ChatThread({ conversationId, onBack, userType, currentUserId }: 
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         {messages.map((msg) => {
           const isOwnMessage = msg.sender === currentUserId;
-          
+
           return (
             <div
               key={msg.id}
-              className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
             >
               <div
                 className={`max-w-[70%] rounded-2xl px-4 py-3 ${
                   isOwnMessage
-                    ? 'bg-[#E11900] text-white'
-                    : 'bg-white/10 text-white'
+                    ? "bg-[#E11900] text-white"
+                    : "bg-white/10 text-white"
                 }`}
               >
                 <p className="text-sm break-words">{msg.messageText}</p>
-                <p className={`text-xs mt-1 ${isOwnMessage ? 'text-white/80' : 'text-white/60'}`}>
-                  {formatDistanceToNow(new Date(msg.timestamp), { addSuffix: true })}
+                <p
+                  className={`text-xs mt-1 ${isOwnMessage ? "text-white/80" : "text-white/60"}`}
+                >
+                  {formatDistanceToNow(new Date(msg.timestamp), {
+                    addSuffix: true,
+                  })}
                 </p>
               </div>
             </div>
@@ -122,7 +138,10 @@ export function ChatThread({ conversationId, onBack, userType, currentUserId }: 
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSendMessage} className="p-6 border-t border-white/20">
+      <form
+        onSubmit={handleSendMessage}
+        className="p-6 border-t border-white/20"
+      >
         <div className="flex gap-3">
           <Input
             value={newMessage}

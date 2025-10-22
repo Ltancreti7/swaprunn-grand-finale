@@ -4,7 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { driveTrackingService, DriveStats } from "@/services/driveTrackingService";
+import {
+  driveTrackingService,
+  DriveStats,
+} from "@/services/driveTrackingService";
 import { ChatButton } from "@/components/chat/ChatButton";
 import { MapPin, Clock, Car, Navigation, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
@@ -31,23 +34,22 @@ interface PersistentDriveNotificationProps {
   driverId: string;
 }
 export const PersistentDriveNotification = ({
-  driverId
+  driverId,
 }: PersistentDriveNotificationProps) => {
-  const [activeAssignment, setActiveAssignment] = useState<ActiveAssignment | null>(null);
+  const [activeAssignment, setActiveAssignment] =
+    useState<ActiveAssignment | null>(null);
   const [driveStats, setDriveStats] = useState<DriveStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
 
   // Fetch active assignment
   const fetchActiveAssignment = async () => {
     if (!driverId) return;
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('assignments').select(`
+      const { data, error } = await supabase
+        .from("assignments")
+        .select(
+          `
           id,
           job_id,
           driver_id,
@@ -65,14 +67,19 @@ export const PersistentDriveNotification = ({
             distance_miles,
             created_at
           )
-        `).eq('driver_id', driverId).is('ended_at', null).not('accepted_at', 'is', null).single();
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching active assignment:', error);
+        `,
+        )
+        .eq("driver_id", driverId)
+        .is("ended_at", null)
+        .not("accepted_at", "is", null)
+        .single();
+      if (error && error.code !== "PGRST116") {
+        console.error("Error fetching active assignment:", error);
         return;
       }
       setActiveAssignment(data);
     } catch (error) {
-      console.error('Error in fetchActiveAssignment:', error);
+      console.error("Error in fetchActiveAssignment:", error);
     }
   };
 
@@ -98,14 +105,21 @@ export const PersistentDriveNotification = ({
     fetchActiveAssignment();
 
     // Subscribe to assignment changes
-    const channel = supabase.channel(`driver-assignments-${driverId}`).on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'assignments',
-      filter: `driver_id=eq.${driverId}`
-    }, () => {
-      fetchActiveAssignment();
-    }).subscribe();
+    const channel = supabase
+      .channel(`driver-assignments-${driverId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "assignments",
+          filter: `driver_id=eq.${driverId}`,
+        },
+        () => {
+          fetchActiveAssignment();
+        },
+      )
+      .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
@@ -114,17 +128,21 @@ export const PersistentDriveNotification = ({
     if (!activeAssignment) return;
     try {
       setIsLoading(true);
-      await driveTrackingService.startDrive(activeAssignment.id, activeAssignment.job_id, driverId);
+      await driveTrackingService.startDrive(
+        activeAssignment.id,
+        activeAssignment.job_id,
+        driverId,
+      );
       toast({
         title: "Drive Started!",
-        description: "Location tracking is now active."
+        description: "Location tracking is now active.",
       });
     } catch (error) {
-      console.error('Error starting drive:', error);
+      console.error("Error starting drive:", error);
       toast({
         title: "Error",
         description: "Failed to start drive tracking.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -137,7 +155,7 @@ export const PersistentDriveNotification = ({
       await driveTrackingService.completeDrive();
       toast({
         title: "Drive Completed!",
-        description: "Great job! The drive has been marked as complete."
+        description: "Great job! The drive has been marked as complete.",
       });
 
       // Refresh to remove the notification
@@ -145,11 +163,11 @@ export const PersistentDriveNotification = ({
         fetchActiveAssignment();
       }, 1000);
     } catch (error) {
-      console.error('Error completing drive:', error);
+      console.error("Error completing drive:", error);
       toast({
         title: "Error",
         description: "Failed to complete drive.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);

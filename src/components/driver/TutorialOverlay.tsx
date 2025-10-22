@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface TutorialStep {
   title: string;
@@ -19,28 +19,33 @@ interface TutorialOverlayProps {
 const tutorialSteps: TutorialStep[] = [
   {
     title: "Welcome to Your Dashboard",
-    description: "This is your command center where you'll manage all your delivery jobs and track your earnings.",
-    highlight: "dashboard-container"
+    description:
+      "This is your command center where you'll manage all your delivery jobs and track your earnings.",
+    highlight: "dashboard-container",
   },
   {
     title: "Check for New Jobs",
-    description: "Click 'View Requests' to see available delivery jobs in your area. You'll get notifications when new jobs are posted.",
-    action: "Look for the red notification badge!"
+    description:
+      "Click 'View Requests' to see available delivery jobs in your area. You'll get notifications when new jobs are posted.",
+    action: "Look for the red notification badge!",
   },
   {
     title: "Accept Jobs Quickly",
-    description: "When a new job alert appears, you can accept it directly or view details first. Fast responses increase your job acceptance rate.",
-    highlight: "job-alert"
+    description:
+      "When a new job alert appears, you can accept it directly or view details first. Fast responses increase your job acceptance rate.",
+    highlight: "job-alert",
   },
   {
     title: "Track Your Progress",
-    description: "Monitor your current jobs, earnings, and completion history. All your job information is organized here.",
-    highlight: "jobs-section"
+    description:
+      "Monitor your current jobs, earnings, and completion history. All your job information is organized here.",
+    highlight: "jobs-section",
   },
   {
     title: "Stay Connected",
-    description: "Use the chat feature to communicate with dealers and customers during deliveries. Clear communication leads to better ratings!"
-  }
+    description:
+      "Use the chat feature to communicate with dealers and customers during deliveries. Clear communication leads to better ratings!",
+  },
 ];
 
 export const TutorialOverlay = ({ isOpen, onClose }: TutorialOverlayProps) => {
@@ -56,13 +61,13 @@ export const TutorialOverlay = ({ isOpen, onClose }: TutorialOverlayProps) => {
     if (isLastStep) {
       onClose();
     } else {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
   const handlePrevious = () => {
     if (!isFirstStep) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev) => prev - 1);
     }
   };
 
@@ -75,7 +80,12 @@ export const TutorialOverlay = ({ isOpen, onClose }: TutorialOverlayProps) => {
               <span className="text-2xl">🎯</span>
               <h3 className="font-semibold">Quick Tutorial</h3>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0"
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -91,16 +101,18 @@ export const TutorialOverlay = ({ isOpen, onClose }: TutorialOverlayProps) => {
                     key={index}
                     className={cn(
                       "w-2 h-2 rounded-full",
-                      index === currentStep ? "bg-primary" : "bg-muted"
+                      index === currentStep ? "bg-primary" : "bg-muted",
                     )}
                   />
                 ))}
               </div>
             </div>
             <div className="w-full bg-secondary rounded-full h-1">
-              <div 
+              <div
                 className="bg-primary h-1 rounded-full transition-all duration-300"
-                style={{ width: `${((currentStep + 1) / tutorialSteps.length) * 100}%` }}
+                style={{
+                  width: `${((currentStep + 1) / tutorialSteps.length) * 100}%`,
+                }}
               />
             </div>
           </div>
@@ -137,13 +149,18 @@ export const TutorialOverlay = ({ isOpen, onClose }: TutorialOverlayProps) => {
             </Button>
 
             <Button onClick={handleNext} className="flex items-center gap-2">
-              {isLastStep ? 'Get Started' : 'Next'}
+              {isLastStep ? "Get Started" : "Next"}
               {!isLastStep && <ChevronRight className="h-4 w-4" />}
             </Button>
           </div>
 
           <div className="mt-4 text-center">
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-xs">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-xs"
+            >
               Skip tutorial
             </Button>
           </div>

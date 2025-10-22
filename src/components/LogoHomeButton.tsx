@@ -7,13 +7,13 @@ const LogoHomeButton = () => {
 
   // Determine the appropriate home route based on current path
   const getHomeRoute = () => {
-    if (location.pathname.startsWith('/dealer')) {
-      return '/dealer/dashboard';
-    } else if (location.pathname.startsWith('/driver')) {
-      return '/driver/dashboard';
+    if (location.pathname.startsWith("/dealer")) {
+      return "/dealer/dashboard";
+    } else if (location.pathname.startsWith("/driver")) {
+      return "/driver/dashboard";
     } else {
       // For other logged-in pages, default to dealer dashboard
-      return '/dealer/dashboard';
+      return "/dealer/dashboard";
     }
   };
 

@@ -1,7 +1,7 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 
 interface JobCreationParams {
-  type: 'delivery' | 'swap';
+  type: "delivery" | "swap";
   pickup_address: string;
   delivery_address: string;
   year: number;
@@ -23,7 +23,7 @@ interface JobCreationParams {
 }
 
 type PreparedJobInsert = {
-  type: 'delivery' | 'swap';
+  type: "delivery" | "swap";
   pickup_address: string;
   delivery_address: string;
   year: number;
@@ -62,34 +62,35 @@ type CreatedJobRecord = {
 
 export const bulletproofJobCreation = async (params: JobCreationParams) => {
   try {
-    console.log('🚀 BULLETPROOF JOB CREATION - Starting...');
-    
+    console.log("🚀 BULLETPROOF JOB CREATION - Starting...");
+
     // First, get user profile to verify dealer status
-    const { data: profiles, error: profileError } = await supabase
-      .rpc('get_user_profile');
-    
+    const { data: profiles, error: profileError } =
+      await supabase.rpc("get_user_profile");
+
     if (profileError) {
       throw new Error(`Profile error: ${profileError.message}`);
     }
-    
+
     if (!profiles || !Array.isArray(profiles) || profiles.length === 0) {
-      throw new Error('No user profile found');
+      throw new Error("No user profile found");
     }
-    
+
     const profile = profiles[0];
-    
-    if (!profile || profile.user_type !== 'dealer') {
-      throw new Error('Only dealers can create job requests');
+
+    if (!profile || profile.user_type !== "dealer") {
+      throw new Error("Only dealers can create job requests");
     }
-    
+
     if (!profile.dealer_id) {
-      throw new Error('Dealer account not properly configured');
+      throw new Error("Dealer account not properly configured");
     }
 
     let requestingUserId = params.created_by ?? null;
 
     if (!requestingUserId) {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
 
       if (userError) {
         throw new Error(`Auth error: ${userError.message}`);
@@ -99,11 +100,12 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
     }
 
     if (!requestingUserId) {
-      throw new Error('Unable to determine requesting user');
+      throw new Error("Unable to determine requesting user");
     }
-    
+
     // Generate tracking token
-    const trackingToken = 'SR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const trackingToken =
+      "SR-" + Math.random().toString(36).substring(2, 10).toUpperCase();
 
     const sanitizedNotes = params.notes?.trim() ? params.notes.trim() : null;
     const tradeFieldsPresent = [
@@ -111,8 +113,8 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
       params.trade_make,
       params.trade_model,
       params.trade_vin,
-      params.trade_transmission
-    ].some((value) => value !== null && value !== undefined && value !== '');
+      params.trade_transmission,
+    ].some((value) => value !== null && value !== undefined && value !== "");
 
     const jobData: PreparedJobInsert = {
       type: params.type,
@@ -126,12 +128,12 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
       customer_phone: params.customer_phone,
       timeframe: params.timeframe,
       notes: sanitizedNotes,
-      status: 'open',
+      status: "open",
       requires_two: params.requires_two || false,
       distance_miles: params.distance_miles || 25,
       dealer_id: profile.dealer_id,
       track_token: trackingToken,
-      created_by: requestingUserId
+      created_by: requestingUserId,
     };
 
     const tradeDetails = [
@@ -139,14 +141,17 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
       params.trade_make ? `Make: ${params.trade_make}` : null,
       params.trade_model ? `Model: ${params.trade_model}` : null,
       params.trade_vin ? `VIN: ${params.trade_vin}` : null,
-      params.trade_transmission ? `Transmission: ${params.trade_transmission}` : null
+      params.trade_transmission
+        ? `Transmission: ${params.trade_transmission}`
+        : null,
     ]
       .filter(Boolean)
-      .join(' | ');
+      .join(" | ");
 
-    const tradeNote = tradeDetails.length > 0
-      ? `[Trade Vehicle]\n${tradeDetails}`
-      : '[Trade Vehicle]\nDetails provided but columns unavailable.';
+    const tradeNote =
+      tradeDetails.length > 0
+        ? `[Trade Vehicle]\n${tradeDetails}`
+        : "[Trade Vehicle]\nDetails provided but columns unavailable.";
 
     const jobDataWithTrade: PreparedJobInsert = tradeFieldsPresent
       ? {
@@ -155,13 +160,13 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
           trade_make: params.trade_make ?? null,
           trade_model: params.trade_model ?? null,
           trade_vin: params.trade_vin ?? null,
-          trade_transmission: params.trade_transmission ?? null
+          trade_transmission: params.trade_transmission ?? null,
         }
       : jobData;
 
-  const notifyDrivers = async (jobRecord: CreatedJobRecord) => {
+    const notifyDrivers = async (jobRecord: CreatedJobRecord) => {
       try {
-        await supabase.functions.invoke('notify-drivers-new-job', {
+        await supabase.functions.invoke("notify-drivers-new-job", {
           body: {
             job_id: jobRecord.id,
             type: jobRecord.type,
@@ -172,19 +177,22 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
             delivery_address: jobRecord.delivery_address,
             distance_miles: jobRecord.distance_miles ?? 0,
             requires_two: jobRecord.requires_two ?? false,
-            customer_name: jobRecord.customer_name ?? null
-          }
+            customer_name: jobRecord.customer_name ?? null,
+          },
         });
       } catch (notificationError) {
-        console.error('⚠️ Driver notification dispatch failed:', notificationError);
+        console.error(
+          "⚠️ Driver notification dispatch failed:",
+          notificationError,
+        );
       }
     };
 
     const insertJob = async (payload: PreparedJobInsert) => {
       const { data, error } = await supabase
-        .from('jobs')
+        .from("jobs")
         .insert(payload)
-        .select('*')
+        .select("*")
         .single();
 
       if (error) {
@@ -196,16 +204,20 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
 
     const extractMessage = (unknownError: unknown) => {
       if (!unknownError) {
-        return 'Unknown error';
+        return "Unknown error";
       }
 
       if (unknownError instanceof Error) {
         return unknownError.message;
       }
 
-      if (typeof unknownError === 'object') {
-        const err = unknownError as { message?: string; details?: string; hint?: string };
-        return err.message || err.details || err.hint || 'Database error';
+      if (typeof unknownError === "object") {
+        const err = unknownError as {
+          message?: string;
+          details?: string;
+          hint?: string;
+        };
+        return err.message || err.details || err.hint || "Database error";
       }
 
       return String(unknownError);
@@ -213,7 +225,11 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
 
     const isMissingTradeColumn = (unknownError: unknown) => {
       const message = extractMessage(unknownError).toLowerCase();
-      return message.includes('trade_') && message.includes('column') && message.includes('does not exist');
+      return (
+        message.includes("trade_") &&
+        message.includes("column") &&
+        message.includes("does not exist")
+      );
     };
 
     const appendTradeNote = (baseNotes: string | null) => {
@@ -224,35 +240,41 @@ export const bulletproofJobCreation = async (params: JobCreationParams) => {
       return baseNotes ? `${baseNotes}\n\n${tradeNote}` : tradeNote;
     };
 
-    console.log('📝 Job data prepared (initial attempt):', jobDataWithTrade);
+    console.log("📝 Job data prepared (initial attempt):", jobDataWithTrade);
 
     try {
       const createdJob = await insertJob(jobDataWithTrade);
-      console.log('✅ Job created successfully:', createdJob);
+      console.log("✅ Job created successfully:", createdJob);
       await notifyDrivers(createdJob);
       return createdJob;
     } catch (initialError) {
       if (tradeFieldsPresent && isMissingTradeColumn(initialError)) {
-        console.warn('⚠️ Trade columns missing in jobs table, retrying with trade details stored in notes.', initialError);
+        console.warn(
+          "⚠️ Trade columns missing in jobs table, retrying with trade details stored in notes.",
+          initialError,
+        );
 
         const fallbackJobData: PreparedJobInsert = {
           ...jobData,
-          notes: appendTradeNote(jobData.notes)
+          notes: appendTradeNote(jobData.notes),
         };
 
-        console.log('📝 Job data prepared (fallback attempt):', fallbackJobData);
+        console.log(
+          "📝 Job data prepared (fallback attempt):",
+          fallbackJobData,
+        );
 
         const createdJob = await insertJob(fallbackJobData);
-        console.log('✅ Job created successfully after fallback:', createdJob);
+        console.log("✅ Job created successfully after fallback:", createdJob);
         await notifyDrivers(createdJob);
         return createdJob;
       }
 
-      console.error('❌ Database insertion failed:', initialError);
+      console.error("❌ Database insertion failed:", initialError);
       throw new Error(`Database error: ${extractMessage(initialError)}`);
     }
   } catch (error) {
-    console.error('💥 BULLETPROOF JOB CREATION FAILED:', error);
+    console.error("💥 BULLETPROOF JOB CREATION FAILED:", error);
     throw error;
   }
 };

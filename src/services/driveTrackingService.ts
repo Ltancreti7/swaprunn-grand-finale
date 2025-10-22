@@ -25,7 +25,11 @@ class DriveTrackingService {
   private locationWatchId: string | null = null;
   private listeners: ((stats: DriveStats) => void)[] = [];
 
-  async startDrive(assignmentId: string, jobId: string, driverId: string): Promise<void> {
+  async startDrive(
+    assignmentId: string,
+    jobId: string,
+    driverId: string,
+  ): Promise<void> {
     // Get current location
     const currentLocation = await mobileGeolocationService.getCurrentPosition();
     if (!currentLocation) {
@@ -34,30 +38,28 @@ class DriveTrackingService {
 
     // Update assignment started_at
     const { error: assignmentError } = await supabase
-      .from('assignments')
+      .from("assignments")
       .update({ started_at: new Date().toISOString() })
-      .eq('id', assignmentId);
+      .eq("id", assignmentId);
 
     if (assignmentError) throw assignmentError;
 
     // Update job status to in_progress
     const { error: jobError } = await supabase
-      .from('jobs')
-      .update({ status: 'in_progress' })
-      .eq('id', jobId);
+      .from("jobs")
+      .update({ status: "in_progress" })
+      .eq("id", jobId);
 
     if (jobError) throw jobError;
 
     // Create timesheet record
-    const { error: timesheetError } = await supabase
-      .from('timesheets')
-      .insert({
-        assignment_id: assignmentId,
-        job_id: jobId,
-        driver_id: driverId,
-        started_at: new Date().toISOString(),
-        pay_rate_cents: 1800
-      });
+    const { error: timesheetError } = await supabase.from("timesheets").insert({
+      assignment_id: assignmentId,
+      job_id: jobId,
+      driver_id: driverId,
+      started_at: new Date().toISOString(),
+      pay_rate_cents: 1800,
+    });
 
     if (timesheetError) throw timesheetError;
 
@@ -71,14 +73,14 @@ class DriveTrackingService {
       currentLocation,
       totalDistance: 0,
       elapsedSeconds: 0,
-      isActive: true
+      isActive: true,
     };
 
     // Start tracking
     this.startTracking();
-    
+
     // Save to localStorage for persistence
-    localStorage.setItem('activeDrive', JSON.stringify(this.activeDrive));
+    localStorage.setItem("activeDrive", JSON.stringify(this.activeDrive));
   }
 
   async completeDrive(): Promise<void> {
@@ -87,41 +89,43 @@ class DriveTrackingService {
     }
 
     const endTime = new Date().toISOString();
-    const totalSeconds = Math.floor((Date.now() - this.activeDrive.startedAt.getTime()) / 1000);
+    const totalSeconds = Math.floor(
+      (Date.now() - this.activeDrive.startedAt.getTime()) / 1000,
+    );
 
     // Stop tracking
     this.stopTracking();
 
     // Update assignment
     const { error: assignmentError } = await supabase
-      .from('assignments')
+      .from("assignments")
       .update({ ended_at: endTime })
-      .eq('id', this.activeDrive.assignmentId);
+      .eq("id", this.activeDrive.assignmentId);
 
     if (assignmentError) throw assignmentError;
 
     // Update job status
     const { error: jobError } = await supabase
-      .from('jobs')
-      .update({ status: 'completed' })
-      .eq('id', this.activeDrive.jobId);
+      .from("jobs")
+      .update({ status: "completed" })
+      .eq("id", this.activeDrive.jobId);
 
     if (jobError) throw jobError;
 
     // Update timesheet
     const { error: timesheetError } = await supabase
-      .from('timesheets')
+      .from("timesheets")
       .update({
         ended_at: endTime,
-        total_seconds: totalSeconds
+        total_seconds: totalSeconds,
       })
-      .eq('assignment_id', this.activeDrive.assignmentId);
+      .eq("assignment_id", this.activeDrive.assignmentId);
 
     if (timesheetError) throw timesheetError;
 
     // Clear active drive
     this.activeDrive = null;
-    localStorage.removeItem('activeDrive');
+    localStorage.removeItem("activeDrive");
     this.notifyListeners();
   }
 
@@ -131,14 +135,15 @@ class DriveTrackingService {
     // Start location tracking
     mobileGeolocationService.startWatching((position) => {
       if (this.activeDrive) {
-        const previousLocation = this.activeDrive.currentLocation || this.activeDrive.startLocation;
+        const previousLocation =
+          this.activeDrive.currentLocation || this.activeDrive.startLocation;
         const distance = this.calculateDistance(
           previousLocation.latitude,
           previousLocation.longitude,
           position.latitude,
-          position.longitude
+          position.longitude,
         );
-        
+
         this.activeDrive.currentLocation = position;
         this.activeDrive.totalDistance += distance;
       }
@@ -148,11 +153,11 @@ class DriveTrackingService {
     this.trackingInterval = setInterval(() => {
       if (this.activeDrive) {
         this.activeDrive.elapsedSeconds = Math.floor(
-          (Date.now() - this.activeDrive.startedAt.getTime()) / 1000
+          (Date.now() - this.activeDrive.startedAt.getTime()) / 1000,
         );
-        
+
         // Save updated state
-        localStorage.setItem('activeDrive', JSON.stringify(this.activeDrive));
+        localStorage.setItem("activeDrive", JSON.stringify(this.activeDrive));
         this.notifyListeners();
       }
     }, 1000);
@@ -163,19 +168,27 @@ class DriveTrackingService {
       clearInterval(this.trackingInterval);
       this.trackingInterval = null;
     }
-    
+
     mobileGeolocationService.stopWatching();
   }
 
-  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const R = 3959; // Earth's radius in miles
     const dLat = this.toRadians(lat2 - lat1);
     const dLon = this.toRadians(lon2 - lon1);
-    
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) *
+        Math.cos(this.toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -204,7 +217,7 @@ class DriveTrackingService {
     return {
       totalDistance: Math.round(this.activeDrive.totalDistance * 100) / 100,
       elapsedTime: this.formatElapsedTime(this.activeDrive.elapsedSeconds),
-      isActive: this.activeDrive.isActive
+      isActive: this.activeDrive.isActive,
     };
   }
 
@@ -218,21 +231,21 @@ class DriveTrackingService {
 
   // Resume tracking from localStorage on app restart
   resumeTrackingIfNeeded(): void {
-    const savedDrive = localStorage.getItem('activeDrive');
+    const savedDrive = localStorage.getItem("activeDrive");
     if (savedDrive) {
       try {
         const driveData = JSON.parse(savedDrive);
         this.activeDrive = {
           ...driveData,
-          startedAt: new Date(driveData.startedAt)
+          startedAt: new Date(driveData.startedAt),
         };
-        
+
         if (this.activeDrive.isActive) {
           this.startTracking();
         }
       } catch (error) {
-        console.error('Error resuming drive tracking:', error);
-        localStorage.removeItem('activeDrive');
+        console.error("Error resuming drive tracking:", error);
+        localStorage.removeItem("activeDrive");
       }
     }
   }
@@ -252,7 +265,7 @@ class DriveTrackingService {
   private notifyListeners(): void {
     const stats = this.getCurrentDriveStats();
     if (stats) {
-      this.listeners.forEach(callback => callback(stats));
+      this.listeners.forEach((callback) => callback(stats));
     }
   }
 }

@@ -10,12 +10,12 @@ interface MobileTouchFeedbackProps {
   variant?: "default" | "subtle" | "strong";
 }
 
-export function MobileTouchFeedback({ 
-  children, 
-  className, 
-  onClick, 
+export function MobileTouchFeedback({
+  children,
+  className,
+  onClick,
   disabled = false,
-  variant = "default"
+  variant = "default",
 }: MobileTouchFeedbackProps) {
   const [isPressed, setIsPressed] = useState(false);
   const isMobile = useIsMobile();
@@ -35,8 +35,8 @@ export function MobileTouchFeedback({
 
   const scaleVariants = {
     default: "active:scale-[0.98]",
-    subtle: "active:scale-[0.995]", 
-    strong: "active:scale-[0.95]"
+    subtle: "active:scale-[0.995]",
+    strong: "active:scale-[0.95]",
   };
 
   return (
@@ -46,7 +46,7 @@ export function MobileTouchFeedback({
         !disabled && scaleVariants[variant],
         isPressed && isMobile && "transform scale-[0.98]",
         disabled && "opacity-50 cursor-not-allowed",
-        className
+        className,
       )}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}

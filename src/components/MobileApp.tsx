@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useMobileCapacitor } from '@/hooks/useMobileCapacitor';
-import { mobileNotificationService } from '@/services/mobileNotificationService';
+import { useEffect } from "react";
+import { useMobileCapacitor } from "@/hooks/useMobileCapacitor";
+import { mobileNotificationService } from "@/services/mobileNotificationService";
 
 interface MobileAppProps {
   children: React.ReactNode;

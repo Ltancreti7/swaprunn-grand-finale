@@ -21,7 +21,9 @@ type SwapCoordinatorMetadata = {
   contact_phone?: string;
 };
 
-const extractSwapCoordinatorMetadata = (user: User | null): SwapCoordinatorMetadata => {
+const extractSwapCoordinatorMetadata = (
+  user: User | null,
+): SwapCoordinatorMetadata => {
   const raw = user?.user_metadata;
   if (raw && typeof raw === "object") {
     return raw as SwapCoordinatorMetadata;
@@ -43,7 +45,9 @@ export default function SwapCoordinatorAuth() {
     fullName?: string | null;
     phone?: string | null;
   }) => {
-    const resolvedFullName = (details?.fullName ?? `${firstName} ${lastName}`.trim()).trim();
+    const resolvedFullName = (
+      details?.fullName ?? `${firstName} ${lastName}`.trim()
+    ).trim();
     const hasFullName = resolvedFullName.length > 0;
     const resolvedPhone = details?.phone ?? phone;
     const sanitizedPhone = resolvedPhone ? cleanPhoneNumber(resolvedPhone) : "";
@@ -53,7 +57,7 @@ export default function SwapCoordinatorAuth() {
         _user_type: "swap_coordinator",
         _name: hasFullName ? resolvedFullName : null,
         _phone: sanitizedPhone || null,
-        _company_name: null
+        _company_name: null,
       });
 
       if (error) throw error;
@@ -72,15 +76,20 @@ export default function SwapCoordinatorAuth() {
     }
 
     const metadataFullName = (() => {
-      const direct = typeof metadata.full_name === "string" ? metadata.full_name : "";
+      const direct =
+        typeof metadata.full_name === "string" ? metadata.full_name : "";
       if (direct.trim()) return direct.trim();
-      const first = typeof metadata.first_name === "string" ? metadata.first_name : "";
-      const last = typeof metadata.last_name === "string" ? metadata.last_name : "";
+      const first =
+        typeof metadata.first_name === "string" ? metadata.first_name : "";
+      const last =
+        typeof metadata.last_name === "string" ? metadata.last_name : "";
       return `${first} ${last}`.trim();
     })();
 
-    const metadataPhoneCandidate = [metadata.phone, metadata.phone_number, metadata.contact_phone]
-      .find((candidate) => typeof candidate === "string" && candidate.trim()) ?? null;
+    const metadataPhoneCandidate =
+      [metadata.phone, metadata.phone_number, metadata.contact_phone].find(
+        (candidate) => typeof candidate === "string" && candidate.trim(),
+      ) ?? null;
 
     try {
       await createSwapCoordinatorProfile({
@@ -88,7 +97,10 @@ export default function SwapCoordinatorAuth() {
         phone: metadataPhoneCandidate,
       });
     } catch (repairError) {
-      console.error("Automatic swap coordinator profile repair failed:", repairError);
+      console.error(
+        "Automatic swap coordinator profile repair failed:",
+        repairError,
+      );
     }
   };
 
@@ -107,7 +119,7 @@ export default function SwapCoordinatorAuth() {
 
         // CRITICAL: Verify user is actually a swap coordinator
         const { data: initialProfile } = await supabase
-          .rpc('get_user_profile')
+          .rpc("get_user_profile")
           .maybeSingle();
 
         let profile = initialProfile;
@@ -115,21 +127,26 @@ export default function SwapCoordinatorAuth() {
         if (!profile) {
           await tryRepairSwapCoordinatorProfile(data.user ?? null);
           const { data: repairedProfile } = await supabase
-            .rpc('get_user_profile')
+            .rpc("get_user_profile")
             .maybeSingle();
           profile = repairedProfile ?? null;
         }
 
-        if (profile?.user_type !== 'swap_coordinator') {
+        if (profile?.user_type !== "swap_coordinator") {
           await supabase.auth.signOut();
-          const metadataUserType = extractSwapCoordinatorMetadata(data.user ?? null).user_type;
-          const accountType = profile?.user_type || metadataUserType || 'different type';
+          const metadataUserType = extractSwapCoordinatorMetadata(
+            data.user ?? null,
+          ).user_type;
+          const accountType =
+            profile?.user_type || metadataUserType || "different type";
           throw new Error(
             `This is a swap coordinator login page. Your account is registered as a ${accountType}. Please use the correct login page: ${
-              accountType === 'dealer' ? '/dealer/auth' : 
-              accountType === 'driver' ? '/driver/auth' : 
-              '/'
-            }`
+              accountType === "dealer"
+                ? "/dealer/auth"
+                : accountType === "driver"
+                  ? "/driver/auth"
+                  : "/"
+            }`,
           );
         }
 
@@ -155,17 +172,21 @@ export default function SwapCoordinatorAuth() {
           try {
             await createSwapCoordinatorProfile({
               fullName: `${firstName} ${lastName}`.trim(),
-              phone
+              phone,
             });
           } catch (profileError) {
-            console.error('Swap coordinator profile creation after signup failed:', profileError);
+            console.error(
+              "Swap coordinator profile creation after signup failed:",
+              profileError,
+            );
           }
         }
         toast.success("Account created! Redirecting...");
         navigate("/swap-coordinator/dashboard");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Please try again.";
+      const message =
+        error instanceof Error ? error.message : "Please try again.";
       toast.error(message);
     } finally {
       setLoading(false);
@@ -173,20 +194,20 @@ export default function SwapCoordinatorAuth() {
   };
 
   return (
-    <div 
-      className="min-h-screen relative px-4" 
+    <div
+      className="min-h-screen relative px-4"
       style={{
         backgroundImage: `url(${mapBackgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
       {/* Back Button */}
       <BackButton />
-      
+
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70 z-0"></div>
-      
+
       {/* Content */}
       <div className="relative z-10 container max-w-7xl mx-auto px-6 pt-24">
         <div className="text-center mb-4">
@@ -195,18 +216,24 @@ export default function SwapCoordinatorAuth() {
             <span className="text-[#E11900]">.</span>
           </h1>
           <p className="text-lg text-white/80 my-0">
-            {isLogin ? 'Sign in to manage swaps' : 'Create your coordinator account'}
+            {isLogin
+              ? "Sign in to manage swaps"
+              : "Create your coordinator account"}
           </p>
         </div>
 
         <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)] border-transparent">
-          
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-white text-sm font-medium">First Name</Label>
+                    <Label
+                      htmlFor="firstName"
+                      className="text-white text-sm font-medium"
+                    >
+                      First Name
+                    </Label>
                     <Input
                       id="firstName"
                       value={firstName}
@@ -217,7 +244,12 @@ export default function SwapCoordinatorAuth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-white text-sm font-medium">Last Name</Label>
+                    <Label
+                      htmlFor="lastName"
+                      className="text-white text-sm font-medium"
+                    >
+                      Last Name
+                    </Label>
                     <Input
                       id="lastName"
                       value={lastName}
@@ -228,7 +260,12 @@ export default function SwapCoordinatorAuth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-white text-sm font-medium">Phone</Label>
+                    <Label
+                      htmlFor="phone"
+                      className="text-white text-sm font-medium"
+                    >
+                      Phone
+                    </Label>
                     <Input
                       id="phone"
                       type="tel"
@@ -243,7 +280,12 @@ export default function SwapCoordinatorAuth() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white text-sm font-medium">Email Address</Label>
+                <Label
+                  htmlFor="email"
+                  className="text-white text-sm font-medium"
+                >
+                  Email Address
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -256,7 +298,12 @@ export default function SwapCoordinatorAuth() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white text-sm font-medium">Password</Label>
+                <Label
+                  htmlFor="password"
+                  className="text-white text-sm font-medium"
+                >
+                  Password
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -287,7 +334,11 @@ export default function SwapCoordinatorAuth() {
                 disabled={loading}
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
               >
-                {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
+                {loading
+                  ? "Processing..."
+                  : isLogin
+                    ? "Sign In"
+                    : "Create Account"}
               </Button>
             </form>
 

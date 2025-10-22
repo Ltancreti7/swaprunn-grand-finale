@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { TrendingUp, Award, Shield, Star, BarChart3 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from "react";
+import { TrendingUp, Award, Shield, Star, BarChart3 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TrustScoreDashboardProps {
   driverId: string;
@@ -41,8 +41,9 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
 
       // Get driver basic info and trust metrics
       const { data: driver, error: driverError } = await supabase
-        .from('drivers')
-        .select(`
+        .from("drivers")
+        .select(
+          `
           trust_score,
           profile_completion_percentage,
           email_verified,
@@ -50,18 +51,19 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
           background_check_verified,
           rating_avg,
           rating_count
-        `)
-        .eq('id', driverId)
+        `,
+        )
+        .eq("id", driverId)
         .single();
 
       if (driverError) throw driverError;
 
       // Get recent reputation metrics
       const { data: reputationData, error: reputationError } = await supabase
-        .from('reputation_metrics')
-        .select('metric_type, score, recorded_at')
-        .eq('driver_id', driverId)
-        .order('recorded_at', { ascending: false })
+        .from("reputation_metrics")
+        .select("metric_type, score, recorded_at")
+        .eq("driver_id", driverId)
+        .order("recorded_at", { ascending: false })
         .limit(20);
 
       if (reputationError) throw reputationError;
@@ -76,37 +78,37 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
           email_verified: driver?.email_verified || false,
           phone_verified: driver?.phone_verified || false,
           background_check_verified: driver?.background_check_verified || false,
-        }
+        },
       });
     } catch (error) {
-      console.error('Error loading trust metrics:', error);
+      console.error("Error loading trust metrics:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const getTrustLevel = (score: number) => {
-    if (score >= 4.5) return { label: 'Excellent', color: 'bg-green-500' };
-    if (score >= 4.0) return { label: 'Very Good', color: 'bg-blue-500' };
-    if (score >= 3.5) return { label: 'Good', color: 'bg-yellow-500' };
-    if (score >= 3.0) return { label: 'Fair', color: 'bg-orange-500' };
-    return { label: 'Needs Improvement', color: 'bg-red-500' };
+    if (score >= 4.5) return { label: "Excellent", color: "bg-green-500" };
+    if (score >= 4.0) return { label: "Very Good", color: "bg-blue-500" };
+    if (score >= 3.5) return { label: "Good", color: "bg-yellow-500" };
+    if (score >= 3.0) return { label: "Fair", color: "bg-orange-500" };
+    return { label: "Needs Improvement", color: "bg-red-500" };
   };
 
   const getMetricsByCategory = () => {
     if (!metrics) return {};
-    
+
     const categories = {
-      on_time_delivery: 'On-Time Delivery',
-      communication_quality: 'Communication',
-      professionalism: 'Professionalism',
-      vehicle_condition: 'Vehicle Condition',
-      customer_satisfaction: 'Customer Satisfaction'
+      on_time_delivery: "On-Time Delivery",
+      communication_quality: "Communication",
+      professionalism: "Professionalism",
+      vehicle_condition: "Vehicle Condition",
+      customer_satisfaction: "Customer Satisfaction",
     };
 
     const metricsByCategory: Record<string, number[]> = {};
-    
-    metrics.recentMetrics.forEach(metric => {
+
+    metrics.recentMetrics.forEach((metric) => {
       if (!metricsByCategory[metric.metric_type]) {
         metricsByCategory[metric.metric_type] = [];
       }
@@ -116,12 +118,13 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
     return Object.entries(metricsByCategory).map(([key, scores]) => ({
       category: categories[key as keyof typeof categories] || key,
       average: scores.reduce((sum, score) => sum + score, 0) / scores.length,
-      count: scores.length
+      count: scores.length,
     }));
   };
 
-  const verificationCount = metrics ? 
-    Object.values(metrics.verifications).filter(Boolean).length : 0;
+  const verificationCount = metrics
+    ? Object.values(metrics.verifications).filter(Boolean).length
+    : 0;
 
   if (loading) {
     return (
@@ -173,9 +176,16 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Trust Score</p>
-                      <p className="text-2xl font-bold">{metrics.trustScore.toFixed(1)}</p>
-                      <Badge variant="secondary" className={`${trustLevel.color} text-white`}>
+                      <p className="text-sm text-muted-foreground">
+                        Trust Score
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {metrics.trustScore.toFixed(1)}
+                      </p>
+                      <Badge
+                        variant="secondary"
+                        className={`${trustLevel.color} text-white`}
+                      >
                         {trustLevel.label}
                       </Badge>
                     </div>
@@ -188,7 +198,9 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Average Rating</p>
+                      <p className="text-sm text-muted-foreground">
+                        Average Rating
+                      </p>
                       <p className="text-2xl font-bold flex items-center gap-1">
                         <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                         {metrics.averageRating.toFixed(1)}
@@ -236,15 +248,17 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold">{metric.average.toFixed(1)}</p>
+                          <p className="text-lg font-bold">
+                            {metric.average.toFixed(1)}
+                          </p>
                           <div className="flex items-center gap-1">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
                                 className={`w-3 h-3 ${
                                   star <= metric.average
-                                    ? 'text-yellow-400 fill-yellow-400'
-                                    : 'text-gray-300'
+                                    ? "text-yellow-400 fill-yellow-400"
+                                    : "text-gray-300"
                                 }`}
                               />
                             ))}
@@ -260,7 +274,8 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
                 <CardContent className="p-6 text-center">
                   <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
                   <p className="text-muted-foreground">
-                    No detailed metrics available yet. Complete more deliveries to see your performance breakdown.
+                    No detailed metrics available yet. Complete more deliveries
+                    to see your performance breakdown.
                   </p>
                 </CardContent>
               </Card>
@@ -274,22 +289,25 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <p className="font-medium capitalize">
-                        {key.replace('_', ' ').replace('verified', 'Verification')}
+                        {key
+                          .replace("_", " ")
+                          .replace("verified", "Verification")}
                       </p>
                       <Badge variant={verified ? "default" : "secondary"}>
-                        {verified ? 'Verified' : 'Pending'}
+                        {verified ? "Verified" : "Pending"}
                       </Badge>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-            
+
             <Card className="bg-blue-50 border-blue-200">
               <CardContent className="p-4">
                 <p className="text-sm text-blue-800">
-                  <strong>Trust Tip:</strong> Complete all verifications to maximize your trust score 
-                  and get priority access to high-value deliveries.
+                  <strong>Trust Tip:</strong> Complete all verifications to
+                  maximize your trust score and get priority access to
+                  high-value deliveries.
                 </p>
               </CardContent>
             </Card>

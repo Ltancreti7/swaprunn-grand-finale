@@ -28,7 +28,11 @@ export default function SalesDashboard() {
   const { user, userProfile } = useAuth();
   const missingDealer = !userProfile?.dealer_id;
 
-  const { data: staffRecord, isLoading: roleLoading, error: roleError } = useQuery<StaffRecord | null, Error>({
+  const {
+    data: staffRecord,
+    isLoading: roleLoading,
+    error: roleError,
+  } = useQuery<StaffRecord | null, Error>({
     queryKey: ["sales-dashboard-role", user?.id, userProfile?.dealer_id],
     enabled: Boolean(user?.id && userProfile?.dealer_id),
     queryFn: async () => {
@@ -54,7 +58,9 @@ export default function SalesDashboard() {
     return ALLOWED_ROLES.has(staffRecord.role);
   }, [staffRecord]);
 
-  const heading = staffRecord?.role ? staffRecord.role.replace(/_/g, " ") : "Sales";
+  const heading = staffRecord?.role
+    ? staffRecord.role.replace(/_/g, " ")
+    : "Sales";
   const headingTitle = heading.replace(/\b\w/g, (char) => char.toUpperCase());
 
   if (missingDealer) {
@@ -65,7 +71,8 @@ export default function SalesDashboard() {
           <Alert variant="destructive">
             <AlertTitle>Dealer profile incomplete</AlertTitle>
             <AlertDescription>
-              Your account is not linked to an active dealership. Please complete dealer onboarding or contact support.
+              Your account is not linked to an active dealership. Please
+              complete dealer onboarding or contact support.
             </AlertDescription>
           </Alert>
         </div>
@@ -76,19 +83,25 @@ export default function SalesDashboard() {
   return (
     <PageContainer>
       <title>Sales Dashboard | SwapRunn</title>
-      <meta name="description" content="Stay on top of current and upcoming driver assignments." />
+      <meta
+        name="description"
+        content="Stay on top of current and upcoming driver assignments."
+      />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6 flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Sales Dashboard</h1>
           <p className="text-muted-foreground">
-            Track driver assignments and upcoming deliveries for your dealership.
+            Track driver assignments and upcoming deliveries for your
+            dealership.
           </p>
         </div>
 
         {roleLoading && (
           <div className="flex items-center gap-3 rounded-lg border border-dashed border-border bg-background p-6">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Loading your staff permissions…</span>
+            <span className="text-sm text-muted-foreground">
+              Loading your staff permissions…
+            </span>
           </div>
         )}
 
@@ -103,8 +116,8 @@ export default function SalesDashboard() {
           <Alert variant="destructive" className="mb-6">
             <AlertTitle>Restricted access</AlertTitle>
             <AlertDescription>
-              You need an active sales role to view this dashboard. Please contact your dealership manager if you
-              believe this is a mistake.
+              You need an active sales role to view this dashboard. Please
+              contact your dealership manager if you believe this is a mistake.
             </AlertDescription>
           </Alert>
         )}
@@ -113,9 +126,12 @@ export default function SalesDashboard() {
           <>
             <div className="rounded-2xl border border-primary/40 bg-primary/10 p-5 sm:flex sm:items-center sm:justify-between">
               <div className="space-y-1">
-                <h2 className="text-xl font-semibold">Need a driver right now?</h2>
+                <h2 className="text-xl font-semibold">
+                  Need a driver right now?
+                </h2>
                 <p className="text-sm text-muted-foreground">
-                  Submit a delivery request and SwapRunn alerts available drivers instantly.
+                  Submit a delivery request and SwapRunn alerts available
+                  drivers instantly.
                 </p>
               </div>
               <Link to="/dealer/request" className="mt-4 inline-flex sm:mt-0">
@@ -125,7 +141,9 @@ export default function SalesDashboard() {
 
             <Tabs defaultValue="driver-schedule" className="space-y-6">
               <TabsList className="w-full justify-start overflow-x-auto">
-                <TabsTrigger value="driver-schedule">Driver Schedule</TabsTrigger>
+                <TabsTrigger value="driver-schedule">
+                  Driver Schedule
+                </TabsTrigger>
                 <TabsTrigger value="notes">Notes</TabsTrigger>
               </TabsList>
 
@@ -140,8 +158,8 @@ export default function SalesDashboard() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Additional sales tools will appear here. For now, focus on the Driver Schedule tab to coordinate your
-                      team.
+                      Additional sales tools will appear here. For now, focus on
+                      the Driver Schedule tab to coordinate your team.
                     </p>
                   </CardContent>
                 </Card>

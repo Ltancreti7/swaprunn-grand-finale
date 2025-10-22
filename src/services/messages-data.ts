@@ -37,7 +37,10 @@ export const getMessages = (): Message[] => {
 export const getMessagesForUser = (userId: string): Message[] => {
   return messages
     .filter((msg) => msg.sender === userId || msg.receiver === userId)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    .sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
 };
 
 export const addMessage = (message: Omit<Message, "id">): Message => {
@@ -49,22 +52,33 @@ export const addMessage = (message: Omit<Message, "id">): Message => {
   return newMessage;
 };
 
-export const getConversationMessages = (userId: string, otherUserId: string): Message[] => {
+export const getConversationMessages = (
+  userId: string,
+  otherUserId: string,
+): Message[] => {
   return messages
     .filter(
       (msg) =>
         (msg.sender === userId && msg.receiver === otherUserId) ||
-        (msg.sender === otherUserId && msg.receiver === userId)
+        (msg.sender === otherUserId && msg.receiver === userId),
     )
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    .sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    );
 };
 
-export const getConversations = (userId: string): Array<{
+export const getConversations = (
+  userId: string,
+): Array<{
   otherUserId: string;
   lastMessage: Message;
   unreadCount: number;
 }> => {
-  const conversationMap = new Map<string, { lastMessage: Message; unreadCount: number }>();
+  const conversationMap = new Map<
+    string,
+    { lastMessage: Message; unreadCount: number }
+  >();
 
   messages
     .filter((msg) => msg.sender === userId || msg.receiver === userId)
@@ -72,7 +86,10 @@ export const getConversations = (userId: string): Array<{
       const otherUserId = msg.sender === userId ? msg.receiver : msg.sender;
       const existing = conversationMap.get(otherUserId);
 
-      if (!existing || new Date(msg.timestamp) > new Date(existing.lastMessage.timestamp)) {
+      if (
+        !existing ||
+        new Date(msg.timestamp) > new Date(existing.lastMessage.timestamp)
+      ) {
         conversationMap.set(otherUserId, {
           lastMessage: msg,
           unreadCount: existing?.unreadCount || 0,
@@ -85,7 +102,9 @@ export const getConversations = (userId: string): Array<{
       otherUserId,
       ...data,
     }))
-    .sort((a, b) => 
-      new Date(b.lastMessage.timestamp).getTime() - new Date(a.lastMessage.timestamp).getTime()
+    .sort(
+      (a, b) =>
+        new Date(b.lastMessage.timestamp).getTime() -
+        new Date(a.lastMessage.timestamp).getTime(),
     );
 };

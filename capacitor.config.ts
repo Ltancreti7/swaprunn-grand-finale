@@ -1,9 +1,9 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: 'com.swaprunn.app',
-  appName: 'SwapRunn',
-  webDir: 'dist',
+  appId: "com.swaprunn.app",
+  appName: "SwapRunn",
+  webDir: "dist",
   plugins: {
     SplashScreen: {
       launchShowDuration: 3000,
@@ -20,10 +20,10 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: "default",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#ffffff",
     },
     PushNotifications: {
-      presentationOptions: ["badge", "sound", "alert"]
+      presentationOptions: ["badge", "sound", "alert"],
     },
     NativeBiometric: {
       // Face ID / Touch ID configuration
@@ -33,8 +33,8 @@ const config: CapacitorConfig = {
     },
     BarcodeScanner: {
       // Barcode scanner configuration
-    }
-  }
+    },
+  },
 };
 
 export default config;
