@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Camera, ImageIcon, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Camera, ImageIcon, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface VehicleInspectionPhotosProps {
   assignmentId: string;
@@ -11,12 +16,14 @@ interface VehicleInspectionPhotosProps {
 
 interface Inspection {
   id: string;
-  inspection_type: 'pre_drive' | 'post_drive';
+  inspection_type: "pre_drive" | "post_drive";
   photo_urls: string[];
   created_at: string;
 }
 
-export function VehicleInspectionPhotos({ assignmentId }: VehicleInspectionPhotosProps) {
+export function VehicleInspectionPhotos({
+  assignmentId,
+}: VehicleInspectionPhotosProps) {
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,31 +35,35 @@ export function VehicleInspectionPhotos({ assignmentId }: VehicleInspectionPhoto
   const fetchInspections = async () => {
     try {
       const { data, error } = await supabase
-        .from('vehicle_inspections')
-        .select('*')
-        .eq('assignment_id', assignmentId)
-        .order('created_at', { ascending: true });
+        .from("vehicle_inspections")
+        .select("*")
+        .eq("assignment_id", assignmentId)
+        .order("created_at", { ascending: true });
 
       if (error) throw error;
-      
+
       // Type-safe mapping
-      const typedInspections: Inspection[] = (data || []).map(item => ({
+      const typedInspections: Inspection[] = (data || []).map((item) => ({
         id: item.id,
-        inspection_type: item.inspection_type as 'pre_drive' | 'post_drive',
+        inspection_type: item.inspection_type as "pre_drive" | "post_drive",
         photo_urls: item.photo_urls as string[],
-        created_at: item.created_at
+        created_at: item.created_at,
       }));
-      
+
       setInspections(typedInspections);
     } catch (error) {
-      console.error('Error fetching inspections:', error);
+      console.error("Error fetching inspections:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const preDriveInspection = inspections.find(i => i.inspection_type === 'pre_drive');
-  const postDriveInspection = inspections.find(i => i.inspection_type === 'post_drive');
+  const preDriveInspection = inspections.find(
+    (i) => i.inspection_type === "pre_drive",
+  );
+  const postDriveInspection = inspections.find(
+    (i) => i.inspection_type === "post_drive",
+  );
 
   if (loading) {
     return (
@@ -91,7 +102,10 @@ export function VehicleInspectionPhotos({ assignmentId }: VehicleInspectionPhoto
           {preDriveInspection && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-400/30">
+                <Badge
+                  variant="outline"
+                  className="bg-blue-500/20 text-blue-400 border-blue-400/30"
+                >
                   Pre-Departure
                 </Badge>
                 <span className="text-white/60 text-sm">
@@ -123,7 +137,10 @@ export function VehicleInspectionPhotos({ assignmentId }: VehicleInspectionPhoto
           {postDriveInspection && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-400/30">
+                <Badge
+                  variant="outline"
+                  className="bg-green-500/20 text-green-400 border-green-400/30"
+                >
                   Post-Delivery
                 </Badge>
                 <span className="text-white/60 text-sm">
@@ -154,7 +171,10 @@ export function VehicleInspectionPhotos({ assignmentId }: VehicleInspectionPhoto
       </Card>
 
       {/* Full-size Image Dialog */}
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+      <Dialog
+        open={!!selectedImage}
+        onOpenChange={() => setSelectedImage(null)}
+      >
         <DialogContent className="max-w-4xl bg-black/95 border-white/20">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center justify-between">
