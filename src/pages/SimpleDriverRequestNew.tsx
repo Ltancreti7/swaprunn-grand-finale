@@ -899,11 +899,11 @@ const SimpleDriverRequest = () => {
           <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2 text-white/40 text-xs sm:hidden">
             {currentStep > 1 && <span>← Swipe</span>}
             <div className="flex gap-1">
-              {Array.from({ length: totalSteps }).map((_, index) => (
+              {steps.map((step) => (
                 <div
-                  key={index}
+                  key={step.number}
                   className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                    index + 1 === currentStep ? 'bg-[#E11900]' : 'bg-white/20'
+                    step.number === currentStep ? 'bg-[#E11900]' : 'bg-white/20'
                   }`}
                 />
               ))}

@@ -226,7 +226,7 @@ export function TrustScoreDashboard({ driverId }: TrustScoreDashboardProps) {
             {Array.isArray(categoryMetrics) && categoryMetrics.length > 0 ? (
               <div className="space-y-3">
                 {categoryMetrics.map((metric, index) => (
-                  <Card key={index}>
+                  <Card key={metric.category}>
                     <CardContent className="p-4">
                       <div className="flex justify-between items-center">
                         <div>

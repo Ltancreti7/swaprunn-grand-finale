@@ -86,9 +86,9 @@ export const TutorialOverlay = ({ isOpen, onClose }: TutorialOverlayProps) => {
                 Step {currentStep + 1} of {tutorialSteps.length}
               </span>
               <div className="flex gap-1">
-                {tutorialSteps.map((_, index) => (
+                {tutorialSteps.map((step, index) => (
                   <div
-                    key={index}
+                    key={step.title}
                     className={cn(
                       "w-2 h-2 rounded-full",
                       index === currentStep ? "bg-primary" : "bg-muted"

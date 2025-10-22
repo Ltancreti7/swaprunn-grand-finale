@@ -36,7 +36,7 @@ export const JobStatsCard = ({
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <div key={index} className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
+              <div key={stat.label} className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
                 <div className={`p-3 rounded-lg ${stat.color}`}>
                   <Icon className="h-6 w-6" />
                 </div>

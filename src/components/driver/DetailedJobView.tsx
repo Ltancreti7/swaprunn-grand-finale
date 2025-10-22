@@ -493,7 +493,7 @@ export function DetailedJobView({
                 {preDeparturePhotos.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
                     {preDeparturePhotoUrls.map((url, index) => (
-                      <div key={index} className="relative group">
+                      <div key={url} className="relative group">
                         <img
                           src={url}
                           alt={`Pre-departure ${index + 1}`}

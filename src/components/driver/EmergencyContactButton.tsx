@@ -142,7 +142,7 @@ export function EmergencyContactButton({ className }: EmergencyContactButtonProp
             <div className="space-y-2">
               {emergencyContacts.map((contact, index) => (
                 <Button
-                  key={index}
+                  key={contact.phone}
                   variant={contact.type === 'Emergency' ? 'destructive' : 'outline'}
                   onClick={() => handleEmergencyCall(contact.phone, contact.name)}
                   className="w-full justify-start"

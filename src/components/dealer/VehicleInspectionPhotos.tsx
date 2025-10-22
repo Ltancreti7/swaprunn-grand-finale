@@ -101,7 +101,7 @@ export function VehicleInspectionPhotos({ assignmentId }: VehicleInspectionPhoto
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {preDriveInspection.photo_urls.map((url, index) => (
                   <button
-                    key={index}
+                    key={url}
                     onClick={() => setSelectedImage(url)}
                     className="relative group aspect-square rounded-xl overflow-hidden border-2 border-white/20 hover:border-[#E11900] transition-all hover:scale-105"
                   >
@@ -133,7 +133,7 @@ export function VehicleInspectionPhotos({ assignmentId }: VehicleInspectionPhoto
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {postDriveInspection.photo_urls.map((url, index) => (
                   <button
-                    key={index}
+                    key={url}
                     onClick={() => setSelectedImage(url)}
                     className="relative group aspect-square rounded-xl overflow-hidden border-2 border-white/20 hover:border-[#E11900] transition-all hover:scale-105"
                   >
