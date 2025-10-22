@@ -257,8 +257,8 @@ const DealersOverview = () => {
                 "Digital inspection reports",
                 "Real-time status updates",
                 "Mobile-optimized interface"
-              ].map((feature, index) => (
-                <li key={index} className="flex items-start gap-3">
+              ].map((feature) => (
+                <li key={feature} className="flex items-start gap-3">
                   <CheckCircle className="h-5 w-5 text-[#E11900] mt-0.5 flex-shrink-0" />
                   <span className="text-white/80">{feature}</span>
                 </li>
@@ -276,8 +276,8 @@ const DealersOverview = () => {
                 "GDPR compliant data handling",
                 "24/7 support availability",
                 "Detailed audit trails"
-              ].map((feature, index) => (
-                <li key={index} className="flex items-start gap-3">
+              ].map((feature) => (
+                <li key={feature} className="flex items-start gap-3">
                   <Shield className="h-5 w-5 text-[#E11900] mt-0.5 flex-shrink-0" />
                   <span className="text-white/80">{feature}</span>
                 </li>
