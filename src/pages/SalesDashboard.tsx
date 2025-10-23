@@ -134,7 +134,10 @@ export default function SalesDashboard() {
                   drivers instantly.
                 </p>
               </div>
-              <Link to="/dealer/create-job" className="mt-4 inline-flex sm:mt-0">
+              <Link
+                to="/dealer/create-job"
+                className="mt-4 inline-flex sm:mt-0"
+              >
                 <Button>New Driver Request</Button>
               </Link>
             </div>
