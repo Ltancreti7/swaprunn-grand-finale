@@ -41,7 +41,6 @@ import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/hooks/useAuth";
 import { MobileApp } from "@/components/MobileApp";
-import DriverAcceptedJob from "./pages/DriverAcceptedJob";
 import { Header } from "@/components/Header";
 import { ElasticScrollContainer } from "@/components/ui/elastic-scroll-container";
 
@@ -180,7 +179,6 @@ const App = () => (
                   path="/driver/job/:jobId"
                   element={
                     <ProtectedRoute requiredUserType="driver">
-                      <DriverAcceptedJob />
                     </ProtectedRoute>
                   }
                 />
