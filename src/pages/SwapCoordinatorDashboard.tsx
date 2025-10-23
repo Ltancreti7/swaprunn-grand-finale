@@ -5,7 +5,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RefreshCw, Mail, User, Calendar, MapPin, Clock, Car } from "lucide-react";
+import {
+  RefreshCw,
+  Mail,
+  User,
+  Calendar,
+  MapPin,
+  Clock,
+  Car,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 
@@ -45,7 +53,9 @@ export default function SwapCoordinatorDashboard() {
   }, []);
 
   async function checkAuth() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       navigate("/swap-coordinator/auth");
       return;
@@ -96,7 +106,9 @@ export default function SwapCoordinatorDashboard() {
   }
 
   const openJobs = jobs.filter((j) => j.status === "open");
-  const assignedJobs = jobs.filter((j) => j.status === "assigned" || j.status === "in_progress");
+  const assignedJobs = jobs.filter(
+    (j) => j.status === "assigned" || j.status === "in_progress",
+  );
   const completedJobs = jobs.filter((j) => j.status === "completed");
 
   return (
@@ -114,10 +126,12 @@ export default function SwapCoordinatorDashboard() {
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Swap Coordinator Dashboard</h1>
+            <h1 className="text-3xl font-bold text-white">
+              Swap Coordinator Dashboard
+            </h1>
             <p className="text-white/70">Manage vehicle swaps and deliveries</p>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <Button
               onClick={handleRefreshJobs}
@@ -158,13 +172,22 @@ export default function SwapCoordinatorDashboard() {
 
         <Tabs defaultValue="open" className="w-full">
           <TabsList className="w-full grid grid-cols-3 bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/20 rounded-xl h-auto p-2 gap-2 shadow-lg mb-8">
-            <TabsTrigger value="open" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white text-white/70 rounded-lg font-bold transition-all duration-300 hover:text-white hover:bg-white/10 py-3">
+            <TabsTrigger
+              value="open"
+              className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white text-white/70 rounded-lg font-bold transition-all duration-300 hover:text-white hover:bg-white/10 py-3"
+            >
               Open Jobs ({openJobs.length})
             </TabsTrigger>
-            <TabsTrigger value="assigned" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white text-white/70 rounded-lg font-bold transition-all duration-300 hover:text-white hover:bg-white/10 py-3">
+            <TabsTrigger
+              value="assigned"
+              className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white text-white/70 rounded-lg font-bold transition-all duration-300 hover:text-white hover:bg-white/10 py-3"
+            >
               Assigned ({assignedJobs.length})
             </TabsTrigger>
-            <TabsTrigger value="completed" className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white text-white/70 rounded-lg font-bold transition-all duration-300 hover:text-white hover:bg-white/10 py-3">
+            <TabsTrigger
+              value="completed"
+              className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white text-white/70 rounded-lg font-bold transition-all duration-300 hover:text-white hover:bg-white/10 py-3"
+            >
               Completed ({completedJobs.length})
             </TabsTrigger>
           </TabsList>
@@ -178,7 +201,10 @@ export default function SwapCoordinatorDashboard() {
               </Card>
             ) : (
               openJobs.map((job) => (
-                <Card key={job.id} className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl">
+                <Card
+                  key={job.id}
+                  className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl"
+                >
                   <CardHeader>
                     <CardTitle className="text-white flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -195,8 +221,12 @@ export default function SwapCoordinatorDashboard() {
                       <div className="flex items-start gap-2">
                         <MapPin className="h-4 w-4 mt-1 flex-shrink-0 text-white/60" />
                         <div>
-                          <p className="text-sm font-medium">Pickup: {job.pickup_address}</p>
-                          <p className="text-sm">Delivery: {job.delivery_address}</p>
+                          <p className="text-sm font-medium">
+                            Pickup: {job.pickup_address}
+                          </p>
+                          <p className="text-sm">
+                            Delivery: {job.delivery_address}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -223,12 +253,17 @@ export default function SwapCoordinatorDashboard() {
             {assignedJobs.length === 0 ? (
               <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                 <CardContent className="p-8 text-center">
-                  <p className="text-white/70">No assigned jobs at the moment</p>
+                  <p className="text-white/70">
+                    No assigned jobs at the moment
+                  </p>
                 </CardContent>
               </Card>
             ) : (
               assignedJobs.map((job) => (
-                <Card key={job.id} className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl">
+                <Card
+                  key={job.id}
+                  className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl"
+                >
                   <CardHeader>
                     <CardTitle className="text-white flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -245,8 +280,12 @@ export default function SwapCoordinatorDashboard() {
                       <div className="flex items-start gap-2">
                         <MapPin className="h-4 w-4 mt-1 flex-shrink-0 text-white/60" />
                         <div>
-                          <p className="text-sm font-medium">Pickup: {job.pickup_address}</p>
-                          <p className="text-sm">Delivery: {job.delivery_address}</p>
+                          <p className="text-sm font-medium">
+                            Pickup: {job.pickup_address}
+                          </p>
+                          <p className="text-sm">
+                            Delivery: {job.delivery_address}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -278,7 +317,10 @@ export default function SwapCoordinatorDashboard() {
               </Card>
             ) : (
               completedJobs.map((job) => (
-                <Card key={job.id} className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl">
+                <Card
+                  key={job.id}
+                  className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-2xl"
+                >
                   <CardHeader>
                     <CardTitle className="text-white flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -295,8 +337,12 @@ export default function SwapCoordinatorDashboard() {
                       <div className="flex items-start gap-2">
                         <MapPin className="h-4 w-4 mt-1 flex-shrink-0 text-white/60" />
                         <div>
-                          <p className="text-sm font-medium">Pickup: {job.pickup_address}</p>
-                          <p className="text-sm">Delivery: {job.delivery_address}</p>
+                          <p className="text-sm font-medium">
+                            Pickup: {job.pickup_address}
+                          </p>
+                          <p className="text-sm">
+                            Delivery: {job.delivery_address}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

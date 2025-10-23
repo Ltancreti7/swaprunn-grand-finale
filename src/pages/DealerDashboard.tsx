@@ -322,7 +322,8 @@ const DealerDashboard = () => {
 
       toast({
         title: "Profile Fixed",
-        description: "Your dealer profile has been successfully repaired. Try creating a job now.",
+        description:
+          "Your dealer profile has been successfully repaired. Try creating a job now.",
       });
 
       // Refresh the page to reload the profile
@@ -331,7 +332,7 @@ const DealerDashboard = () => {
       console.error("Profile repair failed:", error);
       toast({
         title: "Profile Repair Failed",
-        description: `Failed to repair profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: `Failed to repair profile: ${error instanceof Error ? error.message : "Unknown error"}`,
         variant: "destructive",
       });
     }
