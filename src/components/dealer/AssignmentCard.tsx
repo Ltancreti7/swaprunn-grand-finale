@@ -85,7 +85,7 @@ export const AssignmentCard = ({
     profile_photo_url: "",
     available: true,
     city_ok: true,
-    trust_score: 100
+    trust_score: 100,
   };
   const hasStarted = !!assignment.started_at;
   const [salespersonName, setSalespersonName] = useState<string>("");
