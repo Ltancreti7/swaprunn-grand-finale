@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 interface DistanceResult {
   distance: number; // in miles
   duration: string; // human readable duration
@@ -23,8 +25,6 @@ export class DistanceService {
       }
 
       // Call Supabase edge function for Google Maps integration
-      const { supabase } = await import("@/integrations/supabase/client");
-
       const { data, error } = await supabase.functions.invoke(
         "calculate-distance",
         {
