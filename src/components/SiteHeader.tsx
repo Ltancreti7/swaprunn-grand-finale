@@ -4,11 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/components/Logo";
 import BackButton from "@/components/BackButton";
 const SiteHeader = () => {
-  const {
-    user,
-    userProfile,
-    signOut
-  } = useAuth();
+  const { user, userProfile, signOut } = useAuth();
   useEffect(() => {
     let lastScroll = 0;
     const onScroll = () => {
@@ -16,30 +12,32 @@ const SiteHeader = () => {
 
       // Scrolling down past threshold - shrink header
       if (currentScroll > lastScroll && currentScroll > 12) {
-        document.body.classList.add('scrolled');
+        document.body.classList.add("scrolled");
       }
       // At the top - expand header
       else if (currentScroll <= 12) {
-        document.body.classList.remove('scrolled');
+        document.body.classList.remove("scrolled");
       }
       // Scrolling up but not at top yet - keep header small
 
       lastScroll = currentScroll;
     };
-    window.addEventListener('scroll', onScroll, {
-      passive: true
+    window.addEventListener("scroll", onScroll, {
+      passive: true,
     });
     onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
   const handleSignOut = async () => {
     await signOut();
-    window.location.href = '/';
+    window.location.href = "/";
   };
-  return <>
+  return (
+    <>
       <BackButton />
-      <style dangerouslySetInnerHTML={{
-      __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           :root{
             --sr-red:#DC2626; --sr-white:#FFFFFF; --sr-bg:#0B0F14;
             --sr-radius:14px; --sr-shadow:0 8px 24px rgba(0,0,0,.25);
@@ -238,20 +236,20 @@ const SiteHeader = () => {
             pointer-events: none;
           }
           .sr-brand .sr-car-old, .sr-brand [data-old-car]{ display:none !important; }
-        `
-    }} />
-      
+        `,
+        }}
+      />
+
       <header className="sr-header py-0">
         <div className="sr-wrap px-[7px] my-0 bg-black/[0.25]">
           <div className="sr-brandstack py-0 my-0">
             <Logo className="sr-brand" size="auth" />
             <div className="sr-tagline">From Dealership to Driveway</div>
           </div>
-          <nav className="sr-nav">
-            
-          </nav>
+          <nav className="sr-nav"></nav>
         </div>
       </header>
-    </>;
+    </>
+  );
 };
 export default SiteHeader;

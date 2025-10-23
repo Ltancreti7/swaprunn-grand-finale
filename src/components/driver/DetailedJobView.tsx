@@ -112,7 +112,7 @@ export function DetailedJobView({
       }
 
       // Save vehicle inspection record
-      const { error: inspectionError } = await supabase
+      const { error: inspectionError } = await (supabase as any)
         .from("vehicle_inspections")
         .insert({
           job_id: job.id,
@@ -202,7 +202,7 @@ export function DetailedJobView({
       } = supabase.storage.from("vehicle-photos").getPublicUrl(filePath);
 
       // Save delivery inspection record
-      const { error: inspectionError } = await supabase
+      const { error: inspectionError } = await (supabase as any)
         .from("vehicle_inspections")
         .insert({
           job_id: job.id,
@@ -492,22 +492,22 @@ export function DetailedJobView({
 
                 {preDeparturePhotos.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-                    {preDeparturePhotoUrls.map((url, index) => (
-                      <div key={index} className="relative group">
+                    {preDeparturePhotoUrls.map((url, idx) => (
+                      <div key={url} className="relative group">
                         <img
                           src={url}
-                          alt={`Pre-departure ${index + 1}`}
+                          alt={`Pre-departure ${idx + 1}`}
                           className="w-full h-32 object-cover rounded-xl border-2 border-white/20"
                         />
                         <button
                           type="button"
-                          onClick={() => removePreDeparturePhoto(index)}
+                          onClick={() => removePreDeparturePhoto(idx)}
                           className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <X className="h-4 w-4" />
                         </button>
                         <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                          Photo {index + 1}
+                          Photo {idx + 1}
                         </div>
                       </div>
                     ))}

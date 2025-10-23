@@ -21,9 +21,12 @@ const PasswordResetRequest = () => {
 
     try {
       const redirectTo = `${window.location.origin}/auth/password-update`;
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo,
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        {
+          redirectTo,
+        },
+      );
 
       if (error) throw error;
 
@@ -34,7 +37,8 @@ const PasswordResetRequest = () => {
 
       navigate("/", { replace: true });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Please try again.";
+      const message =
+        error instanceof Error ? error.message : "Please try again.";
       toast({
         title: "Unable to send reset link",
         description: message,
@@ -64,7 +68,8 @@ const PasswordResetRequest = () => {
             <span className="text-[#E11900]">.</span>
           </h1>
           <p className="text-white/80 text-lg">
-            Enter the email tied to your SwapRunn account and well send instructions.
+            Enter the email tied to your SwapRunn account and well send
+            instructions.
           </p>
         </div>
 
@@ -72,7 +77,10 @@ const PasswordResetRequest = () => {
           <CardContent className="space-y-6 py-8">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="reset-email" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="reset-email"
+                  className="text-white text-sm font-medium"
+                >
                   Email Address
                 </Label>
                 <Input

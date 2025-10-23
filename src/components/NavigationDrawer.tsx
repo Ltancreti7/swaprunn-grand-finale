@@ -1,4 +1,21 @@
-import { Menu, X, Home, Users, Building2, Info, Mail, LayoutDashboard, FileText, Settings, CreditCard, UserPlus, LogOut, HelpCircle, Navigation, History } from "lucide-react";
+import {
+  Menu,
+  X,
+  Home,
+  Users,
+  Building2,
+  Info,
+  Mail,
+  LayoutDashboard,
+  FileText,
+  Settings,
+  CreditCard,
+  UserPlus,
+  LogOut,
+  HelpCircle,
+  Navigation,
+  History,
+} from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,12 +28,13 @@ export function NavigationDrawer() {
   const navigate = useNavigate();
   const { user, userProfile, signOut } = useAuth();
 
-  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
 
   const handleLogout = async () => {
     setIsOpen(false);
     await signOut();
-    navigate('/');
+    navigate("/");
   };
 
   const handleLinkClick = () => {
@@ -37,8 +55,8 @@ export function NavigationDrawer() {
       ];
     }
 
-    const isDealer = userProfile?.dealers || userProfile?.role === 'dealer';
-    
+    const isDealer = userProfile?.dealers || userProfile?.role === "dealer";
+
     if (isDealer) {
       // Dealer menu
       return [
@@ -75,18 +93,24 @@ export function NavigationDrawer() {
       >
         <div className="relative w-5 h-5">
           {/* Animated hamburger to X */}
-          <span className={cn(
-            "absolute left-0 w-5 h-0.5 bg-white transition-all duration-300 ease-out",
-            isOpen ? "top-1/2 rotate-45 -translate-y-1/2" : "top-1"
-          )} />
-          <span className={cn(
-            "absolute left-0 top-1/2 w-5 h-0.5 bg-white transition-all duration-300 ease-out -translate-y-1/2",
-            isOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"
-          )} />
-          <span className={cn(
-            "absolute left-0 w-5 h-0.5 bg-white transition-all duration-300 ease-out",
-            isOpen ? "top-1/2 -rotate-45 -translate-y-1/2" : "bottom-1"
-          )} />
+          <span
+            className={cn(
+              "absolute left-0 w-5 h-0.5 bg-white transition-all duration-300 ease-out",
+              isOpen ? "top-1/2 rotate-45 -translate-y-1/2" : "top-1",
+            )}
+          />
+          <span
+            className={cn(
+              "absolute left-0 top-1/2 w-5 h-0.5 bg-white transition-all duration-300 ease-out -translate-y-1/2",
+              isOpen ? "opacity-0 scale-0" : "opacity-100 scale-100",
+            )}
+          />
+          <span
+            className={cn(
+              "absolute left-0 w-5 h-0.5 bg-white transition-all duration-300 ease-out",
+              isOpen ? "top-1/2 -rotate-45 -translate-y-1/2" : "bottom-1",
+            )}
+          />
         </div>
       </Button>
 
@@ -94,7 +118,7 @@ export function NavigationDrawer() {
       <div
         className={cn(
           "fixed inset-0 bg-black/60 z-[70] transition-opacity duration-300",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
         onClick={() => setIsOpen(false)}
         aria-hidden="true"
@@ -104,13 +128,17 @@ export function NavigationDrawer() {
       <div
         className={cn(
           "fixed top-0 left-0 h-full w-64 bg-[#1A1A1A] border-r border-white/10 z-[80] transition-transform duration-300 ease-out shadow-2xl",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex flex-col h-full pt-safe">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-white/10">
-            <img src="/swaprunn-logo-2025.png?v=20251001" alt="SwapRunn" className="h-8 w-auto" />
+            <img
+              src="/swaprunn-logo-2025.png?v=20251001"
+              alt="SwapRunn"
+              className="h-8 w-auto"
+            />
             <Button
               variant="ghost"
               size="icon"
@@ -128,7 +156,7 @@ export function NavigationDrawer() {
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.to);
-                
+
                 return (
                   <li key={item.to}>
                     <Link
@@ -138,7 +166,7 @@ export function NavigationDrawer() {
                         "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 active:scale-95",
                         active
                           ? "bg-[#E11900] text-white shadow-lg"
-                          : "text-white/70 hover:text-white hover:bg-white/10"
+                          : "text-white/70 hover:text-white hover:bg-white/10",
                       )}
                     >
                       <Icon className="h-5 w-5" />

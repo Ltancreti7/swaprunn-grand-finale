@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Bell, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useEffect, useState } from "react";
+import { Bell, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface JobNotificationBannerProps {
   show: boolean;
@@ -8,7 +8,11 @@ interface JobNotificationBannerProps {
   onDismiss: () => void;
 }
 
-export const JobNotificationBanner = ({ show, dealerName, onDismiss }: JobNotificationBannerProps) => {
+export const JobNotificationBanner = ({
+  show,
+  dealerName,
+  onDismiss,
+}: JobNotificationBannerProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [headerOffset, setHeaderOffset] = useState<number>(16);
@@ -29,17 +33,25 @@ export const JobNotificationBanner = ({ show, dealerName, onDismiss }: JobNotifi
 
   useEffect(() => {
     const computeOffset = () => {
-      const header = document.querySelector('.sr-header') as HTMLElement | null;
+      const header = document.querySelector(".sr-header") as HTMLElement | null;
       const height = header?.getBoundingClientRect().height ?? 0;
       setHeaderOffset(height + 8);
     };
 
     computeOffset();
-    window.addEventListener('resize', computeOffset as any, { passive: true } as any);
-    window.addEventListener('scroll', computeOffset as any, { passive: true } as any);
+    window.addEventListener(
+      "resize",
+      computeOffset as any,
+      { passive: true } as any,
+    );
+    window.addEventListener(
+      "scroll",
+      computeOffset as any,
+      { passive: true } as any,
+    );
     return () => {
-      window.removeEventListener('resize', computeOffset as any);
-      window.removeEventListener('scroll', computeOffset as any);
+      window.removeEventListener("resize", computeOffset as any);
+      window.removeEventListener("scroll", computeOffset as any);
     };
   }, []);
 
@@ -58,7 +70,7 @@ export const JobNotificationBanner = ({ show, dealerName, onDismiss }: JobNotifi
     <div
       className={cn(
         "fixed left-0 right-0 z-[80] px-4",
-        isExiting ? "animate-fade-out" : "animate-slide-in-from-top"
+        isExiting ? "animate-fade-out" : "animate-slide-in-from-top",
       )}
       style={{ top: headerOffset }}
       onClick={handleDismiss}

@@ -1,7 +1,7 @@
 declare module "https://deno.land/std@0.190.0/http/server.ts" {
   export function serve(
     handler: (request: Request) => Response | Promise<Response>,
-    options?: { port?: number; signal?: AbortSignal }
+    options?: { port?: number; signal?: AbortSignal },
   ): Promise<void>;
 }
 

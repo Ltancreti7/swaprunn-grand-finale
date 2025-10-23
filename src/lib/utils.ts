@@ -12,11 +12,11 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function formatPhoneNumber(value: string): string {
   // Remove all non-numeric characters
-  const phoneNumber = value.replace(/\D/g, '');
-  
+  const phoneNumber = value.replace(/\D/g, "");
+
   // Don't format if empty
-  if (!phoneNumber) return '';
-  
+  if (!phoneNumber) return "";
+
   // Format based on length
   if (phoneNumber.length <= 3) {
     return `(${phoneNumber}`;
@@ -33,5 +33,5 @@ export function formatPhoneNumber(value: string): string {
  * @returns String with only digits
  */
 export function cleanPhoneNumber(phoneNumber: string): string {
-  return phoneNumber.replace(/\D/g, '');
+  return phoneNumber.replace(/\D/g, "");
 }

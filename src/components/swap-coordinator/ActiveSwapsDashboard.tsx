@@ -3,9 +3,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, MapPin, User, Package, Calendar, CheckCircle } from "lucide-react";
+import {
+  Clock,
+  MapPin,
+  User,
+  Package,
+  Calendar,
+  CheckCircle,
+} from "lucide-react";
 import { format } from "date-fns";
 
 interface DriverRequest {
@@ -44,7 +57,7 @@ export function ActiveSwapsDashboard() {
 
   useEffect(() => {
     fetchRequests();
-    
+
     // Real-time subscription
     const channel = supabase
       .channel("driver_requests_changes")
@@ -57,7 +70,7 @@ export function ActiveSwapsDashboard() {
         },
         () => {
           fetchRequests();
-        }
+        },
       )
       .subscribe();
 
@@ -90,11 +103,14 @@ export function ActiveSwapsDashboard() {
   const updateStatus = async (requestId: string, newStatus: string) => {
     try {
       const updateData: any = { status: newStatus };
-      
-      if (newStatus === "in_transit" && !requests.find(r => r.id === requestId)?.departure_time) {
+
+      if (
+        newStatus === "in_transit" &&
+        !requests.find((r) => r.id === requestId)?.departure_time
+      ) {
         updateData.departure_time = new Date().toISOString();
       }
-      
+
       if (newStatus === "delivered" || newStatus === "returned") {
         updateData.completion_time = new Date().toISOString();
       }
@@ -137,9 +153,10 @@ export function ActiveSwapsDashboard() {
     }
   };
 
-  const filteredRequests = statusFilter === "all" 
-    ? requests 
-    : requests.filter(r => r.status === statusFilter);
+  const filteredRequests =
+    statusFilter === "all"
+      ? requests
+      : requests.filter((r) => r.status === statusFilter);
 
   if (loading) {
     return (
@@ -152,8 +169,10 @@ export function ActiveSwapsDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-white">Active Swaps Dashboard</h2>
-        
+        <h2 className="text-2xl font-bold text-white">
+          Active Swaps Dashboard
+        </h2>
+
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[180px] bg-black/20 border-white/20 text-white">
             <SelectValue placeholder="Filter by status" />
@@ -178,14 +197,17 @@ export function ActiveSwapsDashboard() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredRequests.map((request) => (
-            <Card key={request.id} className="bg-black/40 border-white/10 hover:border-white/30 transition-all">
+            <Card
+              key={request.id}
+              className="bg-black/40 border-white/10 hover:border-white/30 transition-all"
+            >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-white text-lg">
                     Swap Request
                   </CardTitle>
                   <Badge className={getStatusColor(request.status)}>
-                    {request.status.replace('_', ' ').toUpperCase()}
+                    {request.status.replace("_", " ").toUpperCase()}
                   </Badge>
                 </div>
               </CardHeader>
@@ -195,21 +217,31 @@ export function ActiveSwapsDashboard() {
                   <div className="space-y-1">
                     <p className="text-xs text-white/60">Outgoing Vehicle</p>
                     <p className="text-white font-medium">
-                      {request.outgoing_year} {request.outgoing_make} {request.outgoing_model}
+                      {request.outgoing_year} {request.outgoing_make}{" "}
+                      {request.outgoing_model}
                     </p>
-                    <p className="text-xs text-white/60">VIN: {request.outgoing_vin}</p>
+                    <p className="text-xs text-white/60">
+                      VIN: {request.outgoing_vin}
+                    </p>
                     {request.outgoing_stock_number && (
-                      <p className="text-xs text-white/60">Stock: {request.outgoing_stock_number}</p>
+                      <p className="text-xs text-white/60">
+                        Stock: {request.outgoing_stock_number}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-white/60">Incoming Vehicle</p>
                     <p className="text-white font-medium">
-                      {request.incoming_year} {request.incoming_make} {request.incoming_model}
+                      {request.incoming_year} {request.incoming_make}{" "}
+                      {request.incoming_model}
                     </p>
-                    <p className="text-xs text-white/60">VIN: {request.incoming_vin}</p>
+                    <p className="text-xs text-white/60">
+                      VIN: {request.incoming_vin}
+                    </p>
                     {request.incoming_stock_number && (
-                      <p className="text-xs text-white/60">Stock: {request.incoming_stock_number}</p>
+                      <p className="text-xs text-white/60">
+                        Stock: {request.incoming_stock_number}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -218,8 +250,12 @@ export function ActiveSwapsDashboard() {
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-white/60 mt-1" />
                   <div className="flex-1">
-                    <p className="text-white font-medium">{request.destination_dealer_name}</p>
-                    <p className="text-sm text-white/60">{request.destination_address}</p>
+                    <p className="text-white font-medium">
+                      {request.destination_dealer_name}
+                    </p>
+                    <p className="text-sm text-white/60">
+                      {request.destination_address}
+                    </p>
                   </div>
                 </div>
 
@@ -237,7 +273,12 @@ export function ActiveSwapsDashboard() {
                     <Calendar className="w-4 h-4 text-white/60" />
                     <div>
                       <p className="text-white/60 text-xs">Requested</p>
-                      <p className="text-white">{format(new Date(request.request_timestamp), 'MMM d, h:mm a')}</p>
+                      <p className="text-white">
+                        {format(
+                          new Date(request.request_timestamp),
+                          "MMM d, h:mm a",
+                        )}
+                      </p>
                     </div>
                   </div>
                   {request.departure_time && (
@@ -245,7 +286,12 @@ export function ActiveSwapsDashboard() {
                       <Clock className="w-4 h-4 text-white/60" />
                       <div>
                         <p className="text-white/60 text-xs">Departed</p>
-                        <p className="text-white">{format(new Date(request.departure_time), 'MMM d, h:mm a')}</p>
+                        <p className="text-white">
+                          {format(
+                            new Date(request.departure_time),
+                            "MMM d, h:mm a",
+                          )}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -254,7 +300,12 @@ export function ActiveSwapsDashboard() {
                       <Clock className="w-4 h-4 text-white/60" />
                       <div>
                         <p className="text-white/60 text-xs">Est. Arrival</p>
-                        <p className="text-white">{format(new Date(request.estimated_arrival_time), 'MMM d, h:mm a')}</p>
+                        <p className="text-white">
+                          {format(
+                            new Date(request.estimated_arrival_time),
+                            "MMM d, h:mm a",
+                          )}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -263,7 +314,12 @@ export function ActiveSwapsDashboard() {
                       <CheckCircle className="w-4 h-4 text-green-400" />
                       <div>
                         <p className="text-white/60 text-xs">Completed</p>
-                        <p className="text-white">{format(new Date(request.completion_time), 'MMM d, h:mm a')}</p>
+                        <p className="text-white">
+                          {format(
+                            new Date(request.completion_time),
+                            "MMM d, h:mm a",
+                          )}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -274,7 +330,8 @@ export function ActiveSwapsDashboard() {
                   <div className="pt-2 border-t border-white/10">
                     <p className="text-xs text-white/60 mb-1">Contact</p>
                     <p className="text-white text-sm">
-                      {request.contact_name} {request.contact_phone && `• ${request.contact_phone}`}
+                      {request.contact_name}{" "}
+                      {request.contact_phone && `• ${request.contact_phone}`}
                     </p>
                   </div>
                 )}
@@ -288,7 +345,10 @@ export function ActiveSwapsDashboard() {
 
                 {request.fuel_level && (
                   <div className="text-sm">
-                    <p className="text-white/60 text-xs">Fuel: <span className="text-white">{request.fuel_level}</span></p>
+                    <p className="text-white/60 text-xs">
+                      Fuel:{" "}
+                      <span className="text-white">{request.fuel_level}</span>
+                    </p>
                   </div>
                 )}
 

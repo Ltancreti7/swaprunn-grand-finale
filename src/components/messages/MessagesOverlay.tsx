@@ -11,8 +11,15 @@ interface MessagesOverlayProps {
   currentUserId: string;
 }
 
-export function MessagesOverlay({ isOpen, onClose, userType, currentUserId }: MessagesOverlayProps) {
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+export function MessagesOverlay({
+  isOpen,
+  onClose,
+  userType,
+  currentUserId,
+}: MessagesOverlayProps) {
+  const [selectedConversation, setSelectedConversation] = useState<
+    string | null
+  >(null);
 
   if (!isOpen) return null;
 
@@ -49,11 +56,18 @@ export function MessagesOverlay({ isOpen, onClose, userType, currentUserId }: Me
           <div className="h-[calc(100%-88px)] overflow-hidden">
             <Tabs defaultValue="open" className="h-full flex flex-col">
               <TabsList className="w-full px-6 pt-4">
-                <TabsTrigger value="open" className="flex-1">Open</TabsTrigger>
-                <TabsTrigger value="past" className="flex-1">Past</TabsTrigger>
+                <TabsTrigger value="open" className="flex-1">
+                  Open
+                </TabsTrigger>
+                <TabsTrigger value="past" className="flex-1">
+                  Past
+                </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="open" className="flex-1 overflow-y-auto px-6 mt-4">
+              <TabsContent
+                value="open"
+                className="flex-1 overflow-y-auto px-6 mt-4"
+              >
                 <ConversationList
                   status="open"
                   onSelectConversation={setSelectedConversation}
@@ -62,7 +76,10 @@ export function MessagesOverlay({ isOpen, onClose, userType, currentUserId }: Me
                 />
               </TabsContent>
 
-              <TabsContent value="past" className="flex-1 overflow-y-auto px-6 mt-4">
+              <TabsContent
+                value="past"
+                className="flex-1 overflow-y-auto px-6 mt-4"
+              >
                 <ConversationList
                   status="past"
                   onSelectConversation={setSelectedConversation}

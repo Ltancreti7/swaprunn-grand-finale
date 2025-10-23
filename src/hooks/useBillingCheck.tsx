@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import { useToast } from './use-toast';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./useAuth";
+import { useToast } from "./use-toast";
 
 interface BillingStatus {
   canCreateJobs: boolean;
@@ -15,7 +15,7 @@ export function useBillingCheck() {
   const { toast } = useToast();
   const [billingStatus, setBillingStatus] = useState<BillingStatus>({
     canCreateJobs: true,
-    billingStatus: 'active',
+    billingStatus: "active",
     showWarning: false,
   });
   const [loading, setLoading] = useState(true);
@@ -32,25 +32,26 @@ export function useBillingCheck() {
 
     try {
       const { data: subscription, error } = await supabase
-        .from('dealer_subscriptions')
-        .select('*')
-        .eq('dealer_id', userProfile.dealer_id)
+        .from("dealer_subscriptions")
+        .select("*")
+        .eq("dealer_id", userProfile.dealer_id)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== "PGRST116") throw error;
 
       if (!subscription) {
         setBillingStatus({
           canCreateJobs: false,
-          billingStatus: 'no_subscription',
+          billingStatus: "no_subscription",
           showWarning: true,
-          warningMessage: 'No active subscription. Please subscribe to create jobs.',
+          warningMessage:
+            "No active subscription. Please subscribe to create jobs.",
         });
         setLoading(false);
         return;
       }
 
-      const isPastDue = subscription.billing_status === 'past_due';
+      const isPastDue = subscription.billing_status === "past_due";
       const usagePercentage = (subscription.swaps_this_period / 60) * 100;
       const highUsage = usagePercentage >= 90;
 
@@ -59,16 +60,16 @@ export function useBillingCheck() {
         billingStatus: subscription.billing_status,
         showWarning: isPastDue || highUsage,
         warningMessage: isPastDue
-          ? 'Your account is past due. Please update payment to continue.'
+          ? "Your account is past due. Please update payment to continue."
           : highUsage
-          ? `You've used ${subscription.swaps_this_period} swaps this period (${usagePercentage.toFixed(0)}% of expected usage).`
-          : undefined,
+            ? `You've used ${subscription.swaps_this_period} swaps this period (${usagePercentage.toFixed(0)}% of expected usage).`
+            : undefined,
       });
     } catch (error) {
-      console.error('Error checking billing status:', error);
+      console.error("Error checking billing status:", error);
       setBillingStatus({
         canCreateJobs: true,
-        billingStatus: 'unknown',
+        billingStatus: "unknown",
         showWarning: false,
       });
     } finally {
@@ -81,23 +82,24 @@ export function useBillingCheck() {
 
     try {
       const { data: subscription } = await supabase
-        .from('dealer_subscriptions')
-        .select('billing_status')
-        .eq('dealer_id', userProfile.dealer_id)
+        .from("dealer_subscriptions")
+        .select("billing_status")
+        .eq("dealer_id", userProfile.dealer_id)
         .single();
 
-      if (subscription?.billing_status === 'past_due') {
+      if (subscription?.billing_status === "past_due") {
         toast({
-          title: 'Payment Required',
-          description: 'Cannot complete jobs with past due account. Please update payment.',
-          variant: 'destructive',
+          title: "Payment Required",
+          description:
+            "Cannot complete jobs with past due account. Please update payment.",
+          variant: "destructive",
         });
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error checking billing before job completion:', error);
+      console.error("Error checking billing before job completion:", error);
       return true; // Allow in case of error to prevent blocking
     }
   };

@@ -14,34 +14,36 @@ const MobileNav = ({ className }: MobileNavProps) => {
   const { user, signOut } = useAuth();
 
   // Pages where we should NOT show Back button
-  const hideBackOnPages = ['/', '/404'];
+  const hideBackOnPages = ["/", "/404"];
   const shouldShowBack = !hideBackOnPages.includes(location.pathname);
 
   // Pages where we should show Logout (authenticated pages only)
   const authPages = [
-    '/driver/dashboard',
-    '/dealer/dashboard',
-    '/dealer/admin',
-    '/dealer/settings',
-    '/driver/profile',
-    '/driver/requests',
-    '/driver/jobs',
-    '/staff/signup'
+    "/driver/dashboard",
+    "/dealer/dashboard",
+    "/dealer/admin",
+    "/dealer/settings",
+    "/driver/profile",
+    "/driver/requests",
+    "/driver/jobs",
+    "/staff/signup",
   ];
-  const isAuthPage = authPages.some(page => location.pathname.startsWith(page));
+  const isAuthPage = authPages.some((page) =>
+    location.pathname.startsWith(page),
+  );
   const shouldShowLogout = user && isAuthPage;
 
   const handleBack = () => {
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      navigate('/');
+      navigate("/");
     }
   };
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/');
+    navigate("/");
   };
 
   // Don't render if no buttons to show
@@ -55,7 +57,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
         "fixed top-2 left-0 right-0 z-[60] bg-black/40 backdrop-blur-md border-b border-white/10",
         "flex items-center justify-between px-4 py-2",
         "lg:bg-transparent lg:backdrop-blur-none lg:border-0",
-        className
+        className,
       )}
     >
       {/* Back Button */}

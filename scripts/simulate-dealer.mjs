@@ -1,5 +1,6 @@
 import { chromium } from "playwright";
 import fs from "fs";
+import path from "path";
 
 (async () => {
   const url = process.env.APP_URL || "http://localhost:8082/";
@@ -13,7 +14,8 @@ import fs from "fs";
   await page.waitForSelector("header", { timeout: 5000 }).catch(() => {});
 
   // Screenshot before
-  const beforePath = "/workspaces/swaprunn-grand-finale/sim-before.png";
+  const cwd = process.cwd();
+  const beforePath = path.join(cwd, "sim-before.png");
   await page.screenshot({ path: beforePath, fullPage: false });
   console.log("Saved before screenshot to", beforePath);
 
@@ -39,7 +41,7 @@ import fs from "fs";
   await page.waitForTimeout(1200);
 
   // Screenshot after
-  const afterPath = "/workspaces/swaprunn-grand-finale/sim-after.png";
+  const afterPath = path.join(cwd, "sim-after.png");
   await page.screenshot({ path: afterPath, fullPage: false });
   console.log("Saved after screenshot to", afterPath);
 
@@ -61,9 +63,7 @@ import fs from "fs";
   await browser.close();
   // write a small report
   const report = { before: beforePath, after: afterPath, badgeText };
-  fs.writeFileSync(
-    "/workspaces/swaprunn-grand-finale/sim-report.json",
-    JSON.stringify(report, null, 2),
-  );
-  console.log("Wrote sim-report.json");
+  const reportPath = path.join(cwd, "sim-report.json");
+  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  console.log("Wrote sim-report.json to", reportPath);
 })();

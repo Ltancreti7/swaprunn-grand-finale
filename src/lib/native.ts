@@ -1,4 +1,4 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor } from "@capacitor/core";
 
 export const isNativeIos = () =>
-  Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios';
+  Capacitor.isNativePlatform() && Capacitor.getPlatform() === "ios";

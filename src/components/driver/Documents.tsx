@@ -179,9 +179,9 @@ export function Documents({ driver, isLoading }: DocumentsProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {driver.docs.map((doc, index) => (
+          {driver.docs.map((doc) => (
             <div
-              key={index}
+              key={doc.type}
               className="flex items-center justify-between p-4 border border-border rounded-lg bg-surface-secondary"
             >
               <div className="flex items-center gap-3">

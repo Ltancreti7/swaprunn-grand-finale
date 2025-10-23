@@ -1,30 +1,39 @@
-import { useState, useEffect } from 'react';
-import { AlertTriangle, MapPin, Phone } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { AlertTriangle, MapPin, Phone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 interface EmergencyContactButtonProps {
   className?: string;
 }
 
-export function EmergencyContactButton({ className }: EmergencyContactButtonProps) {
+export function EmergencyContactButton({
+  className,
+}: EmergencyContactButtonProps) {
   const [showEmergencyDialog, setShowEmergencyDialog] = useState(false);
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
   const [locationError, setLocationError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Emergency contacts (these would come from the database in a real app)
   const emergencyContacts = [
-    { name: 'SwapRunn Support', phone: '1-800-SWAP-911', type: 'Support' },
-    { name: 'Emergency Services', phone: '911', type: 'Emergency' },
-    { name: 'Roadside Assistance', phone: '1-800-AAA-HELP', type: 'Roadside' }
+    { name: "SwapRunn Support", phone: "1-800-SWAP-911", type: "Support" },
+    { name: "Emergency Services", phone: "911", type: "Emergency" },
+    { name: "Roadside Assistance", phone: "1-800-AAA-HELP", type: "Roadside" },
   ];
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by this browser');
+      setLocationError("Geolocation is not supported by this browser");
       return;
     }
 
@@ -32,21 +41,26 @@ export function EmergencyContactButton({ className }: EmergencyContactButtonProp
       (position) => {
         setLocation({
           lat: position.coords.latitude,
-          lng: position.coords.longitude
+          lng: position.coords.longitude,
         });
         setLocationError(null);
       },
       (error) => {
-        setLocationError('Unable to get location: ' + error.message);
+        setLocationError("Unable to get location: " + error.message);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 },
     );
   };
 
   const handleEmergencyCall = (phone: string, contactName: string) => {
     // Log emergency call for tracking
-    console.log('Emergency call initiated:', { phone, contactName, location, timestamp: new Date() });
-    
+    console.log("Emergency call initiated:", {
+      phone,
+      contactName,
+      location,
+      timestamp: new Date(),
+    });
+
     // Show location info if available
     if (location) {
       toast({
@@ -54,7 +68,7 @@ export function EmergencyContactButton({ className }: EmergencyContactButtonProp
         description: `Your location (${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}) will be shared with ${contactName}`,
       });
     }
-    
+
     // Initiate call
     window.location.href = `tel:${phone}`;
   };
@@ -105,7 +119,9 @@ export function EmergencyContactButton({ className }: EmergencyContactButtonProp
                   <MapPin className="w-4 h-4" />
                   {location ? (
                     <div>
-                      <p className="text-green-600 font-medium">Location Available</p>
+                      <p className="text-green-600 font-medium">
+                        Location Available
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
                       </p>
@@ -120,8 +136,12 @@ export function EmergencyContactButton({ className }: EmergencyContactButtonProp
                     </div>
                   ) : locationError ? (
                     <div>
-                      <p className="text-red-600 font-medium">Location Unavailable</p>
-                      <p className="text-xs text-muted-foreground">{locationError}</p>
+                      <p className="text-red-600 font-medium">
+                        Location Unavailable
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {locationError}
+                      </p>
                       <Button
                         variant="link"
                         size="sm"
@@ -132,7 +152,9 @@ export function EmergencyContactButton({ className }: EmergencyContactButtonProp
                       </Button>
                     </div>
                   ) : (
-                    <p className="text-yellow-600 font-medium">Getting Location...</p>
+                    <p className="text-yellow-600 font-medium">
+                      Getting Location...
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -140,11 +162,15 @@ export function EmergencyContactButton({ className }: EmergencyContactButtonProp
 
             {/* Emergency Contacts */}
             <div className="space-y-2">
-              {emergencyContacts.map((contact, index) => (
+              {emergencyContacts.map((contact) => (
                 <Button
-                  key={index}
-                  variant={contact.type === 'Emergency' ? 'destructive' : 'outline'}
-                  onClick={() => handleEmergencyCall(contact.phone, contact.name)}
+                  key={contact.phone}
+                  variant={
+                    contact.type === "Emergency" ? "destructive" : "outline"
+                  }
+                  onClick={() =>
+                    handleEmergencyCall(contact.phone, contact.name)
+                  }
                   className="w-full justify-start"
                 >
                   <Phone className="w-4 h-4 mr-2" />
@@ -160,8 +186,9 @@ export function EmergencyContactButton({ className }: EmergencyContactButtonProp
             <Card className="bg-yellow-50 border-yellow-200">
               <CardContent className="pt-4">
                 <p className="text-xs text-yellow-800">
-                  <strong>Safety Tip:</strong> If this is a life-threatening emergency, call 911 immediately. 
-                  Your location will be automatically shared when possible.
+                  <strong>Safety Tip:</strong> If this is a life-threatening
+                  emergency, call 911 immediately. Your location will be
+                  automatically shared when possible.
                 </p>
               </CardContent>
             </Card>

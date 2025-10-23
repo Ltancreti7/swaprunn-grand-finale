@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { QrCode, Search } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
-import type { DriverProfile } from '@/services/driver-data';
-import { findDriverByIdOrPhone } from '@/services/driver-data';
+import { useState } from "react";
+import { QrCode, Search } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import type { DriverProfile } from "@/services/driver-data";
+import { findDriverByIdOrPhone } from "@/services/driver-data";
 
 interface ProfileHeaderProps {
   driver: DriverProfile | null;
@@ -15,20 +15,24 @@ interface ProfileHeaderProps {
   onDriverChange: (driver: DriverProfile) => void;
 }
 
-export function ProfileHeader({ driver, isLoading, onDriverChange }: ProfileHeaderProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+export function ProfileHeader({
+  driver,
+  isLoading,
+  onDriverChange,
+}: ProfileHeaderProps) {
+  const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
-    
+
     setIsSearching(true);
     try {
       const foundDriver = await findDriverByIdOrPhone(searchTerm.trim());
       if (foundDriver) {
         onDriverChange(foundDriver);
-        setSearchTerm('');
+        setSearchTerm("");
         toast({
           title: "Driver Found",
           description: `Switched to ${foundDriver.name}`,
@@ -63,7 +67,11 @@ export function ProfileHeader({ driver, isLoading, onDriverChange }: ProfileHead
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
   };
 
   if (isLoading) {
@@ -96,16 +104,18 @@ export function ProfileHeader({ driver, isLoading, onDriverChange }: ProfileHead
       <CardContent className="p-6">
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-bold">Find Driver Profile</h2>
-          <p className="text-muted-foreground">Enter a driver ID or phone number to view their profile</p>
+          <p className="text-muted-foreground">
+            Enter a driver ID or phone number to view their profile
+          </p>
           <div className="flex gap-2 max-w-md mx-auto">
             <Input
               placeholder="Driver ID or phone number"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
-            <Button 
-              onClick={handleSearch} 
+            <Button
+              onClick={handleSearch}
               disabled={isSearching || !searchTerm.trim()}
               className="px-4"
             >
@@ -129,12 +139,16 @@ export function ProfileHeader({ driver, isLoading, onDriverChange }: ProfileHead
           {/* Avatar */}
           <div className="h-16 w-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-semibold">
             {driver.avatarUrl ? (
-              <img src={driver.avatarUrl} alt={driver.name} className="h-16 w-16 rounded-full object-cover" />
+              <img
+                src={driver.avatarUrl}
+                alt={driver.name}
+                className="h-16 w-16 rounded-full object-cover"
+              />
             ) : (
               getInitials(driver.name)
             )}
           </div>
-          
+
           {/* Driver details */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -149,15 +163,16 @@ export function ProfileHeader({ driver, isLoading, onDriverChange }: ProfileHead
             <p className="text-muted-foreground">{driver.email}</p>
           </div>
         </div>
-        
+
         {/* Right side - Vehicle & actions */}
         <div className="flex flex-col gap-3">
           <Badge variant="outline" className="px-3 py-1 text-sm">
-            {driver.vehicle.make} {driver.vehicle.model} • {driver.vehicle.plate}
+            {driver.vehicle.make} {driver.vehicle.model} •{" "}
+            {driver.vehicle.plate}
           </Badge>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleShareProfile}
             className="flex items-center gap-2"
           >
@@ -166,7 +181,7 @@ export function ProfileHeader({ driver, isLoading, onDriverChange }: ProfileHead
           </Button>
         </div>
       </div>
-      
+
       {/* Search to switch driver */}
       <div className="mt-6 pt-6 border-t">
         <div className="flex gap-2 max-w-md">
@@ -174,11 +189,11 @@ export function ProfileHeader({ driver, isLoading, onDriverChange }: ProfileHead
             placeholder="Switch to another driver (ID or phone)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className="text-sm"
           />
-          <Button 
-            onClick={handleSearch} 
+          <Button
+            onClick={handleSearch}
             disabled={isSearching || !searchTerm.trim()}
             size="sm"
             variant="secondary"
@@ -186,7 +201,7 @@ export function ProfileHeader({ driver, isLoading, onDriverChange }: ProfileHead
             {isSearching ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
             ) : (
-              'View'
+              "View"
             )}
           </Button>
         </div>

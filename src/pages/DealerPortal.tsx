@@ -1,7 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MessageCircle, Plus, User, ClipboardList, CheckCircle, Settings } from "lucide-react";
+import {
+  MessageCircle,
+  Plus,
+  User,
+  ClipboardList,
+  CheckCircle,
+  Settings,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect, useCallback } from "react";
@@ -53,8 +60,6 @@ export default function DealerPortal() {
     fetchDealerData();
   }, [fetchDealerData]);
 
-
-
   if (loading) {
     return (
       <div
@@ -96,7 +101,9 @@ export default function DealerPortal() {
                 key={label}
                 variant={active ? "default" : "secondary"}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${
-                  active ? "bg-[#E11900] hover:bg-[#B51400]" : "bg-white/10 text-white hover:bg-white/20"
+                  active
+                    ? "bg-[#E11900] hover:bg-[#B51400]"
+                    : "bg-white/10 text-white hover:bg-white/20"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -118,19 +125,25 @@ export default function DealerPortal() {
           <Card className="border-white/10 bg-white/5 text-white">
             <CardContent className="flex flex-col items-center gap-4 py-8">
               <div className="scale-[0.6] transform-gpu">
-                <DealerProfilePhoto 
-                  photoUrl={dealerData?.profile_photo_url} 
-                  dealerName={dealerData?.name} 
+                <DealerProfilePhoto
+                  photoUrl={dealerData?.profile_photo_url}
+                  dealerName={dealerData?.name}
                 />
               </div>
 
               <div className="flex flex-col items-center gap-1 text-center">
                 <div className="flex items-center gap-2 text-[#FACC15]">
                   <MessageCircle className="h-4 w-4" />
-                  <span className="text-sm font-semibold">Top-rated dealer partner</span>
+                  <span className="text-sm font-semibold">
+                    Top-rated dealer partner
+                  </span>
                 </div>
-                <h2 className="text-2xl font-bold">{dealerData?.name || 'Dealer Name'}</h2>
-                <p className="text-sm text-white/70">{dealerData?.dealership_name || 'Dealership Name'}</p>
+                <h2 className="text-2xl font-bold">
+                  {dealerData?.name || "Dealer Name"}
+                </h2>
+                <p className="text-sm text-white/70">
+                  {dealerData?.dealership_name || "Dealership Name"}
+                </p>
               </div>
 
               <Separator className="bg-white/10" />
@@ -138,11 +151,15 @@ export default function DealerPortal() {
               <div className="grid w-full gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
                   <p className="text-sm font-semibold">Open Requests</p>
-                  <p className="text-xs text-white/60">Live metrics appear as jobs roll in.</p>
+                  <p className="text-xs text-white/60">
+                    Live metrics appear as jobs roll in.
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
                   <p className="text-sm font-semibold">On-time Delivery Rate</p>
-                  <p className="text-xs text-white/60">Connect real data to unlock performance stats.</p>
+                  <p className="text-xs text-white/60">
+                    Connect real data to unlock performance stats.
+                  </p>
                 </div>
               </div>
             </CardContent>

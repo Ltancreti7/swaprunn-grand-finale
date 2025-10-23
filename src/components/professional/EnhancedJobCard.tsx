@@ -1,10 +1,10 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Clock, DollarSign, User, Phone, Car } from 'lucide-react';
-import { useProfessionalJob } from '@/hooks/useProfessionalJob';
-import { useAuth } from '@/hooks/useAuth';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Clock, DollarSign, User, Phone, Car } from "lucide-react";
+import { useProfessionalJob } from "@/hooks/useProfessionalJob";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Job {
   id: string;
@@ -33,47 +33,48 @@ interface Job {
 
 interface EnhancedJobCardProps {
   job: Job;
-  viewType: 'dealer' | 'driver';
+  viewType: "dealer" | "driver";
   onJobUpdate?: () => void;
 }
 
 export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
   job,
   viewType,
-  onJobUpdate
+  onJobUpdate,
 }) => {
   const { user } = useAuth();
-  const { 
-    assignJob, 
-    startJob, 
-    completeJob, 
-    cancelJob, 
-    isLoading 
-  } = useProfessionalJob({ 
-    jobId: job.id, 
-    enableRealtime: true 
-  });
+  const { assignJob, startJob, completeJob, cancelJob, isLoading } =
+    useProfessionalJob({
+      jobId: job.id,
+      enableRealtime: true,
+    });
 
   const assignment = job.assignments?.[0];
   const driver = assignment?.drivers;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300';
-      case 'assigned': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300';
-      case 'in_progress': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300';
-      case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
-      case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
+      case "open":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300";
+      case "assigned":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300";
+      case "in_progress":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300";
+      case "completed":
+        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300";
+      case "cancelled":
+        return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300";
     }
   };
 
   const handleAutoAssign = async () => {
     try {
-      await assignJob(undefined, 'auto');
+      await assignJob(undefined, "auto");
       onJobUpdate?.();
     } catch (error) {
-      console.error('Auto-assignment failed:', error);
+      console.error("Auto-assignment failed:", error);
     }
   };
 
@@ -82,7 +83,7 @@ export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
       await startJob(assignment?.id);
       onJobUpdate?.();
     } catch (error) {
-      console.error('Start job failed:', error);
+      console.error("Start job failed:", error);
     }
   };
 
@@ -91,16 +92,16 @@ export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
       await completeJob(assignment?.id);
       onJobUpdate?.();
     } catch (error) {
-      console.error('Complete job failed:', error);
+      console.error("Complete job failed:", error);
     }
   };
 
   const handleCancelJob = async () => {
     try {
-      await cancelJob(assignment?.id, 'Cancelled by user');
+      await cancelJob(assignment?.id, "Cancelled by user");
       onJobUpdate?.();
     } catch (error) {
-      console.error('Cancel job failed:', error);
+      console.error("Cancel job failed:", error);
     }
   };
 
@@ -115,11 +116,11 @@ export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
             <p className="text-sm text-muted-foreground">#{job.track_token}</p>
           </div>
           <Badge className={getStatusColor(job.status)}>
-            {job.status.replace('_', ' ')}
+            {job.status.replace("_", " ")}
           </Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* Vehicle & Job Info */}
         <div className="grid grid-cols-2 gap-4">
@@ -189,7 +190,9 @@ export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
             <div>
               <p className="text-sm font-medium">{job.customer_name}</p>
               {job.customer_phone && (
-                <p className="text-xs text-muted-foreground">{job.customer_phone}</p>
+                <p className="text-xs text-muted-foreground">
+                  {job.customer_phone}
+                </p>
               )}
             </div>
           </div>
@@ -197,9 +200,9 @@ export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          {viewType === 'dealer' && (
+          {viewType === "dealer" && (
             <>
-              {job.status === 'open' && (
+              {job.status === "open" && (
                 <Button
                   onClick={handleAutoAssign}
                   disabled={isLoading}
@@ -208,7 +211,7 @@ export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
                   Auto Assign
                 </Button>
               )}
-              {job.status !== 'completed' && job.status !== 'cancelled' && (
+              {job.status !== "completed" && job.status !== "cancelled" && (
                 <Button
                   onClick={handleCancelJob}
                   disabled={isLoading}
@@ -221,9 +224,9 @@ export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
             </>
           )}
 
-          {viewType === 'driver' && assignment && (
+          {viewType === "driver" && assignment && (
             <>
-              {job.status === 'assigned' && (
+              {job.status === "assigned" && (
                 <Button
                   onClick={handleStartJob}
                   disabled={isLoading}
@@ -232,7 +235,7 @@ export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
                   Start Job
                 </Button>
               )}
-              {job.status === 'in_progress' && (
+              {job.status === "in_progress" && (
                 <Button
                   onClick={handleCompleteJob}
                   disabled={isLoading}
@@ -241,7 +244,7 @@ export const EnhancedJobCard: React.FC<EnhancedJobCardProps> = ({
                   Complete Job
                 </Button>
               )}
-              {(job.status === 'assigned' || job.status === 'in_progress') && (
+              {(job.status === "assigned" || job.status === "in_progress") && (
                 <Button
                   onClick={handleCancelJob}
                   disabled={isLoading}

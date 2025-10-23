@@ -12,7 +12,7 @@ export function MobilePullToRefresh({
   children,
   onRefresh,
   disabled = false,
-  className
+  className,
 }: MobilePullToRefreshProps) {
   const [isPulling, setIsPulling] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -30,7 +30,8 @@ export function MobilePullToRefresh({
     }
   };
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isMobile || disabled || isRefreshing || touchStartY.current === 0) return;
+    if (!isMobile || disabled || isRefreshing || touchStartY.current === 0)
+      return;
     const currentY = e.touches[0].clientY;
     const distance = currentY - touchStartY.current;
     if (distance > 0) {
@@ -64,20 +65,30 @@ export function MobilePullToRefresh({
   if (!isMobile) {
     return <div className={className}>{children}</div>;
   }
-  return <div ref={containerRef} className={cn("relative overflow-auto", className)} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} style={{
-    transform: `translateY(${pullDistance}px)`,
-    transition: isPulling ? 'none' : 'transform 0.3s ease-out'
-  }}>
+  return (
+    <div
+      ref={containerRef}
+      className={cn("relative overflow-auto", className)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{
+        transform: `translateY(${pullDistance}px)`,
+        transition: isPulling ? "none" : "transform 0.3s ease-out",
+      }}
+    >
       {/* Pull indicator */}
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-center z-10" style={{
-      height: `${pullDistance}px`,
-      transform: `translateY(-${pullDistance}px)`,
-      opacity: pullDistance > 20 ? 1 : 0,
-      transition: 'opacity 0.2s ease-out'
-    }}>
-        
-      </div>
+      <div
+        className="absolute top-0 left-0 right-0 flex items-center justify-center z-10"
+        style={{
+          height: `${pullDistance}px`,
+          transform: `translateY(-${pullDistance}px)`,
+          opacity: pullDistance > 20 ? 1 : 0,
+          transition: "opacity 0.2s ease-out",
+        }}
+      ></div>
 
       {children}
-    </div>;
+    </div>
+  );
 }

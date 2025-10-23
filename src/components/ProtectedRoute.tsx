@@ -1,17 +1,20 @@
-import React, { useRef } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useRef } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Navigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredUserType?: 'dealer' | 'driver' | 'swap_coordinator';
+  requiredUserType?: "dealer" | "driver" | "swap_coordinator";
 }
 
-export function ProtectedRoute({ children, requiredUserType }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  requiredUserType,
+}: ProtectedRouteProps) {
   const { user, userProfile, loading, profileLoading } = useAuth();
   const hasRedirected = useRef(false);
 
@@ -19,7 +22,7 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-foreground">
-          {profileLoading ? 'Loading profile...' : 'Authenticating...'}
+          {profileLoading ? "Loading profile..." : "Authenticating..."}
         </div>
       </div>
     );
@@ -40,25 +43,26 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
               <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-2" />
               <h2 className="text-lg font-semibold">Account Setup Required</h2>
               <p className="text-sm text-muted-foreground mb-4">
-                Your account needs to be set up properly. Please choose your account type to continue.
+                Your account needs to be set up properly. Please choose your
+                account type to continue.
               </p>
             </div>
             <div className="flex flex-col gap-3">
-              <Button 
-                onClick={() => window.location.href = '/dealer/auth'}
+              <Button
+                onClick={() => (window.location.href = "/dealer/auth")}
                 className="flex-1"
               >
                 I'm a Dealer
               </Button>
-              <Button 
-                onClick={() => window.location.href = '/driver/auth'}
+              <Button
+                onClick={() => (window.location.href = "/driver/auth")}
                 variant="outline"
                 className="flex-1"
               >
                 I'm a Driver
               </Button>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => supabase.auth.signOut()}
                 className="flex-1 mt-2"
                 size="sm"
@@ -84,7 +88,7 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
               <p className="text-sm text-muted-foreground mb-4">
                 You don't have permission to access this page.
               </p>
-              <Button onClick={() => window.location.href = '/'}>
+              <Button onClick={() => (window.location.href = "/")}>
                 Go Home
               </Button>
             </CardContent>
@@ -92,14 +96,16 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
         </div>
       );
     }
-    
+
     hasRedirected.current = true;
-    
+
     // Redirect to appropriate landing page for actual user type
-    let redirectPath = '/';
-    if (userProfile?.user_type === 'dealer') redirectPath = '/dealer/dashboard';
-    else if (userProfile?.user_type === 'driver') redirectPath = '/driver/dashboard';
-    else if (userProfile?.user_type === 'swap_coordinator') redirectPath = '/swap-coordinator/dashboard';
+    let redirectPath = "/";
+    if (userProfile?.user_type === "dealer") redirectPath = "/dealer/dashboard";
+    else if (userProfile?.user_type === "driver")
+      redirectPath = "/driver/dashboard";
+    else if (userProfile?.user_type === "swap_coordinator")
+      redirectPath = "/swap-coordinator/dashboard";
     return <Navigate to={redirectPath} replace />;
   }
 
