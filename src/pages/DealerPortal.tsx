@@ -115,7 +115,7 @@ export default function DealerPortal() {
           {/* Request Button */}
           <Button
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#E11900] py-3 text-base font-semibold shadow-lg hover:bg-[#B51400]"
-            onClick={() => navigate("/dealer/request")}
+            onClick={() => navigate("/dealer/create-job")}
           >
             <Plus className="h-5 w-5" />
             Request Delivery

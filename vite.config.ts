@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => ({
           // App chunks by feature - split dealer pages for better loading
           'dealer-auth': ['./src/pages/DealerAuth.tsx'],
           'dealer-dashboard': ['./src/pages/DealerDashboard.tsx', './src/pages/DealerAdminDashboard.tsx'],
-          'dealer-operations': ['./src/pages/DealerRequest.tsx', './src/pages/DealerSettings.tsx'],
+          'dealer-operations': ['./src/pages/CreateJob.tsx', './src/pages/DealerSettings.tsx'],
           'driver-pages': [
             './src/pages/DriverAuth.tsx',
             './src/pages/DriverDashboard.tsx',

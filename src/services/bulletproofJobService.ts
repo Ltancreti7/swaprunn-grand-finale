@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { repairDealerProfile } from "@/utils/repairDealerProfile";
 
 interface JobCreationParams {
   type: "delivery" | "swap";
@@ -60,13 +61,18 @@ type CreatedJobRecord = {
   customer_name?: string | null;
 };
 
-export const bulletproofJobCreation = async (params: JobCreationParams) => {
+export const createJob = async (params: JobCreationParams) => {
   try {
-    console.log("🚀 BULLETPROOF JOB CREATION - Starting...");
+    // First, ensure the dealer profile is properly configured
+    try {
+      await repairDealerProfile();
+    } catch (profileFixError) {
+      console.warn("Profile repair failed, continuing anyway:", profileFixError);
+    }
 
-    // First, get user profile to verify dealer status
-    const { data: profiles, error: profileError } =
-      await supabase.rpc("get_user_profile");
+    const { data: profiles, error: profileError } = await supabase.rpc(
+      "get_user_profile",
+    );
 
     if (profileError) {
       throw new Error(`Profile error: ${profileError.message}`);

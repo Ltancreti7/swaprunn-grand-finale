@@ -61,7 +61,7 @@ export function NavigationDrawer() {
       // Dealer menu
       return [
         { to: "/dealer/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { to: "/dealer/request", label: "Create Request", icon: FileText },
+        { to: "/dealer/create-job", label: "Create Job", icon: FileText },
         { to: "/dealer/settings", label: "Settings", icon: Settings },
         { to: "/billing", label: "Billing", icon: CreditCard },
         { to: "/staff/signup", label: "Manage Staff", icon: UserPlus },

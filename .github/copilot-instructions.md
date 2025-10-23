@@ -1,4 +1,40 @@
-# SwapRunn AI Guide
+```md
+# SwapRunn — AI coding agent quick guide
+
+This repo is a hybrid React + TypeScript app that targets web and native through Capacitor. Web and native share the same bundle and routing (see `src/App.tsx`).
+
+Quick, actionable notes for an AI coder:
+
+- Architecture: routes in `src/pages`, shared UI under `src/components`, integrations under `src/integrations` and `src/services`. Supabase client: `src/integrations/supabase/client.ts`.
+- Auth: `src/hooks/useAuth.tsx` (AuthProvider) uses a Supabase RPC (`get_user_profile`), caches and deduplicates profile fetches, and exposes `loading` + `profileLoading`. Gate routes with `ProtectedRoute` and check `requiredUserType`.
+- Realtime & writes: prefer Supabase channels (`supabase.channel`) and `supabaseService` helpers for write flows to avoid concurrency conflicts (watch for `JOB_ALREADY_TAKEN`).
+- Native vs web: add platform-specific implementations under `src/services/*` and provide web fallbacks (see VIN scanner & `useMobileCapacitor()` hook).
+- Forms: React Hook Form + Zod patterns are used throughout (see `DealerRequest` and form components in `src/components`).
+
+Developer workflows (exact commands)
+
+- Start dev server: `npm run dev` (Vite). Build: `npm run build` or `npm run build:dev` for development-mode build. Lint: `npm run lint`. Preview: `npm run preview`.
+- iOS quick: after building web assets run `npx cap sync ios` then `npx cap open ios`.
+
+Conventions & gotchas
+
+- Multi-tenant roles: `dealer`, `driver`, `swap_coordinator`. Routes and UI assume these role names; changing them requires updates in `ProtectedRoute` and any role checks in `src/pages`.
+- Mock data flags: check `store/mockStore.ts` and `driver-data.ts` for `USE_MOCK_DATA` toggles before assuming live APIs.
+- RPCs and edge functions: several flows call Supabase RPCs (e.g., `get_user_profile`) and edge functions under `supabase/functions/*` (distance, sms, billing). If you change those shapes, update callers and tests.
+- Notifications: both web (`notificationService`, `smsService`) and native (`mobileNotificationService`) must be updated together.
+
+Files to inspect first
+
+- `src/hooks/useAuth.tsx` — auth, caching, retries, and how profileLoading is used.
+- `src/integrations/supabase/client.ts` — how the supabase client is created and used.
+- `src/components/ProtectedRoute.tsx` and `src/pages/*` — routing and role-guard patterns.
+- `src/services/*` — examples of platform abstractions (VIN, distance, sms, billing).
+
+If a behavior or integration is unclear, ask which platform (web or native) the change targets and whether to prefer mock data. After edits, run `npm run dev` and watch browser console logs — the app logs auth and supabase steps heavily which helps debugging.
+
+Would you like a 10-line micro quick-start or expanded file-level examples? Reply with preference and I'll iterate.
+
+```# SwapRunn AI Guide
 
 ## Orientation
 

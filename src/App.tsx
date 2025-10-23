@@ -12,8 +12,8 @@ import History from "./pages/History";
 import DealerAuth from "./pages/DealerAuth";
 import DealerDashboard from "./pages/DealerDashboard";
 import DealerAdminDashboard from "./pages/DealerAdminDashboard";
-import DealerRequest from "./pages/DealerRequest";
-import SimpleDriverRequest from "./pages/SimpleDriverRequestNew";
+// Removed old DealerRequest - using unified CreateJob instead
+import CreateJob from "./pages/CreateJob";
 import DealerSettings from "./pages/DealerSettings";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import StaffSignup from "./pages/StaffSignup";
@@ -92,10 +92,19 @@ const App = () => (
                   }
                 />
                 <Route
+                  path="/dealer/create-job"
+                  element={
+                    <ProtectedRoute requiredUserType="dealer">
+                      <CreateJob />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* Legacy routes redirect to new unified form */}
+                <Route
                   path="/dealer/request"
                   element={
                     <ProtectedRoute requiredUserType="dealer">
-                      <DealerRequest />
+                      <CreateJob />
                     </ProtectedRoute>
                   }
                 />
@@ -103,7 +112,7 @@ const App = () => (
                   path="/dealer/request-simple"
                   element={
                     <ProtectedRoute requiredUserType="dealer">
-                      <SimpleDriverRequest />
+                      <CreateJob />
                     </ProtectedRoute>
                   }
                 />

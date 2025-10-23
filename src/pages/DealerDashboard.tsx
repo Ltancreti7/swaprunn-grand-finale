@@ -30,6 +30,7 @@ import { AssignmentCard } from "@/components/dealer/AssignmentCard";
 
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { Job as SupabaseJob } from "@/services/supabaseService";
+import { repairDealerProfile } from "@/utils/repairDealerProfile";
 
 // Extend the Job type to match what JobCard expects
 interface Job extends SupabaseJob {
@@ -310,6 +311,32 @@ const DealerDashboard = () => {
     }));
   };
 
+  const handleFixProfile = async () => {
+    try {
+      toast({
+        title: "Fixing Profile",
+        description: "Attempting to repair dealer profile configuration...",
+      });
+
+      await repairDealerProfile();
+
+      toast({
+        title: "Profile Fixed",
+        description: "Your dealer profile has been successfully repaired. Try creating a job now.",
+      });
+
+      // Refresh the page to reload the profile
+      window.location.reload();
+    } catch (error) {
+      console.error("Profile repair failed:", error);
+      toast({
+        title: "Profile Repair Failed",
+        description: `Failed to repair profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div
@@ -417,7 +444,7 @@ const DealerDashboard = () => {
                 className="mt-2 space-y-4 sm:space-y-6 animate-fade-in"
               >
                 {/* Request Button - Moved above profile card */}
-                <Link to="/dealer/request-simple" className="w-full">
+                <Link to="/dealer/create-job" className="w-full">
                   <Button className="w-full bg-[#E11900] hover:bg-[#E11900]/90 text-white h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all">
                     <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     Request Driver
@@ -476,13 +503,20 @@ const DealerDashboard = () => {
                             </span>
                           </div>
                         </div>
-                        <div className="flex justify-center md:justify-start">
+                        <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-2 sm:gap-4">
                           <Button
                             onClick={() => setIsEditProfileOpen(true)}
                             variant="outline"
                             className="w-full sm:w-auto h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl border-white/40 text-slate-950 bg-white hover:bg-white/90 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all"
                           >
                             Edit Personal Info
+                          </Button>
+                          <Button
+                            onClick={handleFixProfile}
+                            variant="outline"
+                            className="w-full sm:w-auto h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl border-red-400 text-red-600 bg-red-50 hover:bg-red-100 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                          >
+                            Fix Profile Issues
                           </Button>
                         </div>
                       </div>

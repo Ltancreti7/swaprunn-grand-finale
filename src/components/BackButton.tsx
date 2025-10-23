@@ -17,7 +17,7 @@ const BackButton = () => {
     const currentPath = location.pathname;
 
     // Dealer request should go back to dealer dashboard
-    if (currentPath.includes("/dealer/request")) {
+    if (currentPath.includes("/dealer/request") || currentPath.includes("/dealer/create-job")) {
       navigate("/dealer/dashboard");
       return;
     }
