@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface Job {
   id: string;
-  type: "delivery" | "swap";
+  type: "delivery" | "swap" | "parts" | "service";
   vin?: string | null;
   year?: number | null;
   make?: string | null;

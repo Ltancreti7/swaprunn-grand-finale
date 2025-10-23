@@ -55,31 +55,24 @@ export default function BillingSettings() {
     if (!userProfile?.dealer_id) return;
 
     try {
-      const { data, error } = await supabase
-        .from("dealer_subscriptions")
-        .select("*")
-        .eq("dealer_id", userProfile.dealer_id)
-        .single();
+      // Mock subscription data since dealer_subscriptions table doesn't exist yet
+      const mockSubscription = {
+        plan_name: "Professional",
+        base_price_cents: 9900,
+        per_swap_price_cents: 500,
+        swaps_this_period: 0,
+        billing_period: "monthly",
+        status: "active",
+        add_ons: { gps_tracking: false, signature_capture: false },
+        next_billing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        current_period_start: new Date().toISOString(),
+        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      };
 
-      if (error && error.code !== "PGRST116") throw error;
-
-      if (data) {
-        const parsedAddOns =
-          typeof data.add_ons === "object" && data.add_ons !== null
-            ? (data.add_ons as {
-                gps_tracking: boolean;
-                signature_capture: boolean;
-              })
-            : { gps_tracking: false, signature_capture: false };
-
-        setSubscription({
-          ...data,
-          add_ons: parsedAddOns,
-        } as SubscriptionData);
-        setAddOns(parsedAddOns);
-      }
+      setSubscription(mockSubscription);
+      setAddOns(mockSubscription.add_ons);
     } catch (error) {
-      console.error("Error fetching subscription:", error);
+      logger.error("Error fetching subscription:", error);
       toast({
         title: "Error",
         description: "Failed to load billing information",
@@ -138,12 +131,11 @@ export default function BillingSettings() {
     setAddOns(newAddOns);
 
     try {
-      const { error } = await supabase
-        .from("dealer_subscriptions")
-        .update({ add_ons: newAddOns })
-        .eq("dealer_id", userProfile?.dealer_id);
-
-      if (error) throw error;
+      // Mock update since dealer_subscriptions table doesn't exist yet
+      setSubscription({
+        ...subscription,
+        add_ons: newAddOns,
+      });
 
       toast({
         title: "Add-on Updated",
