@@ -194,6 +194,90 @@ export type Database = {
         }
         Relationships: []
       }
+      drivers: {
+        Row: {
+          available: boolean | null
+          checkr_candidate_id: string | null
+          checkr_status: string | null
+          city_ok: boolean | null
+          created_at: string | null
+          id: string
+          max_miles: number | null
+          name: string
+          phone: string | null
+          rating_avg: number | null
+          rating_count: number | null
+          stripe_connect_id: string | null
+        }
+        Insert: {
+          available?: boolean | null
+          checkr_candidate_id?: string | null
+          checkr_status?: string | null
+          city_ok?: boolean | null
+          created_at?: string | null
+          id?: string
+          max_miles?: number | null
+          name: string
+          phone?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          stripe_connect_id?: string | null
+        }
+        Update: {
+          available?: boolean | null
+          checkr_candidate_id?: string | null
+          checkr_status?: string | null
+          city_ok?: boolean | null
+          created_at?: string | null
+          id?: string
+          max_miles?: number | null
+          name?: string
+          phone?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          stripe_connect_id?: string | null
+        }
+        Relationships: []
+      }
+      form_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          error_message: string | null
+          form_type: string
+          id: string
+          message: string | null
+          metadata: Json | null
+          name: string
+          status: string
+          timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          error_message?: string | null
+          form_type: string
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          name: string
+          status?: string
+          timestamp?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          form_type?: string
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          name?: string
+          status?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           created_at: string | null
@@ -282,6 +366,51 @@ export type Database = {
             columns: ["dealer_id"]
             isOneToOne: false
             referencedRelation: "dealers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payouts: {
+        Row: {
+          amount_cents: number
+          assignment_id: string | null
+          created_at: string | null
+          driver_id: string | null
+          id: string
+          status: string | null
+          stripe_transfer_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          assignment_id?: string | null
+          created_at?: string | null
+          driver_id?: string | null
+          id?: string
+          status?: string | null
+          stripe_transfer_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          assignment_id?: string | null
+          created_at?: string | null
+          driver_id?: string | null
+          id?: string
+          status?: string | null
+          stripe_transfer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
             referencedColumns: ["id"]
           },
         ]
@@ -415,6 +544,64 @@ export type Database = {
           },
           {
             foreignKeyName: "swap_usage_records_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timesheets: {
+        Row: {
+          assignment_id: string | null
+          created_at: string | null
+          driver_id: string | null
+          ended_at: string | null
+          id: string
+          job_id: string | null
+          pay_rate_cents: number | null
+          started_at: string | null
+          total_seconds: number | null
+        }
+        Insert: {
+          assignment_id?: string | null
+          created_at?: string | null
+          driver_id?: string | null
+          ended_at?: string | null
+          id?: string
+          job_id?: string | null
+          pay_rate_cents?: number | null
+          started_at?: string | null
+          total_seconds?: number | null
+        }
+        Update: {
+          assignment_id?: string | null
+          created_at?: string | null
+          driver_id?: string | null
+          ended_at?: string | null
+          id?: string
+          job_id?: string | null
+          pay_rate_cents?: number | null
+          started_at?: string | null
+          total_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheets_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheets_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheets_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"

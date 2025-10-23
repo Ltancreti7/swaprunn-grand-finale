@@ -15,7 +15,7 @@ import type { JobData, EarningsData, DriverProfile } from '@/services/driver-dat
 interface DriverData {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone?: string;
   profile_photo_url?: string;
   created_at: string;
