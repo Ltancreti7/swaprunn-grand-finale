@@ -67,7 +67,7 @@ function AcceptInvitation() {
       }
     } catch (error) {
       console.error("Error fetching invitation:", error);
-    logger.error("Error fetching invitation:", error);
+      logger.error("Error fetching invitation:", error);
       setError("Failed to load invitation details.");
     } finally {
       setLoading(false);
@@ -181,7 +181,7 @@ function AcceptInvitation() {
       }
     } catch (caughtError) {
       console.error("Error accepting invitation:", caughtError);
-    logger.error("Error accepting invitation:", caughtError);
+      logger.error("Error accepting invitation:", caughtError);
       const message =
         caughtError instanceof Error
           ? caughtError.message

@@ -11,5 +11,5 @@ export const logger = {
   error: (...args: any[]) => {
     // Keep minimal production surface - send to external logger here if configured
     if (import.meta.env.DEV) console.error(...args);
-  }
+  },
 };
