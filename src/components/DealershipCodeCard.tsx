@@ -19,16 +19,16 @@ export const DealershipCodeCard = () => {
 
       try {
         const { data, error } = await supabase
-          .from('dealers')
-          .select('dealership_code, name')
-          .eq('id', userProfile.dealer_id)
+          .from("dealers")
+          .select("dealership_code, name")
+          .eq("id", userProfile.dealer_id)
           .single();
 
         if (error) throw error;
 
         setDealershipCode(data.dealership_code || "");
       } catch (error) {
-        console.error('Error fetching dealership code:', error);
+        console.error("Error fetching dealership code:", error);
       } finally {
         setLoading(false);
       }
@@ -55,7 +55,7 @@ export const DealershipCodeCard = () => {
 
   const openStaffSignup = () => {
     const signupUrl = `${window.location.origin}/staff/signup`;
-    window.open(signupUrl, '_blank');
+    window.open(signupUrl, "_blank");
   };
 
   if (loading) {
@@ -87,8 +87,8 @@ export const DealershipCodeCard = () => {
         <div>
           <p className="text-sm text-blue-700 mb-2">Your Dealership Code:</p>
           <div className="flex items-center gap-2">
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className="text-lg font-mono px-3 py-1 bg-blue-100 text-blue-800 border-blue-300"
             >
               {dealershipCode}

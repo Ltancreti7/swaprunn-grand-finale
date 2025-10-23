@@ -33,7 +33,10 @@ type DriverScheduleEntry = {
   created_at: string;
 };
 
-const statusVariantMap: Record<string, "default" | "secondary" | "destructive"> = {
+const statusVariantMap: Record<
+  string,
+  "default" | "secondary" | "destructive"
+> = {
   completed: "secondary",
   cancelled: "destructive",
   archived: "destructive",
@@ -108,16 +111,22 @@ function getTimeSortValue(timeValue: string | null) {
 export function DriverSchedule() {
   const { user, userProfile } = useAuth();
 
-  const { data, isLoading, error, refetch, isFetching } = useQuery<DriverScheduleEntry[], Error>({
+  const { data, isLoading, error, refetch, isFetching } = useQuery<
+    DriverScheduleEntry[],
+    Error
+  >({
     queryKey: ["driver-schedule", user?.id],
     enabled: Boolean(user?.id && userProfile?.dealer_id),
     queryFn: async () => {
       if (!user?.id) {
         return [];
       }
-      const { data: schedule, error: scheduleError } = await supabase.rpc("get_driver_schedule", {
-        _user_id: user.id,
-      });
+      const { data: schedule, error: scheduleError } = await supabase.rpc(
+        "get_driver_schedule",
+        {
+          _user_id: user.id,
+        },
+      );
       if (scheduleError) {
         throw scheduleError;
       }
@@ -142,7 +151,10 @@ export function DriverSchedule() {
 
     const nextWeekEntries = entries.filter((entry) => {
       const entryDate = parseEntryDate(entry);
-      return isWithinInterval(entryDate, { start: nextWeekStart, end: nextWeekEnd });
+      return isWithinInterval(entryDate, {
+        start: nextWeekStart,
+        end: nextWeekEnd,
+      });
     });
 
     const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
@@ -150,7 +162,11 @@ export function DriverSchedule() {
     const grouped = daysInWeek.map((day) => {
       const itemsForDay = currentWeekEntries
         .filter((entry) => isSameDay(parseEntryDate(entry), day))
-        .sort((a, b) => getTimeSortValue(a.specific_time) - getTimeSortValue(b.specific_time));
+        .sort(
+          (a, b) =>
+            getTimeSortValue(a.specific_time) -
+            getTimeSortValue(b.specific_time),
+        );
 
       return {
         day,
@@ -159,11 +175,14 @@ export function DriverSchedule() {
     });
 
     const sortedNextWeek = nextWeekEntries.sort((a, b) => {
-      const dateDiff = parseEntryDate(a).getTime() - parseEntryDate(b).getTime();
+      const dateDiff =
+        parseEntryDate(a).getTime() - parseEntryDate(b).getTime();
       if (dateDiff !== 0) {
         return dateDiff;
       }
-      return getTimeSortValue(a.specific_time) - getTimeSortValue(b.specific_time);
+      return (
+        getTimeSortValue(a.specific_time) - getTimeSortValue(b.specific_time)
+      );
     });
 
     return {
@@ -177,7 +196,8 @@ export function DriverSchedule() {
       <Alert variant="destructive">
         <AlertTitle>Dealer context missing</AlertTitle>
         <AlertDescription>
-          You are not linked to an active dealership. Please contact your administrator for access.
+          You are not linked to an active dealership. Please contact your
+          administrator for access.
         </AlertDescription>
       </Alert>
     );
@@ -202,9 +222,7 @@ export function DriverSchedule() {
     return (
       <Alert variant="destructive">
         <AlertTitle>Unable to load schedule</AlertTitle>
-        <AlertDescription>
-          {error.message}
-        </AlertDescription>
+        <AlertDescription>{error.message}</AlertDescription>
       </Alert>
     );
   }
@@ -216,7 +234,9 @@ export function DriverSchedule() {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>Current Week</CardTitle>
-              <p className="text-sm text-muted-foreground">Jobs grouped by day for the current week.</p>
+              <p className="text-sm text-muted-foreground">
+                Jobs grouped by day for the current week.
+              </p>
             </div>
             <button
               onClick={() => refetch()}
@@ -231,13 +251,17 @@ export function DriverSchedule() {
           {scheduleByDay.currentWeek.map(({ day, items }) => (
             <div key={format(day, "yyyy-MM-dd")} className="space-y-3">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <h3 className="text-lg font-semibold">{format(day, "EEEE, MMM d")}</h3>
+                <h3 className="text-lg font-semibold">
+                  {format(day, "EEEE, MMM d")}
+                </h3>
                 <Badge variant={items.length ? "secondary" : "outline"}>
                   {items.length === 1 ? "1 job" : `${items.length} jobs`}
                 </Badge>
               </div>
               {items.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No jobs scheduled.</p>
+                <p className="text-sm text-muted-foreground">
+                  No jobs scheduled.
+                </p>
               ) : (
                 <div className="space-y-3">
                   {items.map((item) => (
@@ -247,8 +271,12 @@ export function DriverSchedule() {
                     >
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <p className="text-sm font-medium">{item.driver_name ?? "Unassigned"}</p>
-                          <p className="text-xs text-muted-foreground">{item.driver_phone || "No phone on file"}</p>
+                          <p className="text-sm font-medium">
+                            {item.driver_name ?? "Unassigned"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {item.driver_phone || "No phone on file"}
+                          </p>
                         </div>
                         <Badge variant={resolveStatusVariant(item.job_status)}>
                           {resolveStatusLabel(item.job_status)}
@@ -257,16 +285,26 @@ export function DriverSchedule() {
                       <Separator className="my-3" />
                       <div className="grid gap-2 text-sm sm:grid-cols-2">
                         <div>
-                          <p className="text-xs text-muted-foreground">Pickup</p>
-                          <p className="font-medium">{item.pickup_address || "TBD"}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Pickup
+                          </p>
+                          <p className="font-medium">
+                            {item.pickup_address || "TBD"}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Drop-off</p>
-                          <p className="font-medium">{item.delivery_address || "TBD"}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Drop-off
+                          </p>
+                          <p className="font-medium">
+                            {item.delivery_address || "TBD"}
+                          </p>
                         </div>
                       </div>
                       <div className="mt-3 text-sm text-muted-foreground">
-                        <span className="font-medium text-foreground">Time:</span>{" "}
+                        <span className="font-medium text-foreground">
+                          Time:
+                        </span>{" "}
                         {getDisplayTime(item.specific_time)}
                       </div>
                     </div>
@@ -284,7 +322,9 @@ export function DriverSchedule() {
         </CardHeader>
         <CardContent className="space-y-4">
           {scheduleByDay.nextWeek.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No jobs scheduled for next week yet.</p>
+            <p className="text-sm text-muted-foreground">
+              No jobs scheduled for next week yet.
+            </p>
           ) : (
             <div className="space-y-3">
               {scheduleByDay.nextWeek.map((item) => (
@@ -294,8 +334,12 @@ export function DriverSchedule() {
                 >
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-medium">{item.driver_name ?? "Unassigned"}</p>
-                      <p className="text-xs text-muted-foreground">{item.driver_phone || "No phone on file"}</p>
+                      <p className="text-sm font-medium">
+                        {item.driver_name ?? "Unassigned"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.driver_phone || "No phone on file"}
+                      </p>
                     </div>
                     <Badge variant={resolveStatusVariant(item.job_status)}>
                       {resolveStatusLabel(item.job_status)}
@@ -305,16 +349,25 @@ export function DriverSchedule() {
                   <div className="grid gap-2 text-sm sm:grid-cols-2">
                     <div>
                       <p className="text-xs text-muted-foreground">Pickup</p>
-                      <p className="font-medium">{item.pickup_address || "TBD"}</p>
+                      <p className="font-medium">
+                        {item.pickup_address || "TBD"}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Drop-off</p>
-                      <p className="font-medium">{item.delivery_address || "TBD"}</p>
+                      <p className="font-medium">
+                        {item.delivery_address || "TBD"}
+                      </p>
                     </div>
                   </div>
                   <div className="mt-3 text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Scheduled:</span>{" "}
-                    {item.specific_date ? format(parseEntryDate(item), "EEEE, MMM d") : "TBD"} · {getDisplayTime(item.specific_time)}
+                    <span className="font-medium text-foreground">
+                      Scheduled:
+                    </span>{" "}
+                    {item.specific_date
+                      ? format(parseEntryDate(item), "EEEE, MMM d")
+                      : "TBD"}{" "}
+                    · {getDisplayTime(item.specific_time)}
                   </div>
                 </div>
               ))}

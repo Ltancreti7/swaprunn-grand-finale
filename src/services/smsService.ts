@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 
 export interface SMSJobNotification {
   to: string;
@@ -15,30 +15,33 @@ export const smsService = {
   async sendJobNotification({ to, job }: SMSJobNotification): Promise<boolean> {
     try {
       // Format the SMS message
-      const vehicleInfo = `${job.year || ''} ${job.make || ''} ${job.model || ''}`.trim();
+      const vehicleInfo =
+        `${job.year || ""} ${job.make || ""} ${job.model || ""}`.trim();
       const distance = job.distance_miles || 0;
-      const payAmount = job.estimated_pay_cents ? (job.estimated_pay_cents / 100).toFixed(2) : '0.00';
-      
+      const payAmount = job.estimated_pay_cents
+        ? (job.estimated_pay_cents / 100).toFixed(2)
+        : "0.00";
+
       const message = `🚗 New SwapRunn Job Available! ${vehicleInfo} - ${distance} miles. Pay: $${payAmount}. Accept in app now!`;
 
       // Call the SMS edge function
-      const { data, error } = await supabase.functions.invoke('sms', {
+      const { data, error } = await supabase.functions.invoke("sms", {
         body: {
           to: to,
-          body: message
-        }
+          body: message,
+        },
       });
 
       if (error) {
-        console.error('SMS sending error:', error);
+        console.error("SMS sending error:", error);
         return false;
       }
 
-      console.log('SMS sent successfully:', data);
+      console.log("SMS sent successfully:", data);
       return true;
     } catch (error) {
-      console.error('SMS service error:', error);
+      console.error("SMS service error:", error);
       return false;
     }
-  }
+  },
 };

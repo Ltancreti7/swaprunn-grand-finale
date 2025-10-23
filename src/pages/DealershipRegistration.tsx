@@ -5,7 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +27,7 @@ const DealershipRegistration = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [planType, setPlanType] = useState<"monthly" | "annual">("monthly");
   const [dealershipCode, setDealershipCode] = useState("");
-  
+
   // Form state
   const [formData, setFormData] = useState({
     dealershipName: "",
@@ -42,18 +48,24 @@ const DealershipRegistration = () => {
   });
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
-    if (!formData.dealershipName || !formData.fullName || !formData.jobTitle || !formData.email || !formData.password) {
+    if (
+      !formData.dealershipName ||
+      !formData.fullName ||
+      !formData.jobTitle ||
+      !formData.email ||
+      !formData.password
+    ) {
       toast({
         title: "Missing Required Fields",
         description: "Please fill in all required fields.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -62,7 +74,7 @@ const DealershipRegistration = () => {
       toast({
         title: "Passwords Don't Match",
         description: "Please ensure both passwords match.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -71,7 +83,7 @@ const DealershipRegistration = () => {
       toast({
         title: "Agreement Required",
         description: "Please agree to the terms and confirm authorization.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -80,10 +92,13 @@ const DealershipRegistration = () => {
 
     try {
       // Log submission attempt to Supabase (background, doesn't block UX)
-      const logSubmission = async (status: 'success' | 'failure', errorMsg?: string) => {
+      const logSubmission = async (
+        status: "success" | "failure",
+        errorMsg?: string,
+      ) => {
         try {
-          await supabase.from('form_submissions' as any).insert({
-            form_type: 'dealer_registration',
+          await supabase.from("form_submissions" as any).insert({
+            form_type: "dealer_registration",
             name: formData.fullName,
             email: formData.email,
             message: `Dealership: ${formData.dealershipName}, Role: ${formData.jobTitle}`,
@@ -93,11 +108,11 @@ const DealershipRegistration = () => {
               dealership_name: formData.dealershipName,
               city: formData.city,
               state: formData.state,
-              plan_type: planType
-            }
+              plan_type: planType,
+            },
           });
         } catch (err) {
-          console.error('Failed to log dealer registration:', err);
+          console.error("Failed to log dealer registration:", err);
         }
       };
 
@@ -107,19 +122,24 @@ const DealershipRegistration = () => {
         password: formData.password,
         options: {
           data: {
-            user_type: 'dealer',
+            user_type: "dealer",
             company_name: formData.dealershipName,
             full_name: formData.fullName,
           },
-          emailRedirectTo: `${window.location.origin}/dealer/admin`
-        }
+          emailRedirectTo: `${window.location.origin}/dealer/admin`,
+        },
       });
 
       if (authError) {
         // Handle specific error cases
-        if (authError.message.includes('already registered') || authError.message.includes('already been registered')) {
-          await logSubmission('failure', 'Email already in use');
-          throw new Error(`This email address is already registered. Please use the login page instead or contact support if you need help accessing your account.`);
+        if (
+          authError.message.includes("already registered") ||
+          authError.message.includes("already been registered")
+        ) {
+          await logSubmission("failure", "Email already in use");
+          throw new Error(
+            `This email address is already registered. Please use the login page instead or contact support if you need help accessing your account.`,
+          );
         }
         throw authError;
       }
@@ -127,13 +147,13 @@ const DealershipRegistration = () => {
 
       // Step 2: Get the dealer_id from the profile
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('dealer_id')
-        .eq('user_id', authData.user.id)
+        .from("profiles")
+        .select("dealer_id")
+        .eq("user_id", authData.user.id)
         .single();
 
       if (profileError || !profileData?.dealer_id) {
-        await logSubmission('failure', 'Failed to create dealer profile');
+        await logSubmission("failure", "Failed to create dealer profile");
         throw new Error("Failed to create dealer profile");
       }
 
@@ -145,7 +165,7 @@ const DealershipRegistration = () => {
 
       // Step 3: Update dealer record with complete information
       const { error: dealerError } = await supabase
-        .from('dealers')
+        .from("dealers")
         .update({
           name: formData.fullName,
           street: formData.street,
@@ -159,25 +179,26 @@ const DealershipRegistration = () => {
           store: formData.dealershipName,
           dealership_code: uniqueCode,
         })
-        .eq('id', dealerId);
+        .eq("id", dealerId);
 
       if (dealerError) {
         console.error("Error updating dealer:", dealerError);
-        await logSubmission('failure', dealerError.message);
+        await logSubmission("failure", dealerError.message);
         throw dealerError;
       }
 
       // Step 4: Create subscription (test mode)
-      const { data: billingData, error: billingError } = await supabase.functions.invoke('stripe-billing', {
-        body: { 
-          dealerId,
-          testMode: true,
-          addOns: {
-            gps_tracking: false,
-            signature_capture: false
-          }
-        }
-      });
+      const { data: billingData, error: billingError } =
+        await supabase.functions.invoke("stripe-billing", {
+          body: {
+            dealerId,
+            testMode: true,
+            addOns: {
+              gps_tracking: false,
+              signature_capture: false,
+            },
+          },
+        });
 
       if (billingError) {
         console.error("Billing setup error:", billingError);
@@ -186,13 +207,13 @@ const DealershipRegistration = () => {
 
       // Step 5: Assign user as owner in dealership_staff
       const { error: staffError } = await supabase
-        .from('dealership_staff')
+        .from("dealership_staff")
         .insert({
           user_id: authData.user.id,
           dealer_id: dealerId,
-          role: 'owner',
+          role: "owner",
           is_active: true,
-          joined_at: new Date().toISOString()
+          joined_at: new Date().toISOString(),
         });
 
       if (staffError) {
@@ -201,36 +222,36 @@ const DealershipRegistration = () => {
       }
 
       // Log successful submission
-      await logSubmission('success');
+      await logSubmission("success");
 
       setShowSuccess(true);
-      
     } catch (error: unknown) {
       console.error("Registration error:", error);
-      
-      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       // Special handling for email already in use
-      if (errorMessage.includes('already registered')) {
+      if (errorMessage.includes("already registered")) {
         toast({
           title: "Email Already Registered",
           description: "This email is already in use. Please sign in instead.",
           variant: "destructive",
           action: (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
-              onClick={() => navigate('/dealer/auth')}
+              onClick={() => navigate("/dealer/auth")}
               className="ml-2"
             >
               Go to Login
             </Button>
-          )
+          ),
         });
       } else {
         toast({
           title: "Registration Failed",
           description: errorMessage || "An error occurred during registration.",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } finally {
@@ -252,7 +273,7 @@ const DealershipRegistration = () => {
                 Your dealership account has been created successfully.
               </p>
             </div>
-            
+
             <div className="bg-black/50 border border-white/10 rounded-2xl p-4 space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-white/60">Account Status</span>
@@ -264,7 +285,9 @@ const DealershipRegistration = () => {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-white/60">Subscription Plan</span>
-                <span className="text-white font-semibold">Hybrid (Test Mode)</span>
+                <span className="text-white font-semibold">
+                  Hybrid (Test Mode)
+                </span>
               </div>
               <div className="text-xs text-white/50 pt-2 border-t border-white/10">
                 $99/month + $1.50 per swap
@@ -272,7 +295,9 @@ const DealershipRegistration = () => {
             </div>
 
             <div className="bg-[#E11900]/10 border border-[#E11900]/20 rounded-2xl p-4 space-y-2">
-              <p className="text-white/80 text-sm font-semibold">Staff Signup Code</p>
+              <p className="text-white/80 text-sm font-semibold">
+                Staff Signup Code
+              </p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 text-2xl font-mono font-bold text-white tracking-wider">
                   {dealershipCode}
@@ -299,11 +324,12 @@ const DealershipRegistration = () => {
 
             <div className="space-y-4">
               <p className="text-sm text-white/60">
-                Check your email to verify your account, then you can start inviting staff members and requesting deliveries.
+                Check your email to verify your account, then you can start
+                inviting staff members and requesting deliveries.
               </p>
-              <Button 
+              <Button
                 className="w-full bg-[#E11900] hover:bg-[#E11900]/90 h-12 rounded-2xl"
-                onClick={() => navigate('/dealer/admin')}
+                onClick={() => navigate("/dealer/admin")}
               >
                 Go to Dashboard
               </Button>
@@ -320,8 +346,12 @@ const DealershipRegistration = () => {
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <Logo size="auth" />
-          <h1 className="text-3xl font-bold mt-6 mb-2">Dealership Registration</h1>
-          <p className="text-white/70">Set up your dealership account in minutes</p>
+          <h1 className="text-3xl font-bold mt-6 mb-2">
+            Dealership Registration
+          </h1>
+          <p className="text-white/70">
+            Set up your dealership account in minutes
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -334,30 +364,40 @@ const DealershipRegistration = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="dealershipName" className="text-white">Dealership Name *</Label>
-                  <Input
-                    id="dealershipName"
-                    value={formData.dealershipName}
-                    onChange={(e) => handleInputChange("dealershipName", e.target.value)}
-                    placeholder="Enter dealership name…"
-                    className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
-                    required
-                  />
+                <Label htmlFor="dealershipName" className="text-white">
+                  Dealership Name *
+                </Label>
+                <Input
+                  id="dealershipName"
+                  value={formData.dealershipName}
+                  onChange={(e) =>
+                    handleInputChange("dealershipName", e.target.value)
+                  }
+                  placeholder="Enter dealership name…"
+                  className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
+                  required
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <Label htmlFor="street" className="text-white">Street Address</Label>
+                  <Label htmlFor="street" className="text-white">
+                    Street Address
+                  </Label>
                   <Input
                     id="street"
                     value={formData.street}
-                    onChange={(e) => handleInputChange("street", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("street", e.target.value)
+                    }
                     placeholder="Enter street address…"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="city" className="text-white">City</Label>
+                  <Label htmlFor="city" className="text-white">
+                    City
+                  </Label>
                   <Input
                     id="city"
                     value={formData.city}
@@ -367,7 +407,9 @@ const DealershipRegistration = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="state" className="text-white">State</Label>
+                  <Label htmlFor="state" className="text-white">
+                    State
+                  </Label>
                   <Input
                     id="state"
                     value={formData.state}
@@ -377,7 +419,9 @@ const DealershipRegistration = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="zip" className="text-white">ZIP Code</Label>
+                  <Label htmlFor="zip" className="text-white">
+                    ZIP Code
+                  </Label>
                   <Input
                     id="zip"
                     value={formData.zip}
@@ -390,24 +434,35 @@ const DealershipRegistration = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="dealershipPhone" className="text-white">Phone Number</Label>
+                  <Label htmlFor="dealershipPhone" className="text-white">
+                    Phone Number
+                  </Label>
                   <Input
                     id="dealershipPhone"
                     type="tel"
                     value={formData.dealershipPhone}
-                    onChange={(e) => handleInputChange("dealershipPhone", formatPhoneNumber(e.target.value))}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "dealershipPhone",
+                        formatPhoneNumber(e.target.value),
+                      )
+                    }
                     placeholder="(802) 444-4444"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
                     maxLength={14}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="website" className="text-white">Website (Optional)</Label>
+                  <Label htmlFor="website" className="text-white">
+                    Website (Optional)
+                  </Label>
                   <Input
                     id="website"
                     type="url"
                     value={formData.website}
-                    onChange={(e) => handleInputChange("website", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("website", e.target.value)
+                    }
                     placeholder="Enter website (optional)…"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
                   />
@@ -418,27 +473,37 @@ const DealershipRegistration = () => {
 
           <Card className="bg-[#1A1A1A] border-white/10 mb-6">
             <CardHeader>
-              <CardTitle className="text-white">Primary Admin Information</CardTitle>
+              <CardTitle className="text-white">
+                Primary Admin Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="fullName" className="text-white">Full Name *</Label>
+                  <Label htmlFor="fullName" className="text-white">
+                    Full Name *
+                  </Label>
                   <Input
                     id="fullName"
                     value={formData.fullName}
-                    onChange={(e) => handleInputChange("fullName", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("fullName", e.target.value)
+                    }
                     placeholder="Enter full name…"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="jobTitle" className="text-white">Job Title *</Label>
+                  <Label htmlFor="jobTitle" className="text-white">
+                    Job Title *
+                  </Label>
                   <Input
                     id="jobTitle"
                     value={formData.jobTitle}
-                    onChange={(e) => handleInputChange("jobTitle", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("jobTitle", e.target.value)
+                    }
                     placeholder="Enter job title…"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
                     required
@@ -448,7 +513,9 @@ const DealershipRegistration = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="email" className="text-white">Email (Login) *</Label>
+                  <Label htmlFor="email" className="text-white">
+                    Email (Login) *
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -460,12 +527,19 @@ const DealershipRegistration = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="phone" className="text-white">Phone Number</Label>
+                  <Label htmlFor="phone" className="text-white">
+                    Phone Number
+                  </Label>
                   <Input
                     id="phone"
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", formatPhoneNumber(e.target.value))}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "phone",
+                        formatPhoneNumber(e.target.value),
+                      )
+                    }
                     placeholder="(802) 444-4444"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
                     maxLength={14}
@@ -475,12 +549,16 @@ const DealershipRegistration = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="password" className="text-white">Password *</Label>
+                  <Label htmlFor="password" className="text-white">
+                    Password *
+                  </Label>
                   <Input
                     id="password"
                     type="password"
                     value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     placeholder="Create a password…"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
                     required
@@ -488,12 +566,16 @@ const DealershipRegistration = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="confirmPassword" className="text-white">Confirm Password *</Label>
+                  <Label htmlFor="confirmPassword" className="text-white">
+                    Confirm Password *
+                  </Label>
                   <Input
                     id="confirmPassword"
                     type="password"
                     value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("confirmPassword", e.target.value)
+                    }
                     placeholder="Confirm password…"
                     className="bg-black/50 border-white/10 text-white h-12 rounded-2xl placeholder:text-white/40"
                     required
@@ -510,11 +592,19 @@ const DealershipRegistration = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label className="text-white mb-4 block text-lg font-semibold">Choose Your Plan</Label>
-                <Tabs value={planType} onValueChange={(value) => setPlanType(value as "monthly" | "annual")} className="w-full">
+                <Label className="text-white mb-4 block text-lg font-semibold">
+                  Choose Your Plan
+                </Label>
+                <Tabs
+                  value={planType}
+                  onValueChange={(value) =>
+                    setPlanType(value as "monthly" | "annual")
+                  }
+                  className="w-full"
+                >
                   <TabsList className="grid w-full grid-cols-2 bg-black/50 gap-3 p-3">
-                    <TabsTrigger 
-                      value="monthly" 
+                    <TabsTrigger
+                      value="monthly"
                       className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white flex flex-col items-center py-4 px-4 h-auto min-h-[100px] rounded-xl border border-white/10 data-[state=active]:border-[#E11900]"
                     >
                       <span className="font-bold text-lg">Monthly</span>
@@ -526,8 +616,8 @@ const DealershipRegistration = () => {
                         + $1.50 per delivery
                       </span>
                     </TabsTrigger>
-                    <TabsTrigger 
-                      value="annual" 
+                    <TabsTrigger
+                      value="annual"
                       className="data-[state=active]:bg-[#E11900] data-[state=active]:text-white flex flex-col items-center py-4 px-4 h-auto min-h-[100px] rounded-xl border border-white/10 data-[state=active]:border-[#E11900] relative"
                     >
                       <div className="absolute -top-2 right-1 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
@@ -545,9 +635,11 @@ const DealershipRegistration = () => {
                   </TabsList>
                 </Tabs>
               </div>
-              
+
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-                <h4 className="text-white font-semibold mb-2">{"What's Included:"}</h4>
+                <h4 className="text-white font-semibold mb-2">
+                  {"What's Included:"}
+                </h4>
                 <ul className="text-sm text-white/80 space-y-1">
                   <li>• Unlimited driver requests</li>
                   <li>• Real-time tracking & updates</li>
@@ -556,9 +648,10 @@ const DealershipRegistration = () => {
                   <li>• 24/7 support</li>
                 </ul>
               </div>
-              
+
               <p className="text-sm text-white/60 text-center">
-                <strong>14-day free trial</strong> • No setup fees • Cancel anytime
+                <strong>14-day free trial</strong> • No setup fees • Cancel
+                anytime
               </p>
             </CardContent>
           </Card>
@@ -569,33 +662,51 @@ const DealershipRegistration = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start space-x-3">
-                <Checkbox 
+                <Checkbox
                   id="authorized"
                   checked={formData.authorizedCheckbox}
-                  onCheckedChange={(checked) => handleInputChange("authorizedCheckbox", checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("authorizedCheckbox", checked as boolean)
+                  }
                   className="mt-1 border-white/30"
                 />
-                <Label htmlFor="authorized" className="text-white text-sm cursor-pointer">
-                  I am authorized to register this business and create an account on its behalf
+                <Label
+                  htmlFor="authorized"
+                  className="text-white text-sm cursor-pointer"
+                >
+                  I am authorized to register this business and create an
+                  account on its behalf
                 </Label>
               </div>
 
               <div className="flex items-start space-x-3">
-                <Checkbox 
+                <Checkbox
                   id="terms"
                   checked={formData.termsCheckbox}
-                  onCheckedChange={(checked) => handleInputChange("termsCheckbox", checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("termsCheckbox", checked as boolean)
+                  }
                   className="mt-1 border-white/30"
                 />
-                <Label htmlFor="terms" className="text-white text-sm cursor-pointer">
-                  I agree to the <a href="/terms" className="text-[#E11900] underline">Terms of Service</a> and <a href="/privacy" className="text-[#E11900] underline">Privacy Policy</a>
+                <Label
+                  htmlFor="terms"
+                  className="text-white text-sm cursor-pointer"
+                >
+                  I agree to the{" "}
+                  <a href="/terms" className="text-[#E11900] underline">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="/privacy" className="text-[#E11900] underline">
+                    Privacy Policy
+                  </a>
                 </Label>
               </div>
 
               <div className="pt-2">
-                <a 
-                  href="/dealer-agreement.pdf" 
-                  download 
+                <a
+                  href="/dealer-agreement.pdf"
+                  download
                   className="text-[#E11900] hover:text-[#E11900]/80 text-sm underline"
                 >
                   Download Dealer Agreement (PDF)
@@ -604,20 +715,20 @@ const DealershipRegistration = () => {
             </CardContent>
           </Card>
 
-          <Button 
+          <Button
             type="submit"
             disabled={loading}
             className="w-full bg-[#E11900] hover:bg-[#E11900]/90 text-white h-14 rounded-2xl text-lg font-bold mb-4"
           >
             {loading ? "Creating Account..." : "Create Dealership Account"}
           </Button>
-          
+
           <div className="text-center">
             <p className="text-white/60 text-sm">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <button
                 type="button"
-                onClick={() => navigate('/dealer/auth')}
+                onClick={() => navigate("/dealer/auth")}
                 className="text-[#E11900] hover:text-[#E11900]/80 underline font-medium"
               >
                 Sign in here

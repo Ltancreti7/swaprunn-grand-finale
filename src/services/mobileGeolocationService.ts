@@ -1,5 +1,5 @@
-import { Capacitor } from '@capacitor/core';
-import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from "@capacitor/core";
+import { Geolocation } from "@capacitor/geolocation";
 
 class MobileGeolocationService {
   private isNative = false;
@@ -9,28 +9,31 @@ class MobileGeolocationService {
     this.isNative = Capacitor.isNativePlatform();
   }
 
-  async getCurrentPosition(): Promise<{ latitude: number; longitude: number } | null> {
+  async getCurrentPosition(): Promise<{
+    latitude: number;
+    longitude: number;
+  } | null> {
     try {
       if (this.isNative) {
         const permissions = await Geolocation.requestPermissions();
-        if (permissions.location !== 'granted') {
-          throw new Error('Location permission denied');
+        if (permissions.location !== "granted") {
+          throw new Error("Location permission denied");
         }
 
         const position = await Geolocation.getCurrentPosition({
           enableHighAccuracy: true,
-          timeout: 10000
+          timeout: 10000,
         });
 
         return {
           latitude: position.coords.latitude,
-          longitude: position.coords.longitude
+          longitude: position.coords.longitude,
         };
       } else {
         // Fallback to web geolocation
         return new Promise((resolve, reject) => {
           if (!navigator.geolocation) {
-            reject(new Error('Geolocation not supported'));
+            reject(new Error("Geolocation not supported"));
             return;
           }
 
@@ -38,45 +41,47 @@ class MobileGeolocationService {
             (position) => {
               resolve({
                 latitude: position.coords.latitude,
-                longitude: position.coords.longitude
+                longitude: position.coords.longitude,
               });
             },
             (error) => reject(error),
             {
               enableHighAccuracy: true,
               timeout: 10000,
-              maximumAge: 60000
-            }
+              maximumAge: 60000,
+            },
           );
         });
       }
     } catch (error) {
-      console.error('Error getting current position:', error);
+      console.error("Error getting current position:", error);
       return null;
     }
   }
 
-  async startWatching(callback: (position: { latitude: number; longitude: number }) => void) {
+  async startWatching(
+    callback: (position: { latitude: number; longitude: number }) => void,
+  ) {
     try {
       if (this.isNative) {
         const permissions = await Geolocation.requestPermissions();
-        if (permissions.location !== 'granted') {
-          throw new Error('Location permission denied');
+        if (permissions.location !== "granted") {
+          throw new Error("Location permission denied");
         }
 
         this.watchId = await Geolocation.watchPosition(
           {
             enableHighAccuracy: true,
-            timeout: 10000
+            timeout: 10000,
           },
           (position) => {
             if (position) {
               callback({
                 latitude: position.coords.latitude,
-                longitude: position.coords.longitude
+                longitude: position.coords.longitude,
               });
             }
-          }
+          },
         );
       } else {
         // Fallback to web geolocation
@@ -85,21 +90,21 @@ class MobileGeolocationService {
             (position) => {
               callback({
                 latitude: position.coords.latitude,
-                longitude: position.coords.longitude
+                longitude: position.coords.longitude,
               });
             },
-            (error) => console.error('Geolocation error:', error),
+            (error) => console.error("Geolocation error:", error),
             {
               enableHighAccuracy: true,
               timeout: 10000,
-              maximumAge: 60000
-            }
+              maximumAge: 60000,
+            },
           );
           this.watchId = id.toString();
         }
       }
     } catch (error) {
-      console.error('Error starting location watch:', error);
+      console.error("Error starting location watch:", error);
     }
   }
 
@@ -113,7 +118,7 @@ class MobileGeolocationService {
         }
         this.watchId = null;
       } catch (error) {
-        console.error('Error stopping location watch:', error);
+        console.error("Error stopping location watch:", error);
       }
     }
   }

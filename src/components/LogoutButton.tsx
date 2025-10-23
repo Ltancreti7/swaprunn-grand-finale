@@ -10,16 +10,18 @@ const LogoutButton = () => {
 
   // Pages where we should show Logout (authenticated pages only)
   const authPages = [
-    '/driver/dashboard',
-    '/dealer/dashboard',
-    '/dealer/admin',
-    '/dealer/settings',
-    '/driver/profile',
-    '/driver/requests',
-    '/driver/jobs',
-    '/staff/signup'
+    "/driver/dashboard",
+    "/dealer/dashboard",
+    "/dealer/admin",
+    "/dealer/settings",
+    "/driver/profile",
+    "/driver/requests",
+    "/driver/jobs",
+    "/staff/signup",
   ];
-  const isAuthPage = authPages.some(page => location.pathname.startsWith(page));
+  const isAuthPage = authPages.some((page) =>
+    location.pathname.startsWith(page),
+  );
 
   // Don't show if not authenticated or not on an auth page
   if (!user || !isAuthPage) {
@@ -28,7 +30,7 @@ const LogoutButton = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/');
+    navigate("/");
   };
 
   return (

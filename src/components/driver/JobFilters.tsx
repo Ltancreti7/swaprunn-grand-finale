@@ -1,10 +1,16 @@
-import { useState } from 'react';
-import { Filter, MapPin, DollarSign, Building } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { Filter, MapPin, DollarSign, Building } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface JobFiltersProps {
   onFiltersChange: (filters: JobFilters) => void;
@@ -25,12 +31,16 @@ const DEFAULT_FILTERS: JobFilters = {
   maxDistance: 50,
   minPay: 0,
   maxPay: 100,
-  dealerPreference: 'any',
-  jobType: 'any',
-  sortBy: 'newest'
+  dealerPreference: "any",
+  jobType: "any",
+  sortBy: "newest",
 };
 
-export function JobFilters({ onFiltersChange, totalJobsCount, filteredJobsCount }: JobFiltersProps) {
+export function JobFilters({
+  onFiltersChange,
+  totalJobsCount,
+  filteredJobsCount,
+}: JobFiltersProps) {
   const [filters, setFilters] = useState<JobFilters>(DEFAULT_FILTERS);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -45,7 +55,8 @@ export function JobFilters({ onFiltersChange, totalJobsCount, filteredJobsCount 
     onFiltersChange(DEFAULT_FILTERS);
   };
 
-  const hasActiveFilters = JSON.stringify(filters) !== JSON.stringify(DEFAULT_FILTERS);
+  const hasActiveFilters =
+    JSON.stringify(filters) !== JSON.stringify(DEFAULT_FILTERS);
 
   return (
     <Card className="w-full">
@@ -66,24 +77,26 @@ export function JobFilters({ onFiltersChange, totalJobsCount, filteredJobsCount 
                 Clear All
               </Button>
             )}
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
             >
-              {isExpanded ? 'Collapse' : 'Expand'}
+              {isExpanded ? "Collapse" : "Expand"}
             </Button>
           </div>
         </div>
       </CardHeader>
-      
+
       {isExpanded && (
         <CardContent className="space-y-6">
           {/* Distance Filter */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Max Distance: {filters.maxDistance} miles</span>
+              <span className="font-medium">
+                Max Distance: {filters.maxDistance} miles
+              </span>
             </div>
             <Slider
               value={[filters.maxDistance]}
@@ -99,7 +112,9 @@ export function JobFilters({ onFiltersChange, totalJobsCount, filteredJobsCount 
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Pay Range: ${filters.minPay} - ${filters.maxPay}</span>
+              <span className="font-medium">
+                Pay Range: ${filters.minPay} - ${filters.maxPay}
+              </span>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -131,13 +146,20 @@ export function JobFilters({ onFiltersChange, totalJobsCount, filteredJobsCount 
               <Building className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">Dealer Preference</span>
             </div>
-            <Select value={filters.dealerPreference} onValueChange={(value) => updateFilters({ dealerPreference: value })}>
+            <Select
+              value={filters.dealerPreference}
+              onValueChange={(value) =>
+                updateFilters({ dealerPreference: value })
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select dealer preference" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="any">Any Dealer</SelectItem>
-                <SelectItem value="preferred">Preferred Dealers Only</SelectItem>
+                <SelectItem value="preferred">
+                  Preferred Dealers Only
+                </SelectItem>
                 <SelectItem value="new">New Dealers</SelectItem>
                 <SelectItem value="high-rated">High Rated Dealers</SelectItem>
               </SelectContent>
@@ -147,7 +169,10 @@ export function JobFilters({ onFiltersChange, totalJobsCount, filteredJobsCount 
           {/* Job Type Filter */}
           <div className="space-y-3">
             <span className="font-medium">Job Type</span>
-            <Select value={filters.jobType} onValueChange={(value) => updateFilters({ jobType: value })}>
+            <Select
+              value={filters.jobType}
+              onValueChange={(value) => updateFilters({ jobType: value })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select job type" />
               </SelectTrigger>
@@ -163,7 +188,10 @@ export function JobFilters({ onFiltersChange, totalJobsCount, filteredJobsCount 
           {/* Sort Options */}
           <div className="space-y-3">
             <span className="font-medium">Sort By</span>
-            <Select value={filters.sortBy} onValueChange={(value) => updateFilters({ sortBy: value })}>
+            <Select
+              value={filters.sortBy}
+              onValueChange={(value) => updateFilters({ sortBy: value })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Sort jobs by" />
               </SelectTrigger>

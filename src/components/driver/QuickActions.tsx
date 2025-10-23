@@ -1,8 +1,8 @@
-import { Phone, MessageSquare, AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { QuickActionTemplates } from './QuickActionTemplates';
+import { Phone, MessageSquare, AlertTriangle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { QuickActionTemplates } from "./QuickActionTemplates";
 
 interface QuickActionsProps {
   showTemplates?: boolean;
@@ -10,12 +10,16 @@ interface QuickActionsProps {
   customerPhone?: string;
 }
 
-export function QuickActions({ showTemplates = false, jobId, customerPhone }: QuickActionsProps) {
+export function QuickActions({
+  showTemplates = false,
+  jobId,
+  customerPhone,
+}: QuickActionsProps) {
   const { toast } = useToast();
 
   const handleCallSupport = () => {
     // Try to make a phone call if supported, otherwise show toast
-    const phoneNumber = 'tel:+15551234567';
+    const phoneNumber = "tel:+15551234567";
     try {
       window.location.href = phoneNumber;
     } catch (error) {
@@ -28,7 +32,7 @@ export function QuickActions({ showTemplates = false, jobId, customerPhone }: Qu
 
   const handleMessageDispatch = () => {
     // Try to open email client, otherwise show toast
-    const emailAddress = 'mailto:dispatch@swaprunn.com?subject=Driver Message';
+    const emailAddress = "mailto:dispatch@swaprunn.com?subject=Driver Message";
     try {
       window.location.href = emailAddress;
     } catch (error) {
@@ -49,12 +53,9 @@ export function QuickActions({ showTemplates = false, jobId, customerPhone }: Qu
   return (
     <div className="space-y-4">
       {showTemplates && (
-        <QuickActionTemplates 
-          jobId={jobId}
-          customerPhone={customerPhone}
-        />
+        <QuickActionTemplates jobId={jobId} customerPhone={customerPhone} />
       )}
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
@@ -69,7 +70,7 @@ export function QuickActions({ showTemplates = false, jobId, customerPhone }: Qu
               <Phone className="h-4 w-4" />
               Call Rider Support
             </Button>
-            
+
             <Button
               variant="outline"
               onClick={handleMessageDispatch}
@@ -78,7 +79,7 @@ export function QuickActions({ showTemplates = false, jobId, customerPhone }: Qu
               <MessageSquare className="h-4 w-4" />
               Message Dispatch
             </Button>
-            
+
             <Button
               variant="outline"
               onClick={handleReportIssue}

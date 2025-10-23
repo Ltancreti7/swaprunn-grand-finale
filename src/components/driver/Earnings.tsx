@@ -1,7 +1,7 @@
-import { DollarSign } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import type { EarningsData } from '@/services/driver-data';
+import { DollarSign } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { EarningsData } from "@/services/driver-data";
 
 interface EarningsProps {
   earnings: EarningsData | null;
@@ -10,10 +10,10 @@ interface EarningsProps {
 
 export function Earnings({ earnings, isLoading }: EarningsProps) {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -48,8 +48,13 @@ export function Earnings({ earnings, isLoading }: EarningsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-text-secondary">
-            <p className="text-lg font-medium mb-2">Earnings Integration Coming Soon</p>
-            <p className="text-sm">Real-time earnings tracking will be available when payroll system is implemented.</p>
+            <p className="text-lg font-medium mb-2">
+              Earnings Integration Coming Soon
+            </p>
+            <p className="text-sm">
+              Real-time earnings tracking will be available when payroll system
+              is implemented.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -72,14 +77,14 @@ export function Earnings({ earnings, isLoading }: EarningsProps) {
             </div>
             <div className="text-sm text-text-secondary">Today</div>
           </div>
-          
+
           <div className="p-4 bg-surface-secondary rounded-lg text-center">
             <div className="text-2xl font-bold text-text-secondary mb-1">
               {earnings.week > 0 ? formatCurrency(earnings.week) : "—"}
             </div>
             <div className="text-sm text-text-secondary">This Week</div>
           </div>
-          
+
           <div className="p-4 bg-surface-secondary rounded-lg text-center">
             <div className="text-2xl font-bold text-text-secondary mb-1">
               {earnings.month > 0 ? formatCurrency(earnings.month) : "—"}

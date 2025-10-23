@@ -16,7 +16,10 @@ const PasswordUpdate = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [sessionReady, setSessionReady] = useState(false);
 
-  const hashParams = useMemo(() => new URLSearchParams(window.location.hash.slice(1)), []);
+  const hashParams = useMemo(
+    () => new URLSearchParams(window.location.hash.slice(1)),
+    [],
+  );
   const isRecovery = hashParams.get("type") === "recovery";
 
   useEffect(() => {
@@ -81,7 +84,8 @@ const PasswordUpdate = () => {
 
       navigate("/", { replace: true });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Something went wrong.";
+      const message =
+        error instanceof Error ? error.message : "Something went wrong.";
       toast({
         title: "Unable to update password",
         description: message,
@@ -120,7 +124,10 @@ const PasswordUpdate = () => {
           <CardContent className="space-y-6 py-8">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="new-password" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="new-password"
+                  className="text-white text-sm font-medium"
+                >
                   New Password
                 </Label>
                 <Input
@@ -137,7 +144,10 @@ const PasswordUpdate = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="confirm-password"
+                  className="text-white text-sm font-medium"
+                >
                   Confirm Password
                 </Label>
                 <Input
