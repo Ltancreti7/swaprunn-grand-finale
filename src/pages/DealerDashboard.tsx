@@ -71,7 +71,7 @@ interface ActiveAssignment {
     created_at: string;
     created_by?: string;
   };
-  drivers: {
+  drivers?: {
     id: string;
     name: string;
     email?: string;
@@ -108,7 +108,7 @@ const DealerDashboard = () => {
         .select(
           `
           *,
-          assignments(*, drivers(name, email, phone, rating_avg, rating_count, available))
+          assignments(*)
         `,
         )
         .eq("dealer_id", userProfile.dealer_id)
@@ -149,17 +149,6 @@ const DealerDashboard = () => {
             created_at,
             created_by,
             dealer_id
-          ),
-          drivers!inner (
-            id,
-            name,
-            email,
-            phone,
-            rating_avg,
-            rating_count,
-            profile_photo_url,
-            available,
-            trust_score
           )
         `,
         )
@@ -288,25 +277,11 @@ const DealerDashboard = () => {
             created_at,
             created_by,
             dealer_id
-          ),
-          drivers!inner (
-            id,
-            name,
-            email,
-            phone,
-            rating_avg,
-            rating_count,
-            profile_photo_url,
-            available,
-            day_off,
-            max_miles,
-            city_ok,
-            trust_score
           )
         `,
         )
         .eq("jobs.dealer_id", userProfile.dealer_id)
-        .is("ended_at", null)
+        .is("completed_at", null)
         .not("accepted_at", "is", null)
         .order("accepted_at", {
           ascending: false,

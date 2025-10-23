@@ -62,7 +62,7 @@ interface Assignment {
   started_at?: string;
   ended_at?: string;
   jobs: Job;
-  drivers: Driver;
+  drivers?: Driver;
 }
 
 interface AssignmentCardProps {
@@ -74,7 +74,19 @@ export const AssignmentCard = ({
   assignment,
   currentUserId,
 }: AssignmentCardProps) => {
-  const { jobs: job, drivers: driver } = assignment;
+  const { jobs: job, drivers } = assignment;
+  const driver = drivers || {
+    id: assignment.driver_id,
+    name: "Driver",
+    email: "",
+    phone: "",
+    rating_avg: 5.0,
+    rating_count: 0,
+    profile_photo_url: "",
+    available: true,
+    city_ok: true,
+    trust_score: 100
+  };
   const hasStarted = !!assignment.started_at;
   const [salespersonName, setSalespersonName] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
@@ -84,16 +96,12 @@ export const AssignmentCard = ({
       if (job.created_by) {
         const { data } = await supabase
           .from("profiles")
-          .select("full_name, first_name, last_name")
+          .select("full_name")
           .eq("user_id", job.created_by)
           .single();
 
         if (data) {
-          setSalespersonName(
-            data.full_name ||
-              `${data.first_name || ""} ${data.last_name || ""}`.trim() ||
-              "Staff Member",
-          );
+          setSalespersonName(data.full_name || "Staff Member");
         }
       }
     };

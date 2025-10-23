@@ -116,10 +116,7 @@ class SupabaseService {
           driver_id,
           accepted_at,
           started_at,
-          ended_at,
-          drivers (
-            name
-          )
+          completed_at
         )
       `,
       )
@@ -131,10 +128,10 @@ class SupabaseService {
       ...job,
       assignment_id: job.assignments?.[0]?.id,
       driver_id: job.assignments?.[0]?.driver_id,
-      driver_name: job.assignments?.[0]?.drivers?.name,
+      driver_name: null, // Driver name needs to be fetched separately
       accepted_at: job.assignments?.[0]?.accepted_at,
       started_at: job.assignments?.[0]?.started_at,
-      ended_at: job.assignments?.[0]?.ended_at,
+      ended_at: job.assignments?.[0]?.completed_at, // Use completed_at instead of ended_at
     }));
   }
 
@@ -170,10 +167,7 @@ class SupabaseService {
           driver_id,
           accepted_at,
           started_at,
-          ended_at,
-          drivers (
-            name
-          )
+          completed_at
         )
       `,
       )
@@ -187,34 +181,43 @@ class SupabaseService {
       ...data,
       assignment_id: data.assignments?.[0]?.id,
       driver_id: data.assignments?.[0]?.driver_id,
-      driver_name: data.assignments?.[0]?.drivers?.name,
+      driver_name: null, // Driver name needs to be fetched separately
       accepted_at: data.assignments?.[0]?.accepted_at,
       started_at: data.assignments?.[0]?.started_at,
-      ended_at: data.assignments?.[0]?.ended_at,
+      ended_at: data.assignments?.[0]?.completed_at, // Use completed_at instead of ended_at
     };
   }
 
   async getJobByTrackingToken(token: string): Promise<Job | null> {
-    // Use the secure tracking function that only exposes safe data
-    const { data, error } = await supabase.rpc("get_job_by_tracking_token", {
-      token,
-    });
+    // Query job by track_token directly
+    const { data, error } = await supabase
+      .from("jobs")
+      .select(`
+        *,
+        assignments (
+          id,
+          driver_id,
+          accepted_at,
+          started_at,
+          completed_at
+        )
+      `)
+      .eq("track_token", token)
+      .maybeSingle();
 
     if (error) throw error;
-    if (!data || data.length === 0) return null;
-
-    const jobData = data[0];
+    if (!data) return null;
 
     // For tracking, we only return limited safe information
     // No customer personal information is exposed
     return {
-      id: jobData.id,
-      type: jobData.type,
-      status: jobData.status,
-      created_at: jobData.created_at,
-      pickup_address: jobData.pickup_address,
-      delivery_address: jobData.delivery_address,
-      track_token: jobData.track_token,
+      id: data.id,
+      type: data.type,
+      status: data.status,
+      created_at: data.created_at,
+      pickup_address: data.pickup_address,
+      delivery_address: data.delivery_address,
+      track_token: data.track_token,
       // No customer name, phone, or other sensitive data
       customer_name: null,
       customer_phone: null,
@@ -307,7 +310,7 @@ class SupabaseService {
     // Update assignment end time
     const { error: assignmentError } = await supabase
       .from("assignments")
-      .update({ ended_at: new Date().toISOString() })
+      .update({ completed_at: new Date().toISOString() })
       .eq("id", assignmentId);
 
     if (assignmentError) throw assignmentError;
@@ -323,26 +326,50 @@ class SupabaseService {
     return this.getJobById(jobId);
   }
 
-  // Driver Management
+  // Driver Management - Note: Using profiles table since drivers table doesn't exist
   async getDrivers(): Promise<Driver[]> {
     const { data, error } = await supabase
-      .from("drivers")
+      .from("profiles")
       .select("*")
-      .order("name");
+      .eq("user_type", "driver")
+      .order("full_name");
 
     if (error) throw error;
-    return data || [];
+    // Map profiles to Driver interface
+    return (data || []).map(profile => ({
+      id: profile.id,
+      name: profile.full_name || "Unknown Driver",
+      phone: profile.phone || "",
+      rating_avg: 5.0, // Default values since not stored
+      rating_count: 0,
+      city_ok: true,
+      max_miles: 50, // Default max miles
+      available: true
+    }));
   }
 
   async getDriver(id: string): Promise<Driver | null> {
     const { data, error } = await supabase
-      .from("drivers")
+      .from("profiles")
       .select("*")
       .eq("id", id)
+      .eq("user_type", "driver")
       .maybeSingle();
 
     if (error) throw error;
-    return data;
+    if (!data) return null;
+    
+    // Map profile to Driver interface
+    return {
+      id: data.id,
+      name: data.full_name || "Unknown Driver",
+      phone: data.phone || "",
+      rating_avg: 5.0, // Default values since not stored
+      rating_count: 0,
+      city_ok: true,
+      max_miles: 50, // Default max miles
+      available: true
+    };
   }
 
   // Get open jobs for drivers (secure - no customer personal info)
