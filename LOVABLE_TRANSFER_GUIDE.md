@@ -48,8 +48,8 @@ Copy this package.json dependencies section:
 Create `.env` file with:
 
 ```
-VITE_SUPABASE_URL=https://bjornisuniwnnrgboibb.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqb3JuaXN1bml3bm5yZ2JvaWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg5MzM2NDksImV4cCI6MjA0NDUwOTY0OX0.plXCzJrflH5aq5iYZWWOxgVQfO5pFVN1j9YJJjUdOOU
+VITE_SUPABASE_URL=your-supabase-project-url
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
 ## Step 3: Core Files to Transfer (in order)
