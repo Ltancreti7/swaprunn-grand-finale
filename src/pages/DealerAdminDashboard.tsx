@@ -90,7 +90,7 @@ const DealerAdminDashboard = () => {
       if (staffError) throw staffError;
       setStaffCount(staffCountData || 0);
     } catch (error) {
-      console.error("Error fetching admin data:", error);
+        logger.error("Error fetching admin data:", error);
     } finally {
       setLoading(false);
     }
