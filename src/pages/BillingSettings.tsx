@@ -64,12 +64,18 @@ export default function BillingSettings() {
         billing_period: "monthly",
         status: "active",
         add_ons: { gps_tracking: false, signature_capture: false },
-        next_billing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        next_billing_date: new Date(
+          Date.now() + 30 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         current_period_start: new Date().toISOString(),
-        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        current_period_end: new Date(
+          Date.now() + 30 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         billing_status: "active",
-        billing_period_start: new Date().toISOString(), 
-        billing_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        billing_period_start: new Date().toISOString(),
+        billing_period_end: new Date(
+          Date.now() + 30 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         stripe_subscription_id: "mock_sub_123",
       };
 
