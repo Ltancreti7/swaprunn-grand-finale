@@ -175,19 +175,14 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                {/* Legacy driver job routes - redirect to requests */}
                 <Route
                   path="/driver/job/:jobId"
-                  element={
-                    <ProtectedRoute requiredUserType="driver">
-                    </ProtectedRoute>
-                  }
+                  element={<Navigate to="/driver/requests" replace />}
                 />
                 <Route
                   path="/driver/job-details/:jobId"
-                  element={
-                    <ProtectedRoute requiredUserType="driver">
-                    </ProtectedRoute>
-                  }
+                  element={<Navigate to="/driver/requests" replace />}
                 />
                 <Route path="/track/:token" element={<Track />} />
                 <Route path="/privacy" element={<Privacy />} />

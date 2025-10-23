@@ -36,7 +36,6 @@ export default defineConfig(({ mode }) => ({
             './src/pages/DriverAuth.tsx',
             './src/pages/DriverDashboard.tsx',
             './src/pages/DriverPersonalProfile.tsx',
-            './src/pages/DriverJobDetails.tsx',
             './src/pages/DriverRequests.tsx'
           ],
           'coordinator-pages': [

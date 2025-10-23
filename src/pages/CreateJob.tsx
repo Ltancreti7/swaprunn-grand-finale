@@ -281,10 +281,10 @@ const CreateJob = () => {
 
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="trade-in"
+                id="hasTradeIn"
                 checked={hasTradeIn}
-                onCheckedChange={setHasTradeIn}
-                className="border-white/20"
+                onCheckedChange={(checked) => setHasTradeIn(checked === true)}
+                className="border-white/30"
               />
               <Label htmlFor="trade-in" className="text-white">
                 Customer has a trade-in vehicle (swap job)
@@ -378,29 +378,29 @@ const CreateJob = () => {
             <div>
               <Label className="text-white mb-2 block">Pickup Address *</Label>
               <AddressInput
+                label=""
                 value={pickupAddress}
                 onChange={setPickupAddress}
-                placeholder="Enter pickup address"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                className="bg-white/10 border-white/30 text-white"
               />
             </div>
 
             <div>
               <Label className="text-white mb-2 block">Delivery Address *</Label>
               <AddressInput
+                label=""
                 value={deliveryAddress}
                 onChange={setDeliveryAddress}
-                placeholder="Enter delivery address"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                className="bg-white/10 border-white/30 text-white"
               />
             </div>
 
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="requires-two"
+                id="requiresTwoPeople"
                 checked={requiresTwoPeople}
-                onCheckedChange={setRequiresTwoPeople}
-                className="border-white/20"
+                onCheckedChange={(checked) => setRequiresTwoPeople(checked === true)}
+                className="border-white/30"
               />
               <Label htmlFor="requires-two" className="text-white">
                 This job requires two drivers

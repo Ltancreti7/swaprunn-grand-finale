@@ -34,7 +34,6 @@ export const DealerProfileCard = ({
             <DealerProfilePhoto
               photoUrl={dealerData?.profile_photo_url}
               dealerName={dealerData?.name}
-              onPhotoUpdate={onPhotoUpdate}
             />
           </div>
 
