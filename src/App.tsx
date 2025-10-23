@@ -178,15 +178,13 @@ const App = () => (
                 <Route
                   path="/driver/job/:jobId"
                   element={
-                    <ProtectedRoute requiredUserType="driver">
-                    </ProtectedRoute>
+                    <ProtectedRoute requiredUserType="driver"></ProtectedRoute>
                   }
                 />
                 <Route
                   path="/driver/job-details/:jobId"
                   element={
-                    <ProtectedRoute requiredUserType="driver">
-                    </ProtectedRoute>
+                    <ProtectedRoute requiredUserType="driver"></ProtectedRoute>
                   }
                 />
                 <Route path="/track/:token" element={<Track />} />
