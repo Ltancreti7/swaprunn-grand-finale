@@ -384,7 +384,9 @@ const DealerAdminDashboard = () => {
                           <Users className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-semibold">{driver.full_name || 'Driver'}</h3>
+                          <h3 className="font-semibold">
+                            {driver.full_name || "Driver"}
+                          </h3>
                           <div
                             className={`flex items-center gap-4 text-sm text-muted-foreground ${isMobile ? "flex-col items-start gap-1" : ""}`}
                           >
@@ -404,7 +406,10 @@ const DealerAdminDashboard = () => {
                       >
                         <div className="flex items-center gap-1">
                           <span className="text-muted-foreground">
-                            Created: {new Date(driver.created_at || '').toLocaleDateString()}
+                            Created:{" "}
+                            {new Date(
+                              driver.created_at || "",
+                            ).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
@@ -412,7 +417,11 @@ const DealerAdminDashboard = () => {
                     <div
                       className={`flex gap-2 ${isMobile ? "flex-col" : "flex-col"}`}
                     >
-                      <Badge variant={driver.status === "active" ? "default" : "secondary"}>
+                      <Badge
+                        variant={
+                          driver.status === "active" ? "default" : "secondary"
+                        }
+                      >
                         {driver.status || "Active"}
                       </Badge>
                     </div>
