@@ -66,7 +66,6 @@ function AcceptInvitation() {
         setInvitation(data as StaffInvitation);
       }
     } catch (error) {
-      console.error("Error fetching invitation:", error);
       logger.error("Error fetching invitation:", error);
       setError("Failed to load invitation details.");
     } finally {
@@ -180,7 +179,6 @@ function AcceptInvitation() {
         });
       }
     } catch (caughtError) {
-      console.error("Error accepting invitation:", caughtError);
       logger.error("Error accepting invitation:", caughtError);
       const message =
         caughtError instanceof Error
