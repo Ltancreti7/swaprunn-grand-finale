@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,8 +74,9 @@ const DealerAdminDashboard = () => {
 
       // Fetch drivers (all drivers for admin view)
       const { data: driversData, error: driversError } = await supabase
-        .from("drivers")
+        .from("profiles")
         .select("*")
+        .eq("user_type", "driver")
         .order("created_at", { ascending: false });
 
       if (driversError) throw driversError;
@@ -189,7 +191,7 @@ const DealerAdminDashboard = () => {
                     clickable
                     icon={<Truck className="w-4 h-4" />}
                     title="Total Drivers"
-                    subtitle={`${drivers.filter((d) => d.available).length} available`}
+                    subtitle={`${drivers.length} registered`}
                   >
                     <div className="text-2xl font-bold">{drivers.length}</div>
                   </MobileOptimizedCard>
@@ -382,18 +384,10 @@ const DealerAdminDashboard = () => {
                           <Users className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-semibold">{driver.name}</h3>
+                          <h3 className="font-semibold">{driver.full_name || 'Driver'}</h3>
                           <div
                             className={`flex items-center gap-4 text-sm text-muted-foreground ${isMobile ? "flex-col items-start gap-1" : ""}`}
                           >
-                            {driver.email && (
-                              <div className="flex items-center gap-1">
-                                <Mail className="w-3 h-3" />
-                                <span className={isMobile ? "text-xs" : ""}>
-                                  {driver.email}
-                                </span>
-                              </div>
-                            )}
                             {driver.phone && (
                               <div className="flex items-center gap-1">
                                 <Phone className="w-3 h-3" />
@@ -409,40 +403,17 @@ const DealerAdminDashboard = () => {
                         className={`flex items-center gap-4 text-sm ${isMobile ? "flex-col items-start gap-2" : ""}`}
                       >
                         <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 text-yellow-400" />
-                          <span>
-                            {driver.rating_avg
-                              ? driver.rating_avg.toFixed(1)
-                              : "5.0"}
-                          </span>
                           <span className="text-muted-foreground">
-                            ({driver.rating_count || 0} reviews)
+                            Created: {new Date(driver.created_at || '').toLocaleDateString()}
                           </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          <span>{driver.max_miles || 50} miles max</span>
                         </div>
                       </div>
                     </div>
                     <div
                       className={`flex gap-2 ${isMobile ? "flex-col" : "flex-col"}`}
                     >
-                      <Badge
-                        variant={driver.available ? "default" : "secondary"}
-                      >
-                        {driver.available ? "Available" : "Busy"}
-                      </Badge>
-                      <Badge
-                        variant={
-                          driver.checkr_status === "clear"
-                            ? "default"
-                            : driver.checkr_status === "pending"
-                              ? "secondary"
-                              : "destructive"
-                        }
-                      >
-                        {driver.checkr_status}
+                      <Badge variant={driver.status === "active" ? "default" : "secondary"}>
+                        {driver.status || "Active"}
                       </Badge>
                     </div>
                   </div>
