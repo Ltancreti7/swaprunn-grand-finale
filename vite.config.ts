@@ -22,35 +22,51 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           // Vendor libraries
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select', '@radix-ui/react-tabs'],
-          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-          'utils-vendor': ['clsx', 'tailwind-merge', 'date-fns', 'lucide-react'],
-          
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "ui-vendor": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tabs",
+          ],
+          "form-vendor": ["react-hook-form", "@hookform/resolvers", "zod"],
+          "supabase-vendor": ["@supabase/supabase-js"],
+          "utils-vendor": [
+            "clsx",
+            "tailwind-merge",
+            "date-fns",
+            "lucide-react",
+          ],
+
           // App chunks by feature - split dealer pages for better loading
-          'dealer-auth': ['./src/pages/DealerAuth.tsx'],
-          'dealer-dashboard': ['./src/pages/DealerDashboard.tsx', './src/pages/DealerAdminDashboard.tsx'],
-          'dealer-operations': ['./src/pages/CreateJob.tsx', './src/pages/DealerSettings.tsx'],
-          'driver-pages': [
-            './src/pages/DriverAuth.tsx',
-            './src/pages/DriverDashboard.tsx',
-            './src/pages/DriverPersonalProfile.tsx',
-            './src/pages/DriverRequests.tsx'
+          "dealer-auth": ["./src/pages/DealerAuth.tsx"],
+          "dealer-dashboard": [
+            "./src/pages/DealerDashboard.tsx",
+            "./src/pages/DealerAdminDashboard.tsx",
           ],
-          'coordinator-pages': [
-            './src/pages/SwapCoordinatorAuth.tsx',
-            './src/pages/SwapCoordinatorDashboard.tsx'
+          "dealer-operations": [
+            "./src/pages/CreateJob.tsx",
+            "./src/pages/DealerSettings.tsx",
           ],
-          'services': [
-            './src/services/supabaseService.ts',
-            './src/services/distanceService.ts',
-            './src/services/notificationService.ts',
-            './src/services/smsService.ts'
-          ]
-        }
-      }
+          "driver-pages": [
+            "./src/pages/DriverAuth.tsx",
+            "./src/pages/DriverDashboard.tsx",
+            "./src/pages/DriverPersonalProfile.tsx",
+            "./src/pages/DriverRequests.tsx",
+          ],
+          "coordinator-pages": [
+            "./src/pages/SwapCoordinatorAuth.tsx",
+            "./src/pages/SwapCoordinatorDashboard.tsx",
+          ],
+          services: [
+            "./src/services/supabaseService.ts",
+            "./src/services/distanceService.ts",
+            "./src/services/notificationService.ts",
+            "./src/services/smsService.ts",
+          ],
+        },
+      },
     },
-    chunkSizeWarningLimit: 1000 // Increase limit to 1000kb to reduce warnings for remaining chunks
-  }
+    chunkSizeWarningLimit: 1000, // Increase limit to 1000kb to reduce warnings for remaining chunks
+  },
 }));
