@@ -192,7 +192,8 @@ class SupabaseService {
     // Query job by track_token directly
     const { data, error } = await supabase
       .from("jobs")
-      .select(`
+      .select(
+        `
         *,
         assignments (
           id,
@@ -201,7 +202,8 @@ class SupabaseService {
           started_at,
           completed_at
         )
-      `)
+      `,
+      )
       .eq("track_token", token)
       .maybeSingle();
 
@@ -336,7 +338,7 @@ class SupabaseService {
 
     if (error) throw error;
     // Map profiles to Driver interface
-    return (data || []).map(profile => ({
+    return (data || []).map((profile) => ({
       id: profile.id,
       name: profile.full_name || "Unknown Driver",
       phone: profile.phone || "",
@@ -344,7 +346,7 @@ class SupabaseService {
       rating_count: 0,
       city_ok: true,
       max_miles: 50, // Default max miles
-      available: true
+      available: true,
     }));
   }
 
@@ -358,7 +360,7 @@ class SupabaseService {
 
     if (error) throw error;
     if (!data) return null;
-    
+
     // Map profile to Driver interface
     return {
       id: data.id,
@@ -368,7 +370,7 @@ class SupabaseService {
       rating_count: 0,
       city_ok: true,
       max_miles: 50, // Default max miles
-      available: true
+      available: true,
     };
   }
 
