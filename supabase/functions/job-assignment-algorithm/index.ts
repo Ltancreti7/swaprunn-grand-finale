@@ -152,12 +152,6 @@ serve(async (req) => {
       // Sort by score and select best driver
       driverScores.sort((a, b) => b.score - a.score);
       assignedDriverId = driverScores[0].driverId;
-
-      console.log("Auto-assignment algorithm selected driver:", {
-        driverId: assignedDriverId,
-        score: driverScores[0].score,
-        totalCandidates: driverScores.length,
-      });
     }
 
     if (!assignedDriverId) {

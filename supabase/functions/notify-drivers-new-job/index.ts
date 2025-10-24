@@ -33,12 +33,6 @@ serve(async (req) => {
     );
 
     const jobData: NewJobNotification = await req.json();
-    console.log("Processing new job notification", {
-      jobId: jobData.job_id,
-      type: jobData.type,
-      distanceMiles: jobData.distance_miles,
-      requiresTwo: jobData.requires_two,
-    });
 
     // Get the job details including dealer_id
     const { data: job, error: jobError } = await supabase
@@ -98,9 +92,6 @@ serve(async (req) => {
     const driverProfiles = (driverProfilesData ?? []) as DriverProfileRow[];
 
     if (driverProfiles.length === 0) {
-      console.log("No available drivers found for dealership", {
-        dealerId: job.dealer_id,
-      });
       return new Response(
         JSON.stringify({
           success: true,
@@ -252,13 +243,6 @@ serve(async (req) => {
       sent_count: successCount + smsCount,
       total_count: drivers.length,
       success: successCount + smsCount > 0,
-    });
-
-    console.log("Notifications sent to dealership drivers", {
-      pushCount: successCount,
-      smsCount,
-      totalDrivers: drivers.length,
-      dealerId: job.dealer_id,
     });
 
     return new Response(

@@ -126,7 +126,6 @@ function DriverPersonalProfile() {
   // Listen for new job notifications to refresh available jobs
   useEffect(() => {
     const handleNewJob = () => {
-      console.log("Refreshing available jobs due to new job notification");
       fetchDriverData();
     };
 

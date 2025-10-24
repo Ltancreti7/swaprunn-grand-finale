@@ -42,7 +42,6 @@ async function run() {
       process.exitCode = 3;
       return;
     }
-    console.log("Query result:", data);
   } catch (err) {
     console.error("Unexpected error:", err);
     process.exitCode = 4;

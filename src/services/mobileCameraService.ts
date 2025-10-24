@@ -105,7 +105,7 @@ class MobileCameraService {
         const permissions = await Camera.requestPermissions({
           permissions: ["camera", "photos"],
         });
-        console.log("Camera permission status:", permissions);
+
         return (
           permissions.camera === "granted" || permissions.photos === "granted"
         );

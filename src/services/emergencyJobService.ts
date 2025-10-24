@@ -3,8 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 // EMERGENCY: Fix RLS policies by running SQL directly
 export const fixRLSPolicies = async () => {
   try {
-    console.log("🚨 FIXING RLS POLICIES FOR JOBS TABLE...");
-
     // Drop existing policies that might be blocking
     await supabase.rpc("exec_sql", {
       sql: `
@@ -51,7 +49,6 @@ export const fixRLSPolicies = async () => {
       `,
     });
 
-    console.log("✅ RLS POLICIES FIXED SUCCESSFULLY");
     return true;
   } catch (error) {
     console.error("❌ Failed to fix RLS policies:", error);
@@ -62,8 +59,6 @@ export const fixRLSPolicies = async () => {
 // Alternative approach - try creating jobs with different method
 export const testJobCreation = async (jobData: any) => {
   try {
-    console.log("🧪 Testing job creation with bypass...");
-
     // Try with select to verify insertion
     const { data, error } = await supabase
       .from("jobs")
