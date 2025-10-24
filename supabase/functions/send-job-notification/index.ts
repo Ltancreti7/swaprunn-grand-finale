@@ -91,7 +91,8 @@ serve(async (req) => {
 
       case "cancellation":
         subject = `Job Cancelled - ${job.track_token}`;
-        message = "The job has been cancelled. Please check the app for details.";
+        message =
+          "The job has been cancelled. Please check the app for details.";
         break;
     }
 
