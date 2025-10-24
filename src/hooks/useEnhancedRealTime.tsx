@@ -66,7 +66,7 @@ export const useEnhancedRealTime = ({
             ...(filters[table] && { filter: filters[table] }),
           },
           (payload) => {
-            console.log(`${event} on ${table}:`, payload);
+            
             onUpdate?.(table, { event, ...payload });
 
             // Show toast for important updates
@@ -98,16 +98,16 @@ export const useEnhancedRealTime = ({
             setIsUserOnline(onlineUsers);
           })
           .on("presence", { event: "join" }, ({ key, newPresences }) => {
-            console.log("User joined:", key, newPresences);
+            
           })
           .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
-            console.log("User left:", key, leftPresences);
+            
           });
       }
 
       // Subscribe to channel
       channel.subscribe((status) => {
-        console.log(`Subscription status for ${table}:`, status);
+        
         setConnectionStatus(status as any);
 
         if (status === "SUBSCRIBED") {

@@ -6,7 +6,7 @@ const supabase = createClient(
 );
 
 async function addTradeColumns() {
-  console.log("🔧 Adding trade columns to jobs table...");
+  
 
   const alterStatements = [
     "ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS trade_make text",
@@ -18,13 +18,13 @@ async function addTradeColumns() {
 
   for (const sql of alterStatements) {
     try {
-      console.log("Running:", sql);
+      
       // Use a raw SQL query via edge function if available, or try direct
       const { error } = await supabase.rpc("sql", { query: sql });
       if (error && !error.message.includes("already exists")) {
-        console.log("Error:", error.message);
+        
       } else {
-        console.log("✅ Success");
+        
       }
     } catch (err) {
       console.log("Trying alternative approach...");
@@ -32,7 +32,7 @@ async function addTradeColumns() {
   }
 
   // Test the updated table
-  console.log("\n🧪 Testing updated jobs table...");
+  
   const { data, error } = await supabase
     .from("jobs")
     .insert({
@@ -46,9 +46,9 @@ async function addTradeColumns() {
     .select();
 
   if (error) {
-    console.log("❌ Still error:", error.message);
+    
   } else {
-    console.log("✅ Jobs table now works with trade_make!");
+    
     // Clean up
     if (data?.[0]) {
       await supabase.from("jobs").delete().eq("id", data[0].id);

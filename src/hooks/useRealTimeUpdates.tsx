@@ -24,7 +24,7 @@ export const useJobUpdates = ({ dealerId, onJobUpdate }: JobUpdatesConfig) => {
           filter: `dealer_id=eq.${dealerId}`,
         },
         (payload) => {
-          console.log("Job updated:", payload);
+          
           if (payload.new.status === "assigned") {
             toast({
               title: "Job Status Updated",
@@ -43,7 +43,7 @@ export const useJobUpdates = ({ dealerId, onJobUpdate }: JobUpdatesConfig) => {
           table: "assignments",
         },
         (payload) => {
-          console.log("New assignment:", payload);
+          
           toast({
             title: "New Assignment",
             description: "A driver has accepted a job request.",
@@ -53,7 +53,7 @@ export const useJobUpdates = ({ dealerId, onJobUpdate }: JobUpdatesConfig) => {
         },
       )
       .subscribe((status) => {
-        console.log("Subscription status:", status);
+        
         if (status === "CHANNEL_ERROR") {
           toast({
             title: "Connection Issue",

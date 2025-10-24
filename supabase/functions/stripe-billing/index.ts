@@ -35,7 +35,7 @@ serve(async (req) => {
     const { dealerId, addOns = {}, testMode = false } = await req.json();
 
     if (!stripeSecretKey || testMode) {
-      console.log("TEST MODE: Creating test subscription");
+      
 
       // Create mock subscription record with hybrid billing
       const { error } = await supabase.from("dealer_subscriptions").upsert({

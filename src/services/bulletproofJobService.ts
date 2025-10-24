@@ -246,11 +246,11 @@ export const createJob = async (params: JobCreationParams) => {
       return baseNotes ? `${baseNotes}\n\n${tradeNote}` : tradeNote;
     };
 
-    console.log("📝 Job data prepared (initial attempt):", jobDataWithTrade);
+    
 
     try {
       const createdJob = await insertJob(jobDataWithTrade);
-      console.log("✅ Job created successfully:", createdJob);
+      
       await notifyDrivers(createdJob);
       return createdJob;
     } catch (initialError) {

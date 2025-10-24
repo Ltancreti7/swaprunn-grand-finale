@@ -85,12 +85,7 @@ serve(async (req) => {
     });
 
     const routesData = await routesResponse.json();
-    console.log("Google Maps Routes API response received", {
-      ok: routesResponse.ok,
-      status: routesResponse.status,
-      hasRoutes:
-        Array.isArray(routesData?.routes) && routesData.routes.length > 0,
-    });
+    
 
     if (
       !routesResponse.ok ||
@@ -138,7 +133,7 @@ serve(async (req) => {
       success: true,
     };
 
-    console.log("Distance calculation result", result);
+    
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

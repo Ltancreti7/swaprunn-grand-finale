@@ -6,7 +6,7 @@ const supabase = createClient(
 );
 
 (async () => {
-  console.log("🧪 Testing jobs table with trade_make column...");
+  
 
   // Test inserting a job with trade_make
   const testJob = {
@@ -26,15 +26,15 @@ const supabase = createClient(
   const { data, error } = await supabase.from("jobs").insert(testJob).select();
 
   if (error) {
-    console.log("❌ Error inserting test job:", error.message);
+    
   } else {
-    console.log("✅ Successfully created job with trade_make!");
-    console.log("Job data:", data);
+    
+    
 
     // Clean up test job
     if (data?.[0]) {
       await supabase.from("jobs").delete().eq("id", data[0].id);
-      console.log("🧹 Cleaned up test job");
+      
     }
   }
 })();

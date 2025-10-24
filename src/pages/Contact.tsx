@@ -110,7 +110,7 @@ const Contact = () => {
           if (error) {
             console.error("Failed to log form submission:", error);
           } else {
-            console.log("Form submission logged successfully");
+            
           }
         });
 

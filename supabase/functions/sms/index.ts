@@ -26,7 +26,7 @@ serve(async (req) => {
     }
 
     if (!twilioSid || !twilioToken || !twilioMessagingServiceSid) {
-      console.log("TEST MODE: Would send SMS to", to, "with body:", body);
+      
       return new Response(
         JSON.stringify({
           success: true,
@@ -59,7 +59,7 @@ serve(async (req) => {
     const result = await response.json();
 
     if (response.ok) {
-      console.log("SMS sent successfully", { sid: result.sid });
+      
       return new Response(
         JSON.stringify({
           success: true,

@@ -32,12 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { title, body, data, userId, userType }: PushNotificationRequest =
       await req.json();
 
-    console.log("Processing push notification:", {
-      title,
-      body,
-      userId,
-      userType,
-    });
+    
 
     // Get push subscriptions based on criteria
     let query = supabaseClient.from("push_subscriptions").select("*");
@@ -65,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!subscriptions || subscriptions.length === 0) {
-      console.log("No push subscriptions found");
+      
       return new Response(
         JSON.stringify({
           success: true,
@@ -134,9 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
     const results = await Promise.all(pushPromises);
     const successCount = results.filter(Boolean).length;
 
-    console.log(
-      `Push notifications sent: ${successCount}/${subscriptions.length}`,
-    );
+    
 
     // Log notification for analytics
     await supabaseClient.from("notification_logs").insert({

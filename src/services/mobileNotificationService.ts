@@ -26,7 +26,7 @@ class MobileNotificationService {
 
         // Listen for registration
         PushNotifications.addListener("registration", (token) => {
-          console.log("Push registration success, token: " + token.value);
+          
           // TODO: Send token to your server for push notifications
         });
 
@@ -34,7 +34,7 @@ class MobileNotificationService {
         PushNotifications.addListener(
           "pushNotificationReceived",
           (notification) => {
-            console.log("Push notification received: ", notification);
+            
           },
         );
 
@@ -42,11 +42,7 @@ class MobileNotificationService {
         PushNotifications.addListener(
           "pushNotificationActionPerformed",
           (notification) => {
-            console.log(
-              "Push notification action performed",
-              notification.actionId,
-              notification.inputValue,
-            );
+            
           },
         );
 

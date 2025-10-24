@@ -76,7 +76,7 @@ export const useDriverNotifications = () => {
           filter: "status=eq.open",
         },
         async (payload) => {
-          console.log("New job detected:", payload.new);
+          
 
           const newJob = payload.new;
 

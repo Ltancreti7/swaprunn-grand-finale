@@ -196,11 +196,7 @@ export class ProfessionalJobService {
       }
 
       // Analytics tracking would go here when analytics table is available
-      console.log("Job created with professional workflow:", {
-        jobId: job.id,
-        dealerId: job.dealer_id,
-        distance: job.distance_miles,
-      });
+      
 
       // Auto-assign if dealer preference is set to auto
       if (jobData.auto_assign) {

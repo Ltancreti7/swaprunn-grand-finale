@@ -30,12 +30,7 @@ serve(async (req) => {
       government_id_url,
     } = await req.json();
 
-    console.log("Received driver signup data:", {
-      full_name,
-      phone,
-      email,
-      license_number,
-    });
+    
 
     // Validate required fields
     if (!full_name || !phone || !email || !license_number) {
@@ -83,7 +78,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Driver created successfully:", driver);
+    
 
     // Note: In a production app, you would also:
     // 1. Store license_number, license_photo_url, insurance_url, government_id_url in a separate documents table

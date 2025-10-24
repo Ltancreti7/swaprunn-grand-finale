@@ -31,7 +31,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     const { role, name, phone, timestamp }: AlertRequest = await req.json();
 
-    console.log(`New ${role} application:`, { role, name, phone, timestamp });
+    
 
     // Email to notify SwapRunn team about new application
     const emailResponse = await resend.emails.send({
@@ -59,7 +59,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Alert email sent successfully:", emailResponse);
+    
 
     return new Response(
       JSON.stringify({

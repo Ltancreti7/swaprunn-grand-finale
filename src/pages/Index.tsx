@@ -14,7 +14,7 @@ const Index = () => {
   // Redirect authenticated users to their dashboard
   useEffect(() => {
     if (!loading && user && userProfile) {
-      console.log("User authenticated, redirecting to dashboard:", userProfile);
+      
 
       switch (userProfile.user_type) {
         case "dealer":
@@ -28,7 +28,7 @@ const Index = () => {
           break;
         default:
           // If user type is unknown, stay on homepage but could add error handling
-          console.log("Unknown user type:", userProfile.user_type);
+          
       }
     }
   }, [user, userProfile, loading, navigate]);

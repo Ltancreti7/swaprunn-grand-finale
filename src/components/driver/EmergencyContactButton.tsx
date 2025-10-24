@@ -54,12 +54,7 @@ export function EmergencyContactButton({
 
   const handleEmergencyCall = (phone: string, contactName: string) => {
     // Log emergency call for tracking
-    console.log("Emergency call initiated:", {
-      phone,
-      contactName,
-      location,
-      timestamp: new Date(),
-    });
+    
 
     // Show location info if available
     if (location) {

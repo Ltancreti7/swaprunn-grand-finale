@@ -48,7 +48,7 @@ export const repairUserProfile = async () => {
       throw error;
     }
 
-    console.log("Profile created successfully:", data);
+    
     return data;
   } catch (error) {
     console.error("Profile repair failed:", error);

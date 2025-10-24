@@ -33,13 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUserProfile = async (userId: string, retryCount = 0) => {
     // Prevent duplicate fetches
     if (fetchingProfileRef.current === userId) {
-      console.log("Profile fetch already in progress for user:", userId);
+      
       return;
     }
 
     // Check cache first
     if (profileCacheRef.current?.userId === userId) {
-      console.log("Using cached profile for user:", userId);
+      
       setUserProfile(profileCacheRef.current.profile);
       setLoading(false);
       return;
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     fetchingProfileRef.current = userId;
     setProfileLoading(true);
-    console.log("Fetching profile for user:", userId);
+    
 
     try {
       // Use RPC for stable, secure profile fetching
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Retry with exponential backoff on transient errors
         if (retryCount < 3 && error.code !== "PGRST116") {
           const delay = Math.pow(2, retryCount) * 1000;
-          console.log(`Retrying profile fetch in ${delay}ms...`);
+          
           setTimeout(() => {
             fetchingProfileRef.current = null;
             fetchUserProfile(userId, retryCount + 1);
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserProfile(null);
         profileCacheRef.current = null;
       } else {
-        console.log("Profile fetched successfully:", data);
+        
         setUserProfile(data);
         profileCacheRef.current = { userId, profile: data };
       }
@@ -86,13 +86,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    console.log("Setting up auth listener...");
+    
 
     // Set up auth state listener FIRST
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
+      
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // THEN check for existing session (but don't duplicate profile fetch)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session check:", session?.user?.id);
+      
       // Only set session/user here, onAuthStateChange will handle profile fetching
       if (!session) {
         setSession(null);

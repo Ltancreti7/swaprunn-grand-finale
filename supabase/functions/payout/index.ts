@@ -70,12 +70,7 @@ serve(async (req) => {
     const amountCents = hoursWorked * timesheet.pay_rate_cents;
 
     if (!stripeSecretKey || !assignment.driver?.stripe_connect_id) {
-      console.log(
-        "TEST MODE: Would pay",
-        amountCents / 100,
-        "dollars to driver",
-        assignment.driver?.name,
-      );
+      
 
       // Create payout record in TEST MODE
       const { error: payoutError } = await supabase.from("payouts").insert({

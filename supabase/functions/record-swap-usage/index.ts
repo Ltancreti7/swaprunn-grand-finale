@@ -65,9 +65,7 @@ serve(async (req) => {
 
     for (const [dealerId, usage] of dealerUsage) {
       if (!stripeSecretKey || !usage.subscriptionId) {
-        console.log(
-          `Skipping Stripe reporting for dealer ${dealerId} (test mode or no subscription)`,
-        );
+        
         // Mark as billed anyway in test mode
         await supabase
           .from("swap_usage_records")
