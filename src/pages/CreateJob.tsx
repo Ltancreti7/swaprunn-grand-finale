@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/utils";
+import { makes, getModelsForMake } from "@/data/vehicleData";
 
 const CreateJob = () => {
   const navigate = useNavigate();
@@ -80,13 +81,8 @@ const CreateJob = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => (currentYear + 1 - i).toString());
 
-  const makes = [
-    "Acura", "Audi", "BMW", "Buick", "Cadillac", "Chevrolet", "Chrysler", 
-    "Dodge", "Ford", "GMC", "Honda", "Hyundai", "Infiniti", "Jaguar", 
-    "Jeep", "Kia", "Land Rover", "Lexus", "Lincoln", "Mazda", 
-    "Mercedes-Benz", "Mitsubishi", "Nissan", "Porsche", "Ram", "Subaru", 
-    "Tesla", "Toyota", "Volkswagen", "Volvo"
-  ];
+  const vehicleModels = vehicleMake ? getModelsForMake(vehicleMake) : [];
+  const tradeModels = tradeMake ? getModelsForMake(tradeMake) : [];
 
   const timeframeOptions = [
     "ASAP - Within 2 hours",
@@ -96,6 +92,15 @@ const CreateJob = () => {
     "Next week",
     "Flexible timing"
   ];
+
+  // Reset model when make changes
+  useEffect(() => {
+    setVehicleModel("");
+  }, [vehicleMake]);
+
+  useEffect(() => {
+    setTradeModel("");
+  }, [tradeMake]);
 
   // Form validation
   const canProceedToStep = (step: number) => {
@@ -260,12 +265,20 @@ const CreateJob = () => {
 
             <div>
               <Label className="text-white mb-2 block">Model *</Label>
-              <Input
+              <Select
                 value={vehicleModel}
-                onChange={(e) => setVehicleModel(e.target.value)}
-                placeholder="Enter vehicle model"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
+                onValueChange={setVehicleModel}
+                disabled={!vehicleMake}
+              >
+                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectValue placeholder={vehicleMake ? "Select model" : "Select make first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {vehicleModels.map((model) => (
+                    <SelectItem key={model} value={model}>{model}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -327,12 +340,20 @@ const CreateJob = () => {
 
                 <div>
                   <Label className="text-white mb-2 block">Trade Model *</Label>
-                  <Input
+                  <Select
                     value={tradeModel}
-                    onChange={(e) => setTradeModel(e.target.value)}
-                    placeholder="Enter trade vehicle model"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                  />
+                    onValueChange={setTradeModel}
+                    disabled={!tradeMake}
+                  >
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectValue placeholder={tradeMake ? "Select model" : "Select make first"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tradeModels.map((model) => (
+                        <SelectItem key={model} value={model}>{model}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
