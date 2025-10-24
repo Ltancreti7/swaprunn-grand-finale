@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { createJob } from "@/services/bulletproofJobService";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -76,6 +77,7 @@ const CreateJob = () => {
   const [timeframe, setTimeframe] = useState("");
   const [notes, setNotes] = useState("");
   const [requiresTwoPeople, setRequiresTwoPeople] = useState(false);
+  const [saveAsDefaultPickup, setSaveAsDefaultPickup] = useState(false);
 
   // Vehicle data
   const currentYear = new Date().getFullYear();
@@ -101,6 +103,36 @@ const CreateJob = () => {
   useEffect(() => {
     setTradeModel("");
   }, [tradeMake]);
+
+  // Load default pickup address from dealer profile
+  useEffect(() => {
+    const loadDefaultPickupAddress = async () => {
+      if (!userProfile?.dealer_id) return;
+
+      try {
+        const { data: dealer, error } = await supabase
+          .from("dealers")
+          .select("street, city, state, zip")
+          .eq("id", userProfile.dealer_id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (dealer && dealer.street && dealer.city) {
+          setPickupAddress({
+            street: dealer.street || "",
+            city: dealer.city || "",
+            state: dealer.state || "",
+            zip: dealer.zip || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error loading default pickup address:", error);
+      }
+    };
+
+    loadDefaultPickupAddress();
+  }, [userProfile?.dealer_id]);
 
   // Form validation
   const canProceedToStep = (step: number) => {
@@ -179,6 +211,19 @@ const CreateJob = () => {
     setIsSubmitting(true);
 
     try {
+      // Save default pickup address if requested
+      if (saveAsDefaultPickup && userProfile?.dealer_id) {
+        await supabase
+          .from("dealers")
+          .update({
+            street: pickupAddress.street,
+            city: pickupAddress.city,
+            state: pickupAddress.state,
+            zip: pickupAddress.zip,
+          })
+          .eq("id", userProfile.dealer_id);
+      }
+
       const jobData = {
         type: hasTradeIn ? ("swap" as const) : ("delivery" as const),
         pickup_address: `${pickupAddress.street}, ${pickupAddress.city}, ${pickupAddress.state} ${pickupAddress.zip}`,
@@ -397,13 +442,37 @@ const CreateJob = () => {
             </div>
 
             <div>
-              <Label className="text-white mb-2 block">Pickup Address *</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-white">Pickup Address *</Label>
+                {pickupAddress.street && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setPickupAddress({ street: "", city: "", state: "", zip: "" })}
+                    className="text-white/70 hover:text-white text-xs"
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
               <AddressInput
                 label=""
                 value={pickupAddress}
                 onChange={setPickupAddress}
                 className="bg-white/10 border-white/30 text-white"
               />
+              <div className="flex items-center space-x-2 mt-3">
+                <Checkbox
+                  id="saveDefaultPickup"
+                  checked={saveAsDefaultPickup}
+                  onCheckedChange={(checked) => setSaveAsDefaultPickup(checked === true)}
+                  className="border-white/30 data-[state=checked]:bg-[#E11900] data-[state=checked]:border-[#E11900]"
+                />
+                <Label htmlFor="saveDefaultPickup" className="text-white/80 text-sm cursor-pointer">
+                  Save as default pickup address for future jobs
+                </Label>
+              </div>
             </div>
 
             <div>
