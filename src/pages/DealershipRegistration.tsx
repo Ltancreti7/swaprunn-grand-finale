@@ -138,7 +138,7 @@ const DealershipRegistration = () => {
         ) {
           await logSubmission("failure", "Email already in use");
           throw new Error(
-            `This email address is already registered. Please use the login page instead or contact support if you need help accessing your account.`,
+            "This email address is already registered. Please use the login page instead or contact support if you need help accessing your account.",
           );
         }
         throw authError;

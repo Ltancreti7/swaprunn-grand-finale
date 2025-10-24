@@ -39,7 +39,7 @@ const supabase = createClient(
               `   Error with basic insert: ${testResult.error.message}`,
             );
           } else {
-            console.log(`   ✅ Basic insert works!`);
+            console.log("   ✅ Basic insert works!");
             // Clean up
             if (testResult.data?.[0]) {
               await supabase

@@ -86,12 +86,12 @@ serve(async (req) => {
 
       case "completion":
         subject = `Job Completed - ${job.track_token}`;
-        message = `Great job! Your delivery has been completed successfully.`;
+        message = "Great job! Your delivery has been completed successfully.";
         break;
 
       case "cancellation":
         subject = `Job Cancelled - ${job.track_token}`;
-        message = `The job has been cancelled. Please check the app for details.`;
+        message = "The job has been cancelled. Please check the app for details.";
         break;
     }
 
