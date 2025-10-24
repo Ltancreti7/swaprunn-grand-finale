@@ -62,7 +62,8 @@ serve(async (req) => {
     }
 
     // Call Google Maps Routes API (newer, more reliable API)
-    const routesUrl = `https://routes.googleapis.com/directions/v2:computeRoutes`;
+    const routesUrl =
+      "https://routes.googleapis.com/directions/v2:computeRoutes";
 
     const routesResponse = await fetch(routesUrl, {
       method: "POST",
