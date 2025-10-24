@@ -58,8 +58,6 @@ const handler = async (req: Request): Promise<Response> => {
     // Handle name field (could be full name or first+last)
     const fullName = name || `${firstName || ""} ${lastName || ""}`.trim();
 
-    
-
     // Find existing user by email (case-insensitive)
     let authUserId: string;
     let createdUser = false;
@@ -108,7 +106,6 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (existingUserId) {
-      
       authUserId = existingUserId;
       createdUser = false;
     } else {
@@ -135,7 +132,6 @@ const handler = async (req: Request): Promise<Response> => {
         throw authError;
       }
 
-      
       authUserId = authUser.user.id;
       createdUser = true;
     }
@@ -186,8 +182,6 @@ const handler = async (req: Request): Promise<Response> => {
       targetDealerId = currentProfile.dealer_id;
     }
 
-    
-
     // 3. Ensure profile exists (upsert to handle existing users) with name information
     const { data: profileData, error: profileUpsertError } = await supabaseAdmin
       .from("profiles")
@@ -213,8 +207,6 @@ const handler = async (req: Request): Promise<Response> => {
       throw profileUpsertError;
     }
 
-    
-
     // 4. Upsert staff membership (idempotent)
     const { data: staffRecord, error: staffError } = await supabaseAdmin
       .from("dealership_staff")
@@ -239,8 +231,6 @@ const handler = async (req: Request): Promise<Response> => {
       throw staffError;
     }
 
-    
-
     // 5. Auto-populate position based on role for sales staff
     if (role === "sales") {
       // Get the dealer record for this staff member to update their position
@@ -261,7 +251,6 @@ const handler = async (req: Request): Promise<Response> => {
           console.error("Error updating dealer position:", dealerUpdateError);
           // Don't throw - this is not critical to the staff creation process
         } else {
-          
         }
       }
     }

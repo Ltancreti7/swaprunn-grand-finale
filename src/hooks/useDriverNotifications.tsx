@@ -76,8 +76,6 @@ export const useDriverNotifications = () => {
           filter: "status=eq.open",
         },
         async (payload) => {
-          
-
           const newJob = payload.new;
 
           // Update state

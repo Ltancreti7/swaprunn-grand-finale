@@ -48,7 +48,6 @@ export const repairUserProfile = async () => {
       throw error;
     }
 
-    
     return data;
   } catch (error) {
     console.error("Profile repair failed:", error);

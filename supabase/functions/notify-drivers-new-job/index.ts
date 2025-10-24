@@ -33,7 +33,6 @@ serve(async (req) => {
     );
 
     const jobData: NewJobNotification = await req.json();
-    
 
     // Get the job details including dealer_id
     const { data: job, error: jobError } = await supabase
@@ -93,7 +92,6 @@ serve(async (req) => {
     const driverProfiles = (driverProfilesData ?? []) as DriverProfileRow[];
 
     if (driverProfiles.length === 0) {
-      
       return new Response(
         JSON.stringify({
           success: true,
@@ -246,8 +244,6 @@ serve(async (req) => {
       total_count: drivers.length,
       success: successCount + smsCount > 0,
     });
-
-    
 
     return new Response(
       JSON.stringify({

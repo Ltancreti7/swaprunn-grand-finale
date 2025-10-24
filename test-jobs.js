@@ -6,8 +6,6 @@ const supabase = createClient(
 );
 
 (async () => {
-  
-
   // Test inserting a job with trade_make
   const testJob = {
     type: "delivery",
@@ -26,15 +24,10 @@ const supabase = createClient(
   const { data, error } = await supabase.from("jobs").insert(testJob).select();
 
   if (error) {
-    
   } else {
-    
-    
-
     // Clean up test job
     if (data?.[0]) {
       await supabase.from("jobs").delete().eq("id", data[0].id);
-      
     }
   }
 })();

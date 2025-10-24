@@ -26,24 +26,19 @@ class MobileNotificationService {
 
         // Listen for registration
         PushNotifications.addListener("registration", (token) => {
-          
           // TODO: Send token to your server for push notifications
         });
 
         // Listen for push notifications
         PushNotifications.addListener(
           "pushNotificationReceived",
-          (notification) => {
-            
-          },
+          (notification) => {},
         );
 
         // Listen for notification actions
         PushNotifications.addListener(
           "pushNotificationActionPerformed",
-          (notification) => {
-            
-          },
+          (notification) => {},
         );
 
         return true;

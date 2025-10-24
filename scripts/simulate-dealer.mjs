@@ -7,7 +7,6 @@ import path from "path";
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
-  
   await page.goto(url + "driver/dashboard", { waitUntil: "networkidle" });
 
   // Wait for the header to load
@@ -17,7 +16,6 @@ import path from "path";
   const cwd = process.cwd();
   const beforePath = path.join(cwd, "sim-before.png");
   await page.screenshot({ path: beforePath, fullPage: false });
-  
 
   // Dispatch the newJobAvailable event in page context
   const fakeJob = {
@@ -32,7 +30,6 @@ import path from "path";
     customer_name: "ACME",
   };
 
-  
   await page.evaluate((job) => {
     window.dispatchEvent(new CustomEvent("newJobAvailable", { detail: job }));
   }, fakeJob);
@@ -43,7 +40,6 @@ import path from "path";
   // Screenshot after
   const afterPath = path.join(cwd, "sim-after.png");
   await page.screenshot({ path: afterPath, fullPage: false });
-  
 
   // Also capture badge text if present
   const badgeText = await page.evaluate(() => {
@@ -58,12 +54,9 @@ import path from "path";
     return el ? el.textContent?.trim() : null;
   });
 
-  
-
   await browser.close();
   // write a small report
   const report = { before: beforePath, after: afterPath, badgeText };
   const reportPath = path.join(cwd, "sim-report.json");
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-  
 })();

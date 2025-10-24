@@ -19,10 +19,7 @@ serve(async (req) => {
   }
 
   try {
-    
-
     if (!webhookSecret) {
-      
       return new Response("TEST MODE: Webhook processed", {
         status: 200,
         headers: corsHeaders,
@@ -42,12 +39,10 @@ serve(async (req) => {
 
     // In production, verify the webhook signature here
     const event = JSON.parse(body);
-    
 
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object;
-        
 
         const dealerId = session.metadata?.dealer_id;
         const planName = session.metadata?.plan_name;
@@ -91,7 +86,6 @@ serve(async (req) => {
 
       case "invoice.paid": {
         const invoice = event.data.object;
-        
 
         // Activate dealer subscription
         await supabase
@@ -108,7 +102,6 @@ serve(async (req) => {
 
       case "invoice.payment_failed": {
         const invoice = event.data.object;
-        
 
         // Mark subscription as past_due
         await supabase
@@ -119,7 +112,6 @@ serve(async (req) => {
       }
 
       default:
-        
     }
 
     return new Response("Webhook processed", {

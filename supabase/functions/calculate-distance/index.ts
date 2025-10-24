@@ -85,7 +85,6 @@ serve(async (req) => {
     });
 
     const routesData = await routesResponse.json();
-    
 
     if (
       !routesResponse.ok ||
@@ -132,8 +131,6 @@ serve(async (req) => {
       duration: durationText,
       success: true,
     };
-
-    
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

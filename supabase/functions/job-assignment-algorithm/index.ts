@@ -152,8 +152,6 @@ serve(async (req) => {
       // Sort by score and select best driver
       driverScores.sort((a, b) => b.score - a.score);
       assignedDriverId = driverScores[0].driverId;
-
-      
     }
 
     if (!assignedDriverId) {

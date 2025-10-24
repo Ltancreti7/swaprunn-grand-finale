@@ -67,12 +67,14 @@ export const createJob = async (params: JobCreationParams) => {
     try {
       await repairDealerProfile();
     } catch (profileFixError) {
-      console.warn("Profile repair failed, continuing anyway:", profileFixError);
+      console.warn(
+        "Profile repair failed, continuing anyway:",
+        profileFixError,
+      );
     }
 
-    const { data: profiles, error: profileError } = await supabase.rpc(
-      "get_user_profile",
-    );
+    const { data: profiles, error: profileError } =
+      await supabase.rpc("get_user_profile");
 
     if (profileError) {
       throw new Error(`Profile error: ${profileError.message}`);
@@ -246,11 +248,9 @@ export const createJob = async (params: JobCreationParams) => {
       return baseNotes ? `${baseNotes}\n\n${tradeNote}` : tradeNote;
     };
 
-    
-
     try {
       const createdJob = await insertJob(jobDataWithTrade);
-      
+
       await notifyDrivers(createdJob);
       return createdJob;
     } catch (initialError) {

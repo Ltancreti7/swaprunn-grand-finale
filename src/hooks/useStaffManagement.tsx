@@ -78,8 +78,6 @@ export function useStaffManagement() {
 
     setLoading(true);
     try {
-      
-
       // First, fetch staff members without profile join
       const { data: staffData, error: staffError } = await supabase
         .from("dealership_staff")
@@ -93,8 +91,6 @@ export function useStaffManagement() {
         throw staffError;
       }
 
-      
-
       if (!staffData || staffData.length === 0) {
         setStaffMembers([]);
         setInvitations([]);
@@ -103,7 +99,6 @@ export function useStaffManagement() {
 
       // Extract user IDs
       const userIds = staffData.map((staff) => staff.user_id);
-      
 
       // Fetch profiles separately
       const { data: profilesData, error: profilesError } = await supabase
@@ -115,8 +110,6 @@ export function useStaffManagement() {
         console.error("Profiles fetch error:", profilesError);
         // Don't throw here - continue with staff data without names
       }
-
-      
 
       // Create a map of user_id to profile for quick lookup
       const profilesMap = new Map();
@@ -137,7 +130,6 @@ export function useStaffManagement() {
         };
       });
 
-      
       setStaffMembers(enrichedStaffData);
 
       // Fetch pending invitations

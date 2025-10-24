@@ -124,7 +124,6 @@ serve(async (req) => {
           preferences.email_notifications &&
           preferences.job_updates
         ) {
-          
           notifications.push({
             type: "email",
             status: "skipped",
@@ -175,7 +174,6 @@ serve(async (req) => {
         const dealerSubject = `Job Update - ${job.track_token}`;
         const dealerMessage = `Your job has been updated: ${job.status}`;
 
-        
         notifications.push({
           type: "dealer_email",
           status: "skipped",

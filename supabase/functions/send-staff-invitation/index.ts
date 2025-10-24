@@ -112,8 +112,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
       `,
     });
 
-    
-
     return new Response(JSON.stringify(emailResponse), {
       status: 200,
       headers: {

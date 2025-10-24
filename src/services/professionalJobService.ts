@@ -196,7 +196,6 @@ export class ProfessionalJobService {
       }
 
       // Analytics tracking would go here when analytics table is available
-      
 
       // Auto-assign if dealer preference is set to auto
       if (jobData.auto_assign) {

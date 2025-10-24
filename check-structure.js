@@ -6,8 +6,6 @@ const supabase = createClient(
 );
 
 (async () => {
-  
-
   // Check which tables actually exist and work
   const tables = ["jobs", "driver_requests", "profiles", "dealers", "drivers"];
 
@@ -15,13 +13,9 @@ const supabase = createClient(
     try {
       const { data, error } = await supabase.from(table).select("*").limit(1);
       if (error) {
-        
       } else {
-        
-
         // If it's the jobs table, try to see what columns it accepts
         if (table === "jobs" && data?.length === 0) {
-          
           // Try basic insert to see what columns are accepted
           const testResult = await supabase
             .from("jobs")
@@ -35,9 +29,7 @@ const supabase = createClient(
             .select();
 
           if (testResult.error) {
-            
           } else {
-            
             // Clean up
             if (testResult.data?.[0]) {
               await supabase

@@ -3,20 +3,16 @@ const CACHE_NAME = "swaprunn-v1";
 
 // Install event
 self.addEventListener("install", (event) => {
-  
   self.skipWaiting();
 });
 
 // Activate event
 self.addEventListener("activate", (event) => {
-  
   event.waitUntil(self.clients.claim());
 });
 
 // Push event
 self.addEventListener("push", (event) => {
-  
-
   if (!event.data) {
     return;
   }
@@ -46,8 +42,6 @@ self.addEventListener("push", (event) => {
 
 // Notification click event
 self.addEventListener("notificationclick", (event) => {
-  
-
   event.notification.close();
 
   if (event.action === "dismiss") {
@@ -77,8 +71,6 @@ self.addEventListener("notificationclick", (event) => {
 
 // Background sync (for offline functionality)
 self.addEventListener("sync", (event) => {
-  
-
   if (event.tag === "sync-messages") {
     event.waitUntil(syncMessages());
   }

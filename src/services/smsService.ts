@@ -37,7 +37,6 @@ export const smsService = {
         return false;
       }
 
-      
       return true;
     } catch (error) {
       console.error("SMS service error:", error);

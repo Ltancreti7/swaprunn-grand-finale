@@ -14,8 +14,6 @@ const Index = () => {
   // Redirect authenticated users to their dashboard
   useEffect(() => {
     if (!loading && user && userProfile) {
-      
-
       switch (userProfile.user_type) {
         case "dealer":
           navigate("/dealer/dashboard");
@@ -27,8 +25,7 @@ const Index = () => {
           navigate("/swap-coordinator/dashboard");
           break;
         default:
-          // If user type is unknown, stay on homepage but could add error handling
-          
+        // If user type is unknown, stay on homepage but could add error handling
       }
     }
   }, [user, userProfile, loading, navigate]);

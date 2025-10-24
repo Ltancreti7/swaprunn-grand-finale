@@ -33,13 +33,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUserProfile = async (userId: string, retryCount = 0) => {
     // Prevent duplicate fetches
     if (fetchingProfileRef.current === userId) {
-      
       return;
     }
 
     // Check cache first
     if (profileCacheRef.current?.userId === userId) {
-      
       setUserProfile(profileCacheRef.current.profile);
       setLoading(false);
       return;
@@ -47,7 +45,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     fetchingProfileRef.current = userId;
     setProfileLoading(true);
-    
 
     try {
       // Use RPC for stable, secure profile fetching
@@ -60,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Retry with exponential backoff on transient errors
         if (retryCount < 3 && error.code !== "PGRST116") {
           const delay = Math.pow(2, retryCount) * 1000;
-          
+
           setTimeout(() => {
             fetchingProfileRef.current = null;
             fetchUserProfile(userId, retryCount + 1);
@@ -70,7 +67,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserProfile(null);
         profileCacheRef.current = null;
       } else {
-        
         setUserProfile(data);
         profileCacheRef.current = { userId, profile: data };
       }
@@ -86,13 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    
-
     // Set up auth state listener FIRST
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -110,7 +103,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // THEN check for existing session (but don't duplicate profile fetch)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      
       // Only set session/user here, onAuthStateChange will handle profile fetching
       if (!session) {
         setSession(null);

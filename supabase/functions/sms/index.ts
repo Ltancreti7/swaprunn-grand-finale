@@ -26,7 +26,6 @@ serve(async (req) => {
     }
 
     if (!twilioSid || !twilioToken || !twilioMessagingServiceSid) {
-      
       return new Response(
         JSON.stringify({
           success: true,
@@ -59,7 +58,6 @@ serve(async (req) => {
     const result = await response.json();
 
     if (response.ok) {
-      
       return new Response(
         JSON.stringify({
           success: true,
