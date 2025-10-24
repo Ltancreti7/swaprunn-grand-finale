@@ -1,24 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import { Input } from "./input";
 import { Label } from "./label";
 import { formatState, formatZipCode } from "@/hooks/useFormValidation";
-import { Loader } from "@googlemaps/js-api-loader";
-
-// Type declaration for Google Maps
-declare global {
-  interface Window {
-    google: {
-      maps: {
-        places: {
-          Autocomplete: any;
-        };
-        event: {
-          clearInstanceListeners: (instance: any) => void;
-        };
-      };
-    };
-  }
-}
 
 export interface AddressData {
   street: string;
@@ -42,9 +25,6 @@ export const AddressInput: React.FC<AddressInputProps> = ({
   required = false,
   className = "",
 }) => {
-  const streetInputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<any>(null);
-
   const handleFieldChange = (field: keyof AddressData, fieldValue: string) => {
     onChange({
       ...value,
@@ -67,99 +47,6 @@ export const AddressInput: React.FC<AddressInputProps> = ({
     handleFieldChange(field, processedValue);
   };
 
-  useEffect(() => {
-    const initAutocomplete = async () => {
-      try {
-        let apiKey = "demo_key";
-
-        // Try to fetch API key from edge function
-        try {
-          const response = await fetch("/functions/v1/google-maps-config");
-          if (response.ok) {
-            const data = await response.json();
-            apiKey = data.apiKey || "demo_key";
-          }
-        } catch (error) {
-          console.log("Using demo API key for development");
-        }
-
-        const loader = new Loader({
-          apiKey: apiKey,
-          version: "weekly",
-          libraries: ["places"],
-        });
-
-        await loader.load();
-
-        if (streetInputRef.current && window.google) {
-          autocompleteRef.current = new window.google.maps.places.Autocomplete(
-            streetInputRef.current,
-            {
-              types: ["address"],
-              componentRestrictions: { country: "us" },
-            },
-          );
-
-          autocompleteRef.current.addListener("place_changed", () => {
-            const place = autocompleteRef.current?.getPlace();
-            if (place?.address_components) {
-              const addressComponents = place.address_components;
-
-              let street = "";
-              let city = "";
-              let state = "";
-              let zip = "";
-
-              // Extract address components
-              addressComponents.forEach((component) => {
-                const types = component.types;
-
-                if (types.includes("street_number")) {
-                  street = component.long_name + " ";
-                }
-                if (types.includes("route")) {
-                  street += component.long_name;
-                }
-                if (
-                  types.includes("locality") ||
-                  types.includes("sublocality_level_1")
-                ) {
-                  city = component.long_name;
-                }
-                if (types.includes("administrative_area_level_1")) {
-                  state = component.short_name;
-                }
-                if (types.includes("postal_code")) {
-                  zip = component.long_name;
-                }
-              });
-
-              // Update all address fields
-              onChange({
-                street: street.trim(),
-                city,
-                state,
-                zip,
-              });
-            }
-          });
-        }
-      } catch (error) {
-        console.log("Google Places API not available, using manual input");
-      }
-    };
-
-    initAutocomplete();
-
-    return () => {
-      if (autocompleteRef.current && window.google) {
-        window.google.maps.event.clearInstanceListeners(
-          autocompleteRef.current,
-        );
-      }
-    };
-  }, [onChange]);
-
   return (
     <div className={`space-y-3 ${className}`}>
       <Label
@@ -171,11 +58,10 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
       {/* Street Address - Full Width */}
       <Input
-        ref={streetInputRef}
         id={`${label}-street`}
         value={value.street}
         onChange={(e) => handleFieldChange("street", e.target.value)}
-        placeholder="Start typing address for suggestions..."
+        placeholder="123 Main Street"
         required={required}
         className="bg-neutral-800/60 border-2 border-white/25 text-white placeholder:text-white/40 text-lg h-14 rounded-xl"
       />
