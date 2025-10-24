@@ -140,10 +140,10 @@ const CreateJob = () => {
       case 2:
         return vehicleYear && vehicleMake && vehicleModel;
       case 3:
-        return pickupAddress.street && pickupAddress.city && 
+        return pickupAddress.street && pickupAddress.city &&
                deliveryAddress.street && deliveryAddress.city;
       case 4:
-        return customerName && customerPhone && timeframe;
+        return customerName && customerPhone;
       default:
         return true;
     }
@@ -194,6 +194,15 @@ const CreateJob = () => {
       toast({
         title: "Missing Customer Information",
         description: "Please provide customer name and phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!timeframe) {
+      toast({
+        title: "Missing Timeframe",
+        description: "Please select when you need this delivered.",
         variant: "destructive",
       });
       return;
@@ -660,16 +669,16 @@ const CreateJob = () => {
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !timeframe}
                   className="bg-gradient-to-r from-[#E11900] to-[#CC1600] hover:from-[#CC1600] hover:to-[#B01400] text-white px-8 disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creating Job...
+                      Sending Request...
                     </div>
                   ) : (
-                    "Create Job"
+                    "Send Request"
                   )}
                 </Button>
               )}
