@@ -30,7 +30,10 @@ export const AddressInput: React.FC<AddressInputProps> = ({
       ...value,
       [field]: fieldValue,
     };
-    console.log(`Address field '${field}' changed to '${fieldValue}'. Full address:`, newAddress);
+    console.log(
+      `Address field '${field}' changed to '${fieldValue}'. Full address:`,
+      newAddress,
+    );
     onChange(newAddress);
   };
 
