@@ -310,7 +310,6 @@ const DealerDashboard = () => {
     }));
   };
 
-
   if (loading) {
     return (
       <div
