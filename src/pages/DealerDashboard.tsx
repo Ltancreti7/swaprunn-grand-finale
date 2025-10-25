@@ -30,7 +30,6 @@ import { AssignmentCard } from "@/components/dealer/AssignmentCard";
 
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { Job as SupabaseJob } from "@/services/supabaseService";
-import { repairDealerProfile } from "@/utils/repairDealerProfile";
 
 // Extend the Job type to match what JobCard expects
 interface Job extends SupabaseJob {
@@ -311,31 +310,6 @@ const DealerDashboard = () => {
     }));
   };
 
-  const handleFixProfile = async () => {
-    try {
-      toast({
-        title: "Fixing Profile",
-        description: "Attempting to repair dealer profile configuration...",
-      });
-
-      await repairDealerProfile();
-
-      toast({
-        title: "Profile Fixed",
-        description: "Your dealer profile has been successfully repaired. Try creating a job now.",
-      });
-
-      // Refresh the page to reload the profile
-      window.location.reload();
-    } catch (error) {
-      console.error("Profile repair failed:", error);
-      toast({
-        title: "Profile Repair Failed",
-        description: `Failed to repair profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        variant: "destructive",
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -510,13 +484,6 @@ const DealerDashboard = () => {
                             className="w-full sm:w-auto h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl border-white/40 text-slate-950 bg-white hover:bg-white/90 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all"
                           >
                             Edit Personal Info
-                          </Button>
-                          <Button
-                            onClick={handleFixProfile}
-                            variant="outline"
-                            className="w-full sm:w-auto h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl border-red-400 text-red-600 bg-red-50 hover:bg-red-100 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all"
-                          >
-                            Fix Profile Issues
                           </Button>
                         </div>
                       </div>
