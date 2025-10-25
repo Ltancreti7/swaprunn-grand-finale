@@ -119,6 +119,7 @@ const CreateJob = () => {
         if (error) throw error;
 
         if (dealer && dealer.street && dealer.city) {
+          console.log("Loading default pickup address from dealer profile:", dealer);
           setPickupAddress({
             street: dealer.street || "",
             city: dealer.city || "",
@@ -222,7 +223,8 @@ const CreateJob = () => {
     try {
       // Save default pickup address if requested
       if (saveAsDefaultPickup && userProfile?.dealer_id) {
-        await supabase
+        console.log("Saving default pickup address:", pickupAddress);
+        const { error: updateError } = await supabase
           .from("dealers")
           .update({
             street: pickupAddress.street,
@@ -231,6 +233,12 @@ const CreateJob = () => {
             zip: pickupAddress.zip,
           })
           .eq("id", userProfile.dealer_id);
+
+        if (updateError) {
+          console.error("Error saving default address:", updateError);
+        } else {
+          console.log("Default address saved successfully");
+        }
       }
 
       const jobData = {

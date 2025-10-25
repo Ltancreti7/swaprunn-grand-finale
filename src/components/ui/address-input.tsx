@@ -26,10 +26,12 @@ export const AddressInput: React.FC<AddressInputProps> = ({
   className = "",
 }) => {
   const handleFieldChange = (field: keyof AddressData, fieldValue: string) => {
-    onChange({
+    const newAddress = {
       ...value,
       [field]: fieldValue,
-    });
+    };
+    console.log(`Address field '${field}' changed to '${fieldValue}'. Full address:`, newAddress);
+    onChange(newAddress);
   };
 
   const handleFieldChangeWithFormat = (
