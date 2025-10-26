@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SiteHeader from "@/components/SiteHeader";
@@ -77,7 +83,9 @@ const DealerAuth = () => {
         .maybeSingle();
 
       if (profile?.user_type === "dealer") {
-        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", {
+          replace: true,
+        });
         return;
       }
 
@@ -98,7 +106,9 @@ const DealerAuth = () => {
         console.warn("Dealer profile create on verify failed, proceeding");
       }
 
-      navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+      navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", {
+        replace: true,
+      });
     };
 
     // Run once on mount
@@ -294,7 +304,10 @@ const DealerAuth = () => {
               {isSignUp && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="firstName"
+                      className="text-white text-sm font-medium"
+                    >
                       First Name
                     </Label>
                     <Input
@@ -309,7 +322,10 @@ const DealerAuth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="lastName"
+                      className="text-white text-sm font-medium"
+                    >
                       Last Name
                     </Label>
                     <Input
@@ -324,7 +340,10 @@ const DealerAuth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="company" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="company"
+                      className="text-white text-sm font-medium"
+                    >
                       Company Name
                     </Label>
                     <Input
@@ -339,22 +358,35 @@ const DealerAuth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-white text-sm font-medium">Your Role</Label>
+                    <Label className="text-white text-sm font-medium">
+                      Your Role
+                    </Label>
                     <Select
                       value={role}
-                      onValueChange={(value: "salesperson" | "manager" | "owner") => setRole(value)}
+                      onValueChange={(
+                        value: "salesperson" | "manager" | "owner",
+                      ) => setRole(value)}
                     >
                       <SelectTrigger className="h-12 bg-white border-gray-300 text-gray-900 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20">
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-gray-200">
-                        <SelectItem value="salesperson" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                        <SelectItem
+                          value="salesperson"
+                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+                        >
                           Sales
                         </SelectItem>
-                        <SelectItem value="manager" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                        <SelectItem
+                          value="manager"
+                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+                        >
                           Swap Manager
                         </SelectItem>
-                        <SelectItem value="owner" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                        <SelectItem
+                          value="owner"
+                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+                        >
                           Admin/Owner
                         </SelectItem>
                       </SelectContent>
@@ -365,7 +397,10 @@ const DealerAuth = () => {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="email"
+                  className="text-white text-sm font-medium"
+                >
                   Email Address
                 </Label>
                 <Input
@@ -380,7 +415,8 @@ const DealerAuth = () => {
               </div>
 
               <div className="text-sm text-white/80">
-                We'll send a one-time magic link to your email. No password required.
+                We'll send a one-time magic link to your email. No password
+                required.
               </div>
 
               {/* Submit Button */}
@@ -389,7 +425,11 @@ const DealerAuth = () => {
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                 disabled={loading}
               >
-                {loading ? "Sending link..." : isSignUp ? "Send Magic Link" : "Send Magic Link"}
+                {loading
+                  ? "Sending link..."
+                  : isSignUp
+                    ? "Send Magic Link"
+                    : "Send Magic Link"}
               </Button>
             </form>
 

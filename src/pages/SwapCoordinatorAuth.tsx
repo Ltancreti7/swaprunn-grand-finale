@@ -115,7 +115,10 @@ export default function SwapCoordinatorAuth() {
       if (!isLogin) {
         localStorage.setItem(
           PENDING_SWAPCO_SIGNUP,
-          JSON.stringify({ fullName: `${firstName} ${lastName}`.trim(), phone: cleanPhoneNumber(phone) })
+          JSON.stringify({
+            fullName: `${firstName} ${lastName}`.trim(),
+            phone: cleanPhoneNumber(phone),
+          }),
         );
       }
 
@@ -151,7 +154,9 @@ export default function SwapCoordinatorAuth() {
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.user) return;
 
-      const { data: profile } = await supabase.rpc("get_user_profile").maybeSingle();
+      const { data: profile } = await supabase
+        .rpc("get_user_profile")
+        .maybeSingle();
       if (profile?.user_type === "swap_coordinator") {
         navigate("/swap-coordinator/dashboard", { replace: true });
         return;
@@ -166,7 +171,9 @@ export default function SwapCoordinatorAuth() {
         });
         localStorage.removeItem(PENDING_SWAPCO_SIGNUP);
       } catch (e) {
-        console.warn("Swap coordinator profile create on verify failed, proceeding");
+        console.warn(
+          "Swap coordinator profile create on verify failed, proceeding",
+        );
       }
 
       navigate("/swap-coordinator/dashboard", { replace: true });
@@ -279,7 +286,8 @@ export default function SwapCoordinatorAuth() {
               </div>
 
               <div className="text-sm text-white/80">
-                We'll send a one-time magic link to your email. No password required.
+                We'll send a one-time magic link to your email. No password
+                required.
               </div>
 
               <Button
@@ -287,7 +295,11 @@ export default function SwapCoordinatorAuth() {
                 disabled={loading}
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
               >
-                {loading ? "Sending link..." : isLogin ? "Send Magic Link" : "Send Magic Link"}
+                {loading
+                  ? "Sending link..."
+                  : isLogin
+                    ? "Send Magic Link"
+                    : "Send Magic Link"}
               </Button>
             </form>
 
