@@ -136,56 +136,62 @@ const Index = () => {
                 <span className="text-[#E11900]">Swap Smarter.</span>
               </h1>
 
-              <p className="text-base sm:text-lg lg:text-xl text-white/90 mb-10 max-w-3xl mx-auto font-light px-4">
+              <p className="text-base sm:text-lg lg:text-xl text-white/90 mb-12 max-w-3xl mx-auto font-light px-4">
                 Streamline off-site deliveries and inventory swaps with a
                 tech-first platform built to revolutionize dealership logistics.
               </p>
 
-              {/* Primary CTA */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-                <Button
-                  asChild
-                  size="lg"
-                  className="bg-[#E11900] hover:bg-[#B51400] text-white px-6 sm:px-8 py-4 rounded-full text-base sm:text-lg font-semibold shadow-xl w-full sm:w-auto min-h-[48px]"
-                >
-                  <Link
-                    to="/how-it-works"
-                    className="flex items-center justify-center"
+              {/* Three Call-to-Action Buttons */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4">
+                {/* Register Your Dealership - Primary */}
+                <div className="flex flex-col items-center text-center">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-[#E11900] hover:bg-[#B51400] text-white px-6 py-4 rounded-lg text-base font-semibold shadow-lg w-full min-h-[56px] transition-all hover:shadow-xl hover:scale-105"
                   >
-                    See How It Works
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="bg-white border-white text-black hover:bg-white/90 hover:text-black px-6 sm:px-8 py-4 rounded-full text-base sm:text-lg font-semibold w-full sm:w-auto min-h-[48px]"
-                >
-                  <Link to="#demo" className="flex items-center justify-center">
-                    Watch Demo
-                  </Link>
-                </Button>
-              </div>
+                    <Link to="/dealership/register">
+                      Register Your Dealership
+                    </Link>
+                  </Button>
+                  <p className="text-white/70 text-sm mt-3 leading-relaxed">
+                    Create your dealership account and invite your team.
+                  </p>
+                </div>
 
-              {/* Driver CTA - Mobile Visible */}
-              <div className="mt-8 sm:hidden">
-                <Button
-                  asChild
-                  size="lg"
-                  className="bg-transparent border-2 border-[#E11900] text-[#E11900] hover:bg-[#E11900] hover:text-white px-8 py-4 rounded-full text-lg font-semibold w-full min-h-[48px]"
-                >
-                  <Link
-                    to="/driver/auth"
-                    className="flex items-center justify-center"
+                {/* Drive With SwapRunn - Secondary */}
+                <div className="flex flex-col items-center text-center">
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-black px-6 py-4 rounded-lg text-base font-semibold w-full min-h-[56px] transition-all hover:shadow-xl hover:scale-105"
                   >
-                    <Truck className="mr-2 h-5 w-5" />
-                    Drive With SwapRunn
-                  </Link>
-                </Button>
-                <p className="text-white/60 text-sm mt-2 text-center">
-                  Earn money delivering vehicles
-                </p>
+                    <Link to="/driver/auth">
+                      Drive With SwapRunn
+                    </Link>
+                  </Button>
+                  <p className="text-white/70 text-sm mt-3 leading-relaxed">
+                    Start earning by delivering vehicles for local dealerships.
+                  </p>
+                </div>
+
+                {/* Sales and Staff Login - Neutral */}
+                <div className="flex flex-col items-center text-center">
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="ghost"
+                    className="bg-white/10 border border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-6 py-4 rounded-lg text-base font-semibold w-full min-h-[56px] transition-all hover:shadow-xl hover:scale-105"
+                  >
+                    <Link to="/dealer/auth">
+                      Sales and Staff Login
+                    </Link>
+                  </Button>
+                  <p className="text-white/70 text-sm mt-3 leading-relaxed">
+                    Access your dealership's delivery dashboard.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
