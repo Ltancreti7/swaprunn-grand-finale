@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SiteHeader from "@/components/SiteHeader";
@@ -77,7 +83,9 @@ const DealerAuth = () => {
         .maybeSingle();
 
       if (profile?.user_type === "dealer") {
-        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", {
+          replace: true,
+        });
         return;
       }
 
@@ -98,7 +106,9 @@ const DealerAuth = () => {
         console.warn("Dealer profile create on verify failed, proceeding");
       }
 
-      navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+      navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", {
+        replace: true,
+      });
     };
 
     // Run once on mount
@@ -203,19 +213,21 @@ const DealerAuth = () => {
     try {
       if (isSignUp) {
         // Sign up with email and password
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              user_type: "dealer",
-              role: role,
-              full_name: `${firstName} ${lastName}`.trim() || undefined,
-              company_name: companyName || undefined,
+        const { data: authData, error: authError } = await supabase.auth.signUp(
+          {
+            email,
+            password,
+            options: {
+              data: {
+                user_type: "dealer",
+                role: role,
+                full_name: `${firstName} ${lastName}`.trim() || undefined,
+                company_name: companyName || undefined,
+              },
+              emailRedirectTo: `${window.location.origin}/dealer/auth`,
             },
-            emailRedirectTo: `${window.location.origin}/dealer/auth`,
           },
-        });
+        );
 
         if (authError) throw authError;
         if (!authData.user) throw new Error("Failed to create user account");
@@ -234,13 +246,16 @@ const DealerAuth = () => {
         });
 
         // Redirect to appropriate dashboard
-        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", {
+          replace: true,
+        });
       } else {
         // Sign in with email and password
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { data: authData, error: authError } =
+          await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
 
         if (authError) throw authError;
 
@@ -261,7 +276,9 @@ const DealerAuth = () => {
         });
 
         // Redirect to appropriate dashboard
-        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", {
+          replace: true,
+        });
       }
     } catch (error) {
       const message =
@@ -323,7 +340,10 @@ const DealerAuth = () => {
               {isSignUp && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="firstName"
+                      className="text-white text-sm font-medium"
+                    >
                       First Name
                     </Label>
                     <Input
@@ -338,7 +358,10 @@ const DealerAuth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="lastName"
+                      className="text-white text-sm font-medium"
+                    >
                       Last Name
                     </Label>
                     <Input
@@ -353,7 +376,10 @@ const DealerAuth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="company" className="text-white text-sm font-medium">
+                    <Label
+                      htmlFor="company"
+                      className="text-white text-sm font-medium"
+                    >
                       Company Name
                     </Label>
                     <Input
@@ -368,22 +394,35 @@ const DealerAuth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-white text-sm font-medium">Your Role</Label>
+                    <Label className="text-white text-sm font-medium">
+                      Your Role
+                    </Label>
                     <Select
                       value={role}
-                      onValueChange={(value: "salesperson" | "manager" | "owner") => setRole(value)}
+                      onValueChange={(
+                        value: "salesperson" | "manager" | "owner",
+                      ) => setRole(value)}
                     >
                       <SelectTrigger className="h-12 bg-white border-gray-300 text-gray-900 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20">
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-gray-200">
-                        <SelectItem value="salesperson" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                        <SelectItem
+                          value="salesperson"
+                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+                        >
                           Sales
                         </SelectItem>
-                        <SelectItem value="manager" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                        <SelectItem
+                          value="manager"
+                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+                        >
                           Swap Manager
                         </SelectItem>
-                        <SelectItem value="owner" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                        <SelectItem
+                          value="owner"
+                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+                        >
                           Admin/Owner
                         </SelectItem>
                       </SelectContent>
@@ -394,7 +433,10 @@ const DealerAuth = () => {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="email"
+                  className="text-white text-sm font-medium"
+                >
                   Email Address
                 </Label>
                 <Input
@@ -410,7 +452,10 @@ const DealerAuth = () => {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="password"
+                  className="text-white text-sm font-medium"
+                >
                   Password
                 </Label>
                 <Input
@@ -418,7 +463,9 @@ const DealerAuth = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={isSignUp ? "Create a password" : "Enter your password"}
+                  placeholder={
+                    isSignUp ? "Create a password" : "Enter your password"
+                  }
                   className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
                   required
                   minLength={6}
@@ -431,7 +478,13 @@ const DealerAuth = () => {
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                 disabled={loading}
               >
-                {loading ? (isSignUp ? "Creating account..." : "Signing in...") : isSignUp ? "Create Account" : "Sign In"}
+                {loading
+                  ? isSignUp
+                    ? "Creating account..."
+                    : "Signing in..."
+                  : isSignUp
+                    ? "Create Account"
+                    : "Sign In"}
               </Button>
             </form>
 
