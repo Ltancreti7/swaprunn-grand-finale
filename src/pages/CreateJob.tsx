@@ -81,7 +81,9 @@ const CreateJob = () => {
 
   // Vehicle data
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 30 }, (_, i) => (currentYear + 1 - i).toString());
+  const years = Array.from({ length: 30 }, (_, i) =>
+    (currentYear + 1 - i).toString(),
+  );
 
   const vehicleModels = vehicleMake ? getModelsForMake(vehicleMake) : [];
   const tradeModels = tradeMake ? getModelsForMake(tradeMake) : [];
@@ -92,7 +94,7 @@ const CreateJob = () => {
     "Tomorrow",
     "This week",
     "Next week",
-    "Flexible timing"
+    "Flexible timing",
   ];
 
   // Reset model when make changes
@@ -119,7 +121,10 @@ const CreateJob = () => {
         if (error) throw error;
 
         if (dealer && dealer.street && dealer.city) {
-          console.log("Loading default pickup address from dealer profile:", dealer);
+          console.log(
+            "Loading default pickup address from dealer profile:",
+            dealer,
+          );
           setPickupAddress({
             street: dealer.street || "",
             city: dealer.city || "",
@@ -141,8 +146,12 @@ const CreateJob = () => {
       case 2:
         return vehicleYear && vehicleMake && vehicleModel;
       case 3:
-        return pickupAddress.street && pickupAddress.city &&
-               deliveryAddress.street && deliveryAddress.city;
+        return (
+          pickupAddress.street &&
+          pickupAddress.city &&
+          deliveryAddress.street &&
+          deliveryAddress.city
+        );
       case 4:
         return customerName && customerPhone;
       default:
@@ -166,7 +175,8 @@ const CreateJob = () => {
     if (!userProfile?.dealer_id) {
       toast({
         title: "Account Setup Required",
-        description: "Your dealer account is not properly configured. Please contact support.",
+        description:
+          "Your dealer account is not properly configured. Please contact support.",
         variant: "destructive",
       });
       return;
@@ -209,7 +219,10 @@ const CreateJob = () => {
       return;
     }
 
-    if (hasTradeIn && (!tradeYear || !tradeMake || !tradeModel || !tradeTransmission)) {
+    if (
+      hasTradeIn &&
+      (!tradeYear || !tradeMake || !tradeModel || !tradeTransmission)
+    ) {
       toast({
         title: "Missing Trade Vehicle Information",
         description: "Please complete all trade vehicle details.",
@@ -276,7 +289,8 @@ const CreateJob = () => {
       console.error("Job creation failed:", error);
       toast({
         title: "Job Creation Failed",
-        description: error instanceof Error ? error.message : "Please try again.",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -291,34 +305,52 @@ const CreateJob = () => {
           <div className="space-y-6">
             <div className="text-center">
               <Car className="mx-auto h-12 w-12 text-[#E11900] mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Vehicle Information</h2>
-              <p className="text-white/70">Tell us about the vehicle being delivered</p>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Vehicle Information
+              </h2>
+              <p className="text-white/70">
+                Tell us about the vehicle being delivered
+              </p>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label className="text-white mb-2 block" htmlFor="vehicle-year">Year *</Label>
+                <Label className="text-white mb-2 block" htmlFor="vehicle-year">
+                  Year *
+                </Label>
                 <Select value={vehicleYear} onValueChange={setVehicleYear}>
-                  <SelectTrigger id="vehicle-year" className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger
+                    id="vehicle-year"
+                    className="bg-white/10 border-white/20 text-white"
+                  >
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
                     {years.map((year) => (
-                      <SelectItem key={year} value={year}>{year}</SelectItem>
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
-                <Label className="text-white mb-2 block" htmlFor="vehicle-make">Make *</Label>
+                <Label className="text-white mb-2 block" htmlFor="vehicle-make">
+                  Make *
+                </Label>
                 <Select value={vehicleMake} onValueChange={setVehicleMake}>
-                  <SelectTrigger id="vehicle-make" className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger
+                    id="vehicle-make"
+                    className="bg-white/10 border-white/20 text-white"
+                  >
                     <SelectValue placeholder="Select make" />
                   </SelectTrigger>
                   <SelectContent>
                     {makes.map((make) => (
-                      <SelectItem key={make} value={make}>{make}</SelectItem>
+                      <SelectItem key={make} value={make}>
+                        {make}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -333,18 +365,26 @@ const CreateJob = () => {
                 disabled={!vehicleMake}
               >
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue placeholder={vehicleMake ? "Select model" : "Select make first"} />
+                  <SelectValue
+                    placeholder={
+                      vehicleMake ? "Select model" : "Select make first"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {vehicleModels.map((model) => (
-                    <SelectItem key={model} value={model}>{model}</SelectItem>
+                    <SelectItem key={model} value={model}>
+                      {model}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label className="text-white mb-2 block" htmlFor="vehicle-vin">VIN (Optional)</Label>
+              <Label className="text-white mb-2 block" htmlFor="vehicle-vin">
+                VIN (Optional)
+              </Label>
               <Input
                 id="vehicle-vin"
                 name="vehicleVin"
@@ -370,32 +410,54 @@ const CreateJob = () => {
 
             {hasTradeIn && (
               <div className="space-y-4 p-4 bg-white/5 rounded-lg border border-white/10">
-                <h3 className="text-lg font-semibold text-white">Trade Vehicle Information</h3>
-                
+                <h3 className="text-lg font-semibold text-white">
+                  Trade Vehicle Information
+                </h3>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-white mb-2 block" htmlFor="trade-year">Trade Year *</Label>
+                    <Label
+                      className="text-white mb-2 block"
+                      htmlFor="trade-year"
+                    >
+                      Trade Year *
+                    </Label>
                     <Select value={tradeYear} onValueChange={setTradeYear}>
-                      <SelectTrigger id="trade-year" className="bg-white/10 border-white/20 text-white">
+                      <SelectTrigger
+                        id="trade-year"
+                        className="bg-white/10 border-white/20 text-white"
+                      >
                         <SelectValue placeholder="Select year" />
                       </SelectTrigger>
                       <SelectContent>
                         {years.map((year) => (
-                          <SelectItem key={year} value={year}>{year}</SelectItem>
+                          <SelectItem key={year} value={year}>
+                            {year}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
-                    <Label className="text-white mb-2 block" htmlFor="trade-make">Trade Make *</Label>
+                    <Label
+                      className="text-white mb-2 block"
+                      htmlFor="trade-make"
+                    >
+                      Trade Make *
+                    </Label>
                     <Select value={tradeMake} onValueChange={setTradeMake}>
-                      <SelectTrigger id="trade-make" className="bg-white/10 border-white/20 text-white">
+                      <SelectTrigger
+                        id="trade-make"
+                        className="bg-white/10 border-white/20 text-white"
+                      >
                         <SelectValue placeholder="Select make" />
                       </SelectTrigger>
                       <SelectContent>
                         {makes.map((make) => (
-                          <SelectItem key={make} value={make}>{make}</SelectItem>
+                          <SelectItem key={make} value={make}>
+                            {make}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -410,11 +472,17 @@ const CreateJob = () => {
                     disabled={!tradeMake}
                   >
                     <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder={tradeMake ? "Select model" : "Select make first"} />
+                      <SelectValue
+                        placeholder={
+                          tradeMake ? "Select model" : "Select make first"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {tradeModels.map((model) => (
-                        <SelectItem key={model} value={model}>{model}</SelectItem>
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -422,22 +490,40 @@ const CreateJob = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-white mb-2 block" htmlFor="trade-vin">Trade VIN (Optional)</Label>
+                    <Label
+                      className="text-white mb-2 block"
+                      htmlFor="trade-vin"
+                    >
+                      Trade VIN (Optional)
+                    </Label>
                     <Input
                       id="trade-vin"
                       name="tradeVin"
                       value={tradeVin}
-                      onChange={(e) => setTradeVin(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setTradeVin(e.target.value.toUpperCase())
+                      }
                       placeholder="Enter trade VIN"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                       maxLength={17}
                     />
                   </div>
-                  
+
                   <div>
-                    <Label className="text-white mb-2 block" htmlFor="trade-transmission">Transmission *</Label>
-                    <Select value={tradeTransmission} onValueChange={setTradeTransmission}>
-                      <SelectTrigger id="trade-transmission" className="bg-white/10 border-white/20 text-white">
+                    <Label
+                      className="text-white mb-2 block"
+                      htmlFor="trade-transmission"
+                    >
+                      Transmission *
+                    </Label>
+                    <Select
+                      value={tradeTransmission}
+                      onValueChange={setTradeTransmission}
+                    >
+                      <SelectTrigger
+                        id="trade-transmission"
+                        className="bg-white/10 border-white/20 text-white"
+                      >
                         <SelectValue placeholder="Select transmission" />
                       </SelectTrigger>
                       <SelectContent>
@@ -458,8 +544,12 @@ const CreateJob = () => {
           <div className="space-y-6">
             <div className="text-center">
               <MapPin className="mx-auto h-12 w-12 text-[#E11900] mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Pickup & Delivery</h2>
-              <p className="text-white/70">Where should we pick up and deliver the vehicle?</p>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Pickup & Delivery
+              </h2>
+              <p className="text-white/70">
+                Where should we pick up and deliver the vehicle?
+              </p>
             </div>
 
             <div>
@@ -470,7 +560,14 @@ const CreateJob = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => setPickupAddress({ street: "", city: "", state: "", zip: "" })}
+                    onClick={() =>
+                      setPickupAddress({
+                        street: "",
+                        city: "",
+                        state: "",
+                        zip: "",
+                      })
+                    }
                     className="text-white/70 hover:text-white text-xs"
                   >
                     Clear
@@ -489,10 +586,15 @@ const CreateJob = () => {
                 <Checkbox
                   id="saveDefaultPickup"
                   checked={saveAsDefaultPickup}
-                  onCheckedChange={(checked) => setSaveAsDefaultPickup(checked === true)}
+                  onCheckedChange={(checked) =>
+                    setSaveAsDefaultPickup(checked === true)
+                  }
                   className="border-white/30 data-[state=checked]:bg-[#E11900] data-[state=checked]:border-[#E11900]"
                 />
-                <Label htmlFor="saveDefaultPickup" className="text-white/80 text-sm cursor-pointer">
+                <Label
+                  htmlFor="saveDefaultPickup"
+                  className="text-white/80 text-sm cursor-pointer"
+                >
                   Save as default pickup address for future jobs
                 </Label>
               </div>
@@ -513,7 +615,9 @@ const CreateJob = () => {
               <Checkbox
                 id="requiresTwoPeople"
                 checked={requiresTwoPeople}
-                onCheckedChange={(checked) => setRequiresTwoPeople(checked === true)}
+                onCheckedChange={(checked) =>
+                  setRequiresTwoPeople(checked === true)
+                }
                 className="border-white/30"
               />
               <Label htmlFor="requires-two" className="text-white">
@@ -528,12 +632,16 @@ const CreateJob = () => {
           <div className="space-y-6">
             <div className="text-center">
               <User className="mx-auto h-12 w-12 text-[#E11900] mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Customer Information</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Customer Information
+              </h2>
               <p className="text-white/70">Who is receiving the vehicle?</p>
             </div>
 
             <div>
-              <Label className="text-white mb-2 block" htmlFor="customer-name">Customer Name *</Label>
+              <Label className="text-white mb-2 block" htmlFor="customer-name">
+                Customer Name *
+              </Label>
               <Input
                 id="customer-name"
                 name="customerName"
@@ -545,12 +653,16 @@ const CreateJob = () => {
             </div>
 
             <div>
-              <Label className="text-white mb-2 block" htmlFor="customer-phone">Customer Phone *</Label>
+              <Label className="text-white mb-2 block" htmlFor="customer-phone">
+                Customer Phone *
+              </Label>
               <Input
                 id="customer-phone"
                 name="customerPhone"
                 value={customerPhone}
-                onChange={(e) => setCustomerPhone(formatPhoneNumber(e.target.value))}
+                onChange={(e) =>
+                  setCustomerPhone(formatPhoneNumber(e.target.value))
+                }
                 placeholder="(555) 123-4567"
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                 maxLength={14}
@@ -564,26 +676,37 @@ const CreateJob = () => {
           <div className="space-y-6">
             <div className="text-center">
               <Clock className="mx-auto h-12 w-12 text-[#E11900] mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Timing & Notes</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Timing & Notes
+              </h2>
               <p className="text-white/70">When do you need this delivered?</p>
             </div>
 
             <div>
-              <Label className="text-white mb-2 block" htmlFor="timeframe">Timeframe *</Label>
+              <Label className="text-white mb-2 block" htmlFor="timeframe">
+                Timeframe *
+              </Label>
               <Select value={timeframe} onValueChange={setTimeframe}>
-                <SelectTrigger id="timeframe" className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger
+                  id="timeframe"
+                  className="bg-white/10 border-white/20 text-white"
+                >
                   <SelectValue placeholder="Select timeframe" />
                 </SelectTrigger>
                 <SelectContent>
                   {timeframeOptions.map((option) => (
-                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label className="text-white mb-2 block" htmlFor="job-notes">Additional Notes (Optional)</Label>
+              <Label className="text-white mb-2 block" htmlFor="job-notes">
+                Additional Notes (Optional)
+              </Label>
               <Textarea
                 id="job-notes"
                 name="notes"
@@ -597,14 +720,29 @@ const CreateJob = () => {
 
             {/* Summary */}
             <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-3">Job Summary</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Job Summary
+              </h3>
               <div className="space-y-2 text-sm text-white/80">
-                <p><strong>Vehicle:</strong> {vehicleYear} {vehicleMake} {vehicleModel}</p>
-                <p><strong>Type:</strong> {hasTradeIn ? "Vehicle Swap" : "Vehicle Delivery"}</p>
-                <p><strong>Customer:</strong> {customerName}</p>
-                <p><strong>Timeframe:</strong> {timeframe}</p>
+                <p>
+                  <strong>Vehicle:</strong> {vehicleYear} {vehicleMake}{" "}
+                  {vehicleModel}
+                </p>
+                <p>
+                  <strong>Type:</strong>{" "}
+                  {hasTradeIn ? "Vehicle Swap" : "Vehicle Delivery"}
+                </p>
+                <p>
+                  <strong>Customer:</strong> {customerName}
+                </p>
+                <p>
+                  <strong>Timeframe:</strong> {timeframe}
+                </p>
                 {hasTradeIn && (
-                  <p><strong>Trade Vehicle:</strong> {tradeYear} {tradeMake} {tradeModel}</p>
+                  <p>
+                    <strong>Trade Vehicle:</strong> {tradeYear} {tradeMake}{" "}
+                    {tradeModel}
+                  </p>
                 )}
               </div>
             </div>
@@ -617,7 +755,7 @@ const CreateJob = () => {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen bg-black relative"
       style={{
         backgroundImage: `url(${mapBackgroundImage})`,
@@ -627,7 +765,7 @@ const CreateJob = () => {
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/60 z-0"></div>
-      
+
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -639,19 +777,19 @@ const CreateJob = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Button>
-          
           <div className="text-center">
             <h1 className="text-3xl font-bold text-white">Create New Job</h1>
-            <p className="text-white/70">Step {currentStep} of {totalSteps}</p>
+            <p className="text-white/70">
+              Step {currentStep} of {totalSteps}
+            </p>
           </div>
-          
           <div className="w-24"></div> {/* Spacer for centering */}
         </div>
 
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="w-full bg-white/20 rounded-full h-2">
-            <div 
+            <div
               className="bg-[#E11900] h-2 rounded-full transition-all duration-300"
               style={{ width: `${(currentStep / totalSteps) * 100}%` }}
             ></div>
@@ -690,7 +828,9 @@ const CreateJob = () => {
                       };
                       toast({
                         title: "Missing information",
-                        description: messages[currentStep + 1] || "Please complete the required fields for this step.",
+                        description:
+                          messages[currentStep + 1] ||
+                          "Please complete the required fields for this step.",
                         variant: "destructive",
                       });
                       return;

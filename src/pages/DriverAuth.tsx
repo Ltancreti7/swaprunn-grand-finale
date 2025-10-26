@@ -135,7 +135,7 @@ const DriverAuth = () => {
         // Stash signup info to create profile after verification
         localStorage.setItem(
           PENDING_DRIVER_SIGNUP,
-          JSON.stringify({ fullName, phone: cleanPhoneNumber(phoneNumber) })
+          JSON.stringify({ fullName, phone: cleanPhoneNumber(phoneNumber) }),
         );
       }
 
@@ -155,7 +155,10 @@ const DriverAuth = () => {
       if (error) throw error;
 
       localStorage.setItem(SAVED_EMAIL_KEY, email);
-      toast({ title: "Check your email", description: "We sent you a magic link to sign in." });
+      toast({
+        title: "Check your email",
+        description: "We sent you a magic link to sign in.",
+      });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
@@ -175,7 +178,9 @@ const DriverAuth = () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.user) return;
 
-      const { data: profile } = await supabase.rpc("get_user_profile").maybeSingle();
+      const { data: profile } = await supabase
+        .rpc("get_user_profile")
+        .maybeSingle();
       if (profile?.user_type === "driver") {
         navigate("/driver/dashboard", { replace: true });
         return;
@@ -295,7 +300,8 @@ const DriverAuth = () => {
               </div>
 
               <div className="text-sm text-white/80">
-                We'll send a one-time magic link to your email. No password required.
+                We'll send a one-time magic link to your email. No password
+                required.
               </div>
 
               <Button
@@ -303,7 +309,11 @@ const DriverAuth = () => {
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                 disabled={loading}
               >
-                {loading ? "Sending link..." : isSignUp ? "Send Magic Link" : "Send Magic Link"}
+                {loading
+                  ? "Sending link..."
+                  : isSignUp
+                    ? "Send Magic Link"
+                    : "Send Magic Link"}
               </Button>
             </form>
 
