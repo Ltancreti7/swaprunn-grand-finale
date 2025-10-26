@@ -70,27 +70,37 @@ export const createJob = async (params: JobCreationParams) => {
       console.warn("Profile repair failed, continuing anyway:", profileFixError);
     }
 
+    console.log("🔍 Fetching user profile...");
     const { data: profiles, error: profileError } = await supabase.rpc(
       "get_user_profile",
     );
 
     if (profileError) {
+      console.error("❌ Profile fetch error:", profileError);
       throw new Error(`Profile error: ${profileError.message}`);
     }
 
+    console.log("📋 Profiles data:", profiles);
+
     if (!profiles || !Array.isArray(profiles) || profiles.length === 0) {
-      throw new Error("No user profile found");
+      console.error("❌ No profiles returned");
+      throw new Error("No user profile found. Please log out and log back in.");
     }
 
     const profile = profiles[0];
+    console.log("👤 Current profile:", profile);
 
     if (!profile || profile.user_type !== "dealer") {
+      console.error("❌ User is not a dealer:", profile?.user_type);
       throw new Error("Only dealers can create job requests");
     }
 
     if (!profile.dealer_id) {
-      throw new Error("Dealer account not properly configured");
+      console.error("❌ Profile missing dealer_id");
+      throw new Error("Dealer account not properly configured. Please contact support.");
     }
+
+    console.log("✅ Profile validated. Dealer ID:", profile.dealer_id);
 
     let requestingUserId = params.created_by ?? null;
 
