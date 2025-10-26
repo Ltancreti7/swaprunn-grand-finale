@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,11 +35,13 @@ export default function SwapCoordinatorAuth() {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Password removed for magic-link flow
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const SAVED_EMAIL_KEY = "swaprunn_swapco_saved_email";
+  const PENDING_SWAPCO_SIGNUP = "pending_swapco_signup";
 
   const createSwapCoordinatorProfile = async (details?: {
     fullName?: string | null;
@@ -109,81 +111,31 @@ export default function SwapCoordinatorAuth() {
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
-        // CRITICAL: Verify user is actually a swap coordinator
-        const { data: initialProfile } = await supabase
-          .rpc("get_user_profile")
-          .maybeSingle();
-
-        let profile = initialProfile;
-
-        if (!profile) {
-          await tryRepairSwapCoordinatorProfile(data.user ?? null);
-          const { data: repairedProfile } = await supabase
-            .rpc("get_user_profile")
-            .maybeSingle();
-          profile = repairedProfile ?? null;
-        }
-
-        if (profile?.user_type !== "swap_coordinator") {
-          await supabase.auth.signOut();
-          const metadataUserType = extractSwapCoordinatorMetadata(
-            data.user ?? null,
-          ).user_type;
-          const accountType =
-            profile?.user_type || metadataUserType || "different type";
-          throw new Error(
-            `This is a swap coordinator login page. Your account is registered as a ${accountType}. Please use the correct login page: ${
-              accountType === "dealer"
-                ? "/dealer/auth"
-                : accountType === "driver"
-                  ? "/driver/auth"
-                  : "/"
-            }`,
-          );
-        }
-
-        navigate("/swap-coordinator/dashboard");
-      } else {
-        const { data: authData, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              first_name: firstName,
-              last_name: lastName,
-              full_name: `${firstName} ${lastName}`,
-              phone,
-              user_type: "swap_coordinator",
-            },
-          },
-        });
-
-        if (error) throw error;
-        if (authData.user) {
-          try {
-            await createSwapCoordinatorProfile({
-              fullName: `${firstName} ${lastName}`.trim(),
-              phone,
-            });
-          } catch (profileError) {
-            console.error(
-              "Swap coordinator profile creation after signup failed:",
-              profileError,
-            );
-          }
-        }
-        toast.success("Account created! Redirecting...");
-        navigate("/swap-coordinator/dashboard");
+      // Magic link only
+      if (!isLogin) {
+        localStorage.setItem(
+          PENDING_SWAPCO_SIGNUP,
+          JSON.stringify({ fullName: `${firstName} ${lastName}`.trim(), phone: cleanPhoneNumber(phone) })
+        );
       }
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/swap-coordinator/auth?verify=1`,
+          shouldCreateUser: true,
+          data: {
+            user_type: "swap_coordinator",
+            full_name: `${firstName} ${lastName}`.trim() || undefined,
+            phone_number: cleanPhoneNumber(phone) || undefined,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      localStorage.setItem(SAVED_EMAIL_KEY, email);
+      toast.success("Check your email for a magic link to sign in.");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
@@ -192,6 +144,35 @@ export default function SwapCoordinatorAuth() {
       setLoading(false);
     }
   };
+
+  // After magic link, if user is signed in, ensure swap coordinator profile exists and redirect
+  useEffect(() => {
+    const completeSwapcoOnboarding = async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.user) return;
+
+      const { data: profile } = await supabase.rpc("get_user_profile").maybeSingle();
+      if (profile?.user_type === "swap_coordinator") {
+        navigate("/swap-coordinator/dashboard", { replace: true });
+        return;
+      }
+
+      try {
+        const pendingRaw = localStorage.getItem(PENDING_SWAPCO_SIGNUP);
+        const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+        await createSwapCoordinatorProfile({
+          fullName: pending?.fullName || null,
+          phone: pending?.phone || null,
+        });
+        localStorage.removeItem(PENDING_SWAPCO_SIGNUP);
+      } catch (e) {
+        console.warn("Swap coordinator profile create on verify failed, proceeding");
+      }
+
+      navigate("/swap-coordinator/dashboard", { replace: true });
+    };
+    void completeSwapcoOnboarding();
+  }, [navigate]);
 
   return (
     <div
@@ -297,48 +278,16 @@ export default function SwapCoordinatorAuth() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="text-white text-sm font-medium"
-                >
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="Enter your password"
-                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
-                  minLength={isLogin ? undefined : 6}
-                />
+              <div className="text-sm text-white/80">
+                We'll send a one-time magic link to your email. No password required.
               </div>
-
-              {isLogin && (
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="px-0 text-sm text-white/80 hover:text-white"
-                    onClick={() => navigate("/auth/reset")}
-                  >
-                    Forgot password?
-                  </Button>
-                </div>
-              )}
 
               <Button
                 type="submit"
                 disabled={loading}
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
               >
-                {loading
-                  ? "Processing..."
-                  : isLogin
-                    ? "Sign In"
-                    : "Create Account"}
+                {loading ? "Sending link..." : isLogin ? "Send Magic Link" : "Send Magic Link"}
               </Button>
             </form>
 

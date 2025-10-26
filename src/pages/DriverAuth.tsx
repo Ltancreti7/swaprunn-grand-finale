@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+// Removed password-based login; magic-link only
 import { useToast } from "@/hooks/use-toast";
 import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,34 +34,26 @@ const extractDriverMetadata = (user: User | null): DriverMetadata => {
 };
 
 const SAVED_EMAIL_KEY = "swaprunn_driver_saved_email";
-const SAVED_PASSWORD_KEY = "swaprunn_driver_saved_password";
-const REMEMBER_ME_KEY = "swaprunn_driver_remember_me";
+const PENDING_DRIVER_SIGNUP = "pending_driver_signup";
 
 const DriverAuth = () => {
   const location = useLocation();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Password removed for magic-link flow
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Load saved credentials on mount
+  // Load saved email on mount
   useEffect(() => {
     const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
-    const savedPassword = localStorage.getItem(SAVED_PASSWORD_KEY);
-    const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === "true";
 
     if (savedEmail) {
       setEmail(savedEmail);
     }
-    if (savedPassword && savedRememberMe) {
-      setPassword(savedPassword);
-    }
-    setRememberMe(savedRememberMe);
   }, []);
 
   useEffect(() => {
@@ -138,134 +130,37 @@ const DriverAuth = () => {
     setLoading(true);
 
     try {
+      // Magic link only
       if (isSignUp) {
-        // Log driver signup to database (background task)
-        const logSignup = async (
-          status: "success" | "failure",
-          errorMsg?: string,
-        ) => {
-          try {
-            await supabase.from("form_submissions").insert({
-              form_type: "driver_signup",
-              name: fullName,
-              email: email,
-              message: `Phone: ${phoneNumber}`,
-              status,
-              error_message: errorMsg,
-              metadata: {
-                phone: phoneNumber,
-              },
-            });
-          } catch (err) {
-            console.error("Failed to log driver signup:", err);
-          }
-        };
-
-        const { data: authData, error: signUpError } =
-          await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/`,
-              data: {
-                full_name: fullName,
-                phone_number: cleanPhoneNumber(phoneNumber),
-                user_type: "driver",
-              },
-            },
-          });
-
-        if (signUpError) {
-          await logSignup("failure", signUpError.message);
-          throw signUpError;
-        }
-
-        if (authData.user) {
-          try {
-            await createDriverProfile();
-            await logSignup("success");
-          } catch (profileError) {
-            console.error("Profile creation failed:", profileError);
-            await logSignup("failure", "Profile creation failed");
-          }
-
-          if (!authData.user.email_confirmed_at) {
-            toast({
-              title: "Account created!",
-              description:
-                "Check your email to verify your account, then sign in.",
-            });
-            setIsSignUp(false);
-          } else {
-            toast({
-              title: "Account created!",
-              description: "Successfully logged in.",
-            });
-            navigate("/driver/dashboard");
-          }
-        }
-      } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
-        // CRITICAL: Verify user is actually a driver
-        const { data: initialProfile } = await supabase
-          .rpc("get_user_profile")
-          .maybeSingle();
-
-        let profile = initialProfile;
-
-        if (!profile) {
-          await tryRepairDriverProfile(data.user ?? null);
-          const { data: repairedProfile } = await supabase
-            .rpc("get_user_profile")
-            .maybeSingle();
-          profile = repairedProfile ?? null;
-        }
-
-        if (profile?.user_type !== "driver") {
-          await supabase.auth.signOut();
-          const metadataUserType = extractDriverMetadata(
-            data.user ?? null,
-          ).user_type;
-          const accountType =
-            profile?.user_type || metadataUserType || "different type";
-          throw new Error(
-            `This is a driver login page. Your account is registered as a ${accountType}. Please use the correct login page: ${
-              accountType === "dealer"
-                ? "/dealer/auth"
-                : accountType === "swap_coordinator"
-                  ? "/swap-coordinator/auth"
-                  : "/"
-            }`,
-          );
-        }
-
-        // Save credentials based on "Remember Me" preference
-        localStorage.setItem(SAVED_EMAIL_KEY, email);
-        localStorage.setItem(REMEMBER_ME_KEY, rememberMe.toString());
-
-        if (rememberMe) {
-          localStorage.setItem(SAVED_PASSWORD_KEY, password);
-        } else {
-          localStorage.removeItem(SAVED_PASSWORD_KEY);
-        }
-
-        toast({
-          title: "Welcome back!",
-          description: "Successfully logged in.",
-        });
-        navigate("/driver/dashboard");
+        // Stash signup info to create profile after verification
+        localStorage.setItem(
+          PENDING_DRIVER_SIGNUP,
+          JSON.stringify({ fullName, phone: cleanPhoneNumber(phoneNumber) })
+        );
       }
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/driver/auth?verify=1`,
+          shouldCreateUser: true,
+          data: {
+            user_type: "driver",
+            full_name: fullName || undefined,
+            phone_number: cleanPhoneNumber(phoneNumber) || undefined,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      localStorage.setItem(SAVED_EMAIL_KEY, email);
+      toast({ title: "Check your email", description: "We sent you a magic link to sign in." });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
       toast({
-        title: "Authentication failed",
+        title: "Email could not be sent",
         description: message,
         variant: "destructive",
       });
@@ -273,6 +168,35 @@ const DriverAuth = () => {
       setLoading(false);
     }
   };
+
+  // After magic link, if user is signed in, ensure driver profile exists and redirect
+  useEffect(() => {
+    const completeDriverOnboarding = async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.user) return;
+
+      const { data: profile } = await supabase.rpc("get_user_profile").maybeSingle();
+      if (profile?.user_type === "driver") {
+        navigate("/driver/dashboard", { replace: true });
+        return;
+      }
+
+      try {
+        const pendingRaw = localStorage.getItem(PENDING_DRIVER_SIGNUP);
+        const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+        await createDriverProfile({
+          fullName: pending?.fullName || null,
+          phone: pending?.phone || null,
+        });
+        localStorage.removeItem(PENDING_DRIVER_SIGNUP);
+      } catch (e) {
+        console.warn("Driver profile create on verify failed, proceeding");
+      }
+
+      navigate("/driver/dashboard", { replace: true });
+    };
+    void completeDriverOnboarding();
+  }, [navigate]);
 
   return (
     <div
@@ -370,103 +294,16 @@ const DriverAuth = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="text-white text-sm font-medium"
-                >
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
-                  required={isSignUp}
-                  minLength={isSignUp ? 6 : undefined}
-                />
+              <div className="text-sm text-white/80">
+                We'll send a one-time magic link to your email. No password required.
               </div>
-
-              {/* Remember Me Option - Only show for sign in */}
-              {!isSignUp && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="remember-driver"
-                        checked={rememberMe}
-                        onCheckedChange={(checked) => {
-                          setRememberMe(checked as boolean);
-                          if (!checked) {
-                            localStorage.removeItem(SAVED_PASSWORD_KEY);
-                          }
-                        }}
-                        className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                      />
-                      <Label
-                        htmlFor="remember-driver"
-                        className="text-sm text-white/80 cursor-pointer font-medium"
-                      >
-                        Remember my login details
-                      </Label>
-                    </div>
-
-                    {(localStorage.getItem(SAVED_EMAIL_KEY) ||
-                      localStorage.getItem(SAVED_PASSWORD_KEY)) && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          localStorage.removeItem(SAVED_EMAIL_KEY);
-                          localStorage.removeItem(SAVED_PASSWORD_KEY);
-                          localStorage.removeItem(REMEMBER_ME_KEY);
-                          setEmail("");
-                          setPassword("");
-                          setRememberMe(false);
-                          toast({
-                            title: "Cleared",
-                            description:
-                              "Saved login details have been cleared",
-                          });
-                        }}
-                        className="text-xs text-white/50 hover:text-white/80 underline"
-                      >
-                        Clear saved data
-                      </button>
-                    )}
-                  </div>
-
-                  {rememberMe && (
-                    <p className="text-xs text-white/50 italic">
-                      Your email and password will be saved for faster login
-                      next time
-                    </p>
-                  )}
-
-                  <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="px-0 text-sm text-white/80 hover:text-white"
-                      onClick={() => navigate("/auth/reset")}
-                    >
-                      Forgot password?
-                    </Button>
-                  </div>
-                </div>
-              )}
 
               <Button
                 type="submit"
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                 disabled={loading}
               >
-                {loading
-                  ? "Processing..."
-                  : isSignUp
-                    ? "Create Account"
-                    : "Sign In"}
+                {loading ? "Sending link..." : isSignUp ? "Send Magic Link" : "Send Magic Link"}
               </Button>
             </form>
 
@@ -477,8 +314,8 @@ const DriverAuth = () => {
                 className="text-white/80 hover:text-white hover:underline transition-colors duration-200 font-medium"
               >
                 {isSignUp
-                  ? "Already have an account? Sign in"
-                  : "Don't have an account? Sign up here."}
+                  ? "Already have an account? Use magic link"
+                  : "Don't have an account? Create one"}
               </button>
             </div>
           </CardContent>

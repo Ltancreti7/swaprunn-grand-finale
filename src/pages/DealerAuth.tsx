@@ -5,21 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SiteHeader from "@/components/SiteHeader";
 import { AuthHeader } from "@/components/AuthHeader";
-import { Crown, ArrowLeft, Fingerprint } from "lucide-react";
+import { Crown } from "lucide-react";
 import mapBackgroundImage from "@/assets/map-background.jpg";
-import { useBiometricAuth } from "@/hooks/useBiometricAuth";
 import BackButton from "@/components/BackButton";
 import type { User } from "@supabase/supabase-js";
 
@@ -45,8 +37,7 @@ const extractDealerMetadata = (user: User | null): DealerMetadata => {
 };
 
 const SAVED_EMAIL_KEY = "swaprunn_saved_email";
-const SAVED_PASSWORD_KEY = "swaprunn_saved_password";
-const REMEMBER_ME_KEY = "swaprunn_remember_me";
+const PENDING_DEALER_SIGNUP = "pending_dealer_signup";
 
 const DealerAuth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -58,73 +49,61 @@ const DealerAuth = () => {
   const [role, setRole] = useState<"salesperson" | "manager" | "owner">(
     "salesperson",
   );
-  const [rememberMe, setRememberMe] = useState(true);
-  const [useBiometric, setUseBiometric] = useState(true);
-
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const biometric = useBiometricAuth();
 
   // Check for admin role in URL params
   const urlParams = new URLSearchParams(window.location.search);
   const isAdminSignup = urlParams.get("role") === "admin";
 
-  // Load saved credentials on mount
+  // Load saved email on mount
   useEffect(() => {
     const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
-    const savedPassword = localStorage.getItem(SAVED_PASSWORD_KEY);
-    const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === "true";
-
     if (savedEmail) {
       setEmail(savedEmail);
     }
-    if (savedPassword && savedRememberMe) {
-      setPassword(savedPassword);
-    }
-    setRememberMe(savedRememberMe);
   }, []);
 
-  const attemptBiometricLogin = useCallback(async () => {
-    try {
-      const credentials = await biometric.getCredentials();
-      if (!credentials) return;
+  // After magic link, if user is signed in, ensure dealer profile exists and redirect
+  useEffect(() => {
+    const completeDealerOnboarding = async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.user) return;
 
-      const verified = await biometric.authenticate(
-        "Use Face ID to sign in to SwapRunn",
-      );
-      if (!verified) return;
+      // If profile exists, go to dashboard
+      const { data: profile } = await supabase
+        .rpc("get_user_profile")
+        .maybeSingle();
 
-      // Auto-login with saved credentials
-      const { error } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password,
-      });
-
-      if (error) {
-        toast({
-          title: "Biometric login failed",
-          description: "Please sign in manually",
-          variant: "destructive",
-        });
+      if (profile?.user_type === "dealer") {
+        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
         return;
       }
 
-      toast({
-        title: "Welcome back!",
-        description: "Signed in with Face ID",
-      });
-    } catch (error) {
-      console.error("Biometric login error:", error);
-    }
-  }, [biometric, toast]);
+      // Attempt to create profile from pending signup data or metadata
+      try {
+        const pendingRaw = localStorage.getItem(PENDING_DEALER_SIGNUP);
+        const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
 
-  // Try biometric login on mount if available
-  useEffect(() => {
-    if (!isSignUp && biometric.isAvailable) {
-      attemptBiometricLogin();
-    }
-  }, [biometric.isAvailable, isSignUp, attemptBiometricLogin]);
+        await createDealerProfile({
+          fullName: pending?.fullName || null,
+          companyName: pending?.companyName || null,
+          phone: pending?.phone || null,
+        });
+
+        // Clear pending data
+        localStorage.removeItem(PENDING_DEALER_SIGNUP);
+      } catch (e) {
+        console.warn("Dealer profile create on verify failed, proceeding");
+      }
+
+      navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+    };
+
+    // Run once on mount
+    void completeDealerOnboarding();
+  }, [navigate, isAdminSignup]);
 
   const createDealerProfile = async (details?: {
     fullName?: string | null;
@@ -222,126 +201,44 @@ const DealerAuth = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Always send a magic link. If sign-up, stash profile details for post-verify creation
       if (isSignUp) {
-        const { data: authData, error: signUpError } =
-          await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/`,
-              data: {
-                first_name: firstName,
-                last_name: lastName,
-                full_name: `${firstName} ${lastName}`.trim(),
-                company_name: companyName,
-                user_type: "dealer",
-                role: role,
-              },
-            },
-          });
-        if (signUpError) throw signUpError;
-        if (authData.user) {
-          // Manually create dealer and profile records
-          try {
-            await createDealerProfile();
-          } catch (profileError) {
-            console.error("Profile creation failed:", profileError);
-            // Continue anyway - profile can be created later
-          }
-
-          // Save email
-          localStorage.setItem(SAVED_EMAIL_KEY, email);
-
-          if (!authData.user.email_confirmed_at) {
-            toast({
-              title: "Account created!",
-              description:
-                "Check your email to verify your account, then sign in.",
-            });
-            setIsSignUp(false); // Switch to login mode
-          } else {
-            toast({
-              title: "Account created!",
-              description: "Successfully logged in.",
-            });
-            navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard");
-          }
-        }
-      } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
-        // CRITICAL: Verify user is actually a dealer
-        const { data: initialProfile } = await supabase
-          .rpc("get_user_profile")
-          .maybeSingle();
-
-        let profile = initialProfile;
-
-        if (!profile) {
-          await tryRepairDealerProfile(data.user ?? null);
-          const { data: repairedProfile } = await supabase
-            .rpc("get_user_profile")
-            .maybeSingle();
-          profile = repairedProfile ?? null;
-        }
-
-        if (profile?.user_type !== "dealer") {
-          await supabase.auth.signOut();
-          const metadataUserType = extractDealerMetadata(
-            data.user ?? null,
-          ).user_type;
-          const accountType =
-            profile?.user_type || metadataUserType || "different type";
-          throw new Error(
-            `This is a dealer login page. Your account is registered as a ${accountType}. Please use the correct login page: ${
-              accountType === "driver"
-                ? "/driver/auth"
-                : accountType === "swap_coordinator"
-                  ? "/swap-coordinator/auth"
-                  : "/"
-            }`,
-          );
-        }
-
-        // Save credentials based on "Remember Me" preference
-        localStorage.setItem(SAVED_EMAIL_KEY, email);
-        localStorage.setItem(REMEMBER_ME_KEY, rememberMe.toString());
-
-        if (rememberMe) {
-          // Save password securely in localStorage for convenience
-          localStorage.setItem(SAVED_PASSWORD_KEY, password);
-
-          // Also save to biometric storage if available
-          if (useBiometric && biometric.isAvailable) {
-            await biometric.saveCredentials(email, password);
-            toast({
-              title: "Credentials saved",
-              description: "Your login will be remembered for faster access",
-              duration: 3000,
-            });
-          }
-        } else {
-          // Clear saved password if remember me is unchecked
-          localStorage.removeItem(SAVED_PASSWORD_KEY);
-        }
-
-        toast({
-          title: "Welcome back!",
-          description: "Successfully logged in.",
-        });
-
-        navigate("/dealer/dashboard");
+        localStorage.setItem(
+          PENDING_DEALER_SIGNUP,
+          JSON.stringify({
+            fullName: `${firstName} ${lastName}`.trim(),
+            companyName,
+            phone: undefined,
+          }),
+        );
       }
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dealer/auth?verify=1`,
+          shouldCreateUser: true,
+          data: {
+            user_type: "dealer",
+            role: role,
+            full_name: `${firstName} ${lastName}`.trim() || undefined,
+            company_name: companyName || undefined,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      localStorage.setItem(SAVED_EMAIL_KEY, email);
+      toast({
+        title: "Check your email",
+        description: "We sent you a magic link to sign in.",
+      });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
       toast({
-        title: "Authentication failed",
+        title: "Email could not be sent",
         description: message,
         variant: "destructive",
       });
@@ -397,10 +294,7 @@ const DealerAuth = () => {
               {isSignUp && (
                 <>
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="firstName"
-                      className="text-white text-sm font-medium"
-                    >
+                    <Label htmlFor="firstName" className="text-white text-sm font-medium">
                       First Name
                     </Label>
                     <Input
@@ -415,10 +309,7 @@ const DealerAuth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="lastName"
-                      className="text-white text-sm font-medium"
-                    >
+                    <Label htmlFor="lastName" className="text-white text-sm font-medium">
                       Last Name
                     </Label>
                     <Input
@@ -433,10 +324,7 @@ const DealerAuth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="company"
-                      className="text-white text-sm font-medium"
-                    >
+                    <Label htmlFor="company" className="text-white text-sm font-medium">
                       Company Name
                     </Label>
                     <Input
@@ -451,38 +339,22 @@ const DealerAuth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="role"
-                      className="text-white text-sm font-medium"
-                    >
-                      Your Role
-                    </Label>
+                    <Label className="text-white text-sm font-medium">Your Role</Label>
                     <Select
                       value={role}
-                      onValueChange={(
-                        value: "salesperson" | "manager" | "owner",
-                      ) => setRole(value)}
+                      onValueChange={(value: "salesperson" | "manager" | "owner") => setRole(value)}
                     >
                       <SelectTrigger className="h-12 bg-white border-gray-300 text-gray-900 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20">
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-gray-200">
-                        <SelectItem
-                          value="salesperson"
-                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
-                        >
+                        <SelectItem value="salesperson" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
                           Sales
                         </SelectItem>
-                        <SelectItem
-                          value="manager"
-                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
-                        >
+                        <SelectItem value="manager" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
                           Swap Manager
                         </SelectItem>
-                        <SelectItem
-                          value="owner"
-                          className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
-                        >
+                        <SelectItem value="owner" className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
                           Admin/Owner
                         </SelectItem>
                       </SelectContent>
@@ -493,10 +365,7 @@ const DealerAuth = () => {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="text-white text-sm font-medium"
-                >
+                <Label htmlFor="email" className="text-white text-sm font-medium">
                   Email Address
                 </Label>
                 <Input
@@ -510,118 +379,9 @@ const DealerAuth = () => {
                 />
               </div>
 
-              {/* Password Field */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="text-white text-sm font-medium"
-                >
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
-                  required={isSignUp}
-                  minLength={isSignUp ? 6 : undefined}
-                />
+              <div className="text-sm text-white/80">
+                We'll send a one-time magic link to your email. No password required.
               </div>
-
-              {/* Remember Me & Biometric Options - Only show for sign in */}
-              {!isSignUp && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="remember"
-                        checked={rememberMe}
-                        onCheckedChange={(checked) => {
-                          setRememberMe(checked as boolean);
-                          if (!checked) {
-                            // Clear saved password immediately if unchecked
-                            localStorage.removeItem(SAVED_PASSWORD_KEY);
-                          }
-                        }}
-                        className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                      />
-                      <Label
-                        htmlFor="remember"
-                        className="text-sm text-white/80 cursor-pointer font-medium"
-                      >
-                        Remember my login details
-                      </Label>
-                    </div>
-
-                    {/* Clear saved data button */}
-                    {(localStorage.getItem(SAVED_EMAIL_KEY) ||
-                      localStorage.getItem(SAVED_PASSWORD_KEY)) && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          localStorage.removeItem(SAVED_EMAIL_KEY);
-                          localStorage.removeItem(SAVED_PASSWORD_KEY);
-                          localStorage.removeItem(REMEMBER_ME_KEY);
-                          setEmail("");
-                          setPassword("");
-                          setRememberMe(false);
-                          toast({
-                            title: "Cleared",
-                            description:
-                              "Saved login details have been cleared",
-                          });
-                        }}
-                        className="text-xs text-white/50 hover:text-white/80 underline"
-                      >
-                        Clear saved data
-                      </button>
-                    )}
-                  </div>
-
-                  {biometric.isAvailable && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="biometric"
-                        checked={useBiometric}
-                        onCheckedChange={(checked) =>
-                          setUseBiometric(checked as boolean)
-                        }
-                        className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                      />
-                      <Label
-                        htmlFor="biometric"
-                        className="text-sm text-white/80 cursor-pointer flex items-center gap-2 font-medium"
-                      >
-                        <Fingerprint className="w-4 h-4" />
-                        Enable{" "}
-                        {biometric.biometryType === "face"
-                          ? "Face ID"
-                          : "Touch ID"}
-                      </Label>
-                    </div>
-                  )}
-
-                  {rememberMe && (
-                    <p className="text-xs text-white/50 italic">
-                      Your email and password will be saved for faster login
-                      next time
-                    </p>
-                  )}
-
-                  <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="px-0 text-sm text-white/80 hover:text-white"
-                      onClick={() => navigate("/auth/reset")}
-                    >
-                      Forgot password?
-                    </Button>
-                  </div>
-                </div>
-              )}
 
               {/* Submit Button */}
               <Button
@@ -629,11 +389,7 @@ const DealerAuth = () => {
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                 disabled={loading}
               >
-                {loading
-                  ? "Processing..."
-                  : isSignUp
-                    ? "Create Account"
-                    : "Sign In"}
+                {loading ? "Sending link..." : isSignUp ? "Send Magic Link" : "Send Magic Link"}
               </Button>
             </form>
 
@@ -645,8 +401,8 @@ const DealerAuth = () => {
                 className="text-white/80 hover:text-white hover:underline transition-colors duration-200 font-medium"
               >
                 {isSignUp
-                  ? "Already have an account? Sign in"
-                  : "Don't have an account? Sign up here."}
+                  ? "Already have an account? Use magic link"
+                  : "Don't have an account? Create one"}
               </button>
             </div>
           </CardContent>

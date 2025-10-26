@@ -57,6 +57,8 @@ export const useDriverNotifications = () => {
 
   useEffect(() => {
     if (userProfile?.user_type !== "driver") return;
+    const dealerId = (userProfile as any)?.dealer_id;
+    if (!dealerId) return;
 
     // Request notification permissions on mount
     notificationService.requestPermission();
@@ -66,19 +68,25 @@ export const useDriverNotifications = () => {
 
     // Set up real-time subscription to jobs table
     const channel = supabase
-      .channel("job-notifications")
+      .channel(`job-notifications-${dealerId}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "jobs",
-          filter: "status=eq.open",
+          // Filter to jobs for the same dealership; we'll check status in handler
+          filter: `dealer_id=eq.${dealerId}` as any,
         },
         async (payload) => {
           console.log("New job detected:", payload.new);
 
           const newJob = payload.new;
+
+          // Only react to open jobs
+          if (newJob?.status && newJob.status !== "open") {
+            return;
+          }
 
           // Update state
           setNewJobsCount((prev) => prev + 1);
