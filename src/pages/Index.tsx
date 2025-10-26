@@ -149,9 +149,7 @@ const Index = () => {
                     variant="outline"
                     className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-black px-8 py-5 rounded-lg text-lg font-semibold w-full transition-all hover:shadow-xl hover:scale-105"
                   >
-                    <Link to="/driver/auth">
-                      Drive With SwapRunn
-                    </Link>
+                    <Link to="/driver/auth">Drive With SwapRunn</Link>
                   </Button>
                   <p className="text-white/70 text-base mt-4 leading-relaxed">
                     Start earning by delivering vehicles for local dealerships.
@@ -166,9 +164,7 @@ const Index = () => {
                     variant="ghost"
                     className="bg-white/10 border border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-8 py-5 rounded-lg text-lg font-semibold w-full transition-all hover:shadow-xl hover:scale-105"
                   >
-                    <Link to="/dealer/auth">
-                      Sales and Staff Login
-                    </Link>
+                    <Link to="/dealer/auth">Sales and Staff Login</Link>
                   </Button>
                   <p className="text-white/70 text-base mt-4 leading-relaxed">
                     Access your dealership's delivery dashboard.
@@ -294,7 +290,6 @@ const Index = () => {
             </div>
           </div>
         </section>
-
 
         {/* Footer */}
         <footer className="relative z-10 py-12 border-t border-white/10">
