@@ -203,7 +203,7 @@ const CreateJob = () => {
     if (!timeframe) {
       toast({
         title: "Missing Timeframe",
-        description: "Please select when you need this delivered.",
+        description: "Please select a delivery timeframe.",
         variant: "destructive",
       });
       return;
@@ -297,9 +297,9 @@ const CreateJob = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label className="text-white mb-2 block">Year *</Label>
+                <Label className="text-white mb-2 block" htmlFor="vehicle-year">Year *</Label>
                 <Select value={vehicleYear} onValueChange={setVehicleYear}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger id="vehicle-year" className="bg-white/10 border-white/20 text-white">
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -311,9 +311,9 @@ const CreateJob = () => {
               </div>
               
               <div>
-                <Label className="text-white mb-2 block">Make *</Label>
+                <Label className="text-white mb-2 block" htmlFor="vehicle-make">Make *</Label>
                 <Select value={vehicleMake} onValueChange={setVehicleMake}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger id="vehicle-make" className="bg-white/10 border-white/20 text-white">
                     <SelectValue placeholder="Select make" />
                   </SelectTrigger>
                   <SelectContent>
@@ -344,8 +344,10 @@ const CreateJob = () => {
             </div>
 
             <div>
-              <Label className="text-white mb-2 block">VIN (Optional)</Label>
+              <Label className="text-white mb-2 block" htmlFor="vehicle-vin">VIN (Optional)</Label>
               <Input
+                id="vehicle-vin"
+                name="vehicleVin"
                 value={vehicleVin}
                 onChange={(e) => setVehicleVin(e.target.value.toUpperCase())}
                 placeholder="Enter VIN number"
@@ -372,9 +374,9 @@ const CreateJob = () => {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-white mb-2 block">Trade Year *</Label>
+                    <Label className="text-white mb-2 block" htmlFor="trade-year">Trade Year *</Label>
                     <Select value={tradeYear} onValueChange={setTradeYear}>
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectTrigger id="trade-year" className="bg-white/10 border-white/20 text-white">
                         <SelectValue placeholder="Select year" />
                       </SelectTrigger>
                       <SelectContent>
@@ -386,9 +388,9 @@ const CreateJob = () => {
                   </div>
                   
                   <div>
-                    <Label className="text-white mb-2 block">Trade Make *</Label>
+                    <Label className="text-white mb-2 block" htmlFor="trade-make">Trade Make *</Label>
                     <Select value={tradeMake} onValueChange={setTradeMake}>
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectTrigger id="trade-make" className="bg-white/10 border-white/20 text-white">
                         <SelectValue placeholder="Select make" />
                       </SelectTrigger>
                       <SelectContent>
@@ -420,8 +422,10 @@ const CreateJob = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-white mb-2 block">Trade VIN (Optional)</Label>
+                    <Label className="text-white mb-2 block" htmlFor="trade-vin">Trade VIN (Optional)</Label>
                     <Input
+                      id="trade-vin"
+                      name="tradeVin"
                       value={tradeVin}
                       onChange={(e) => setTradeVin(e.target.value.toUpperCase())}
                       placeholder="Enter trade VIN"
@@ -431,9 +435,9 @@ const CreateJob = () => {
                   </div>
                   
                   <div>
-                    <Label className="text-white mb-2 block">Transmission *</Label>
+                    <Label className="text-white mb-2 block" htmlFor="trade-transmission">Transmission *</Label>
                     <Select value={tradeTransmission} onValueChange={setTradeTransmission}>
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectTrigger id="trade-transmission" className="bg-white/10 border-white/20 text-white">
                         <SelectValue placeholder="Select transmission" />
                       </SelectTrigger>
                       <SelectContent>
@@ -474,9 +478,11 @@ const CreateJob = () => {
                 )}
               </div>
               <AddressInput
-                label=""
+                label="Pickup Address"
+                idBase="pickup"
                 value={pickupAddress}
                 onChange={setPickupAddress}
+                required
                 className="bg-white/10 border-white/30 text-white"
               />
               <div className="flex items-center space-x-2 mt-3">
@@ -493,11 +499,12 @@ const CreateJob = () => {
             </div>
 
             <div>
-              <Label className="text-white mb-2 block">Delivery Address *</Label>
               <AddressInput
-                label=""
+                label="Delivery Address"
+                idBase="delivery"
                 value={deliveryAddress}
                 onChange={setDeliveryAddress}
+                required
                 className="bg-white/10 border-white/30 text-white"
               />
             </div>
@@ -526,8 +533,10 @@ const CreateJob = () => {
             </div>
 
             <div>
-              <Label className="text-white mb-2 block">Customer Name *</Label>
+              <Label className="text-white mb-2 block" htmlFor="customer-name">Customer Name *</Label>
               <Input
+                id="customer-name"
+                name="customerName"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Enter customer's full name"
@@ -536,8 +545,10 @@ const CreateJob = () => {
             </div>
 
             <div>
-              <Label className="text-white mb-2 block">Customer Phone *</Label>
+              <Label className="text-white mb-2 block" htmlFor="customer-phone">Customer Phone *</Label>
               <Input
+                id="customer-phone"
+                name="customerPhone"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(formatPhoneNumber(e.target.value))}
                 placeholder="(555) 123-4567"
@@ -558,9 +569,9 @@ const CreateJob = () => {
             </div>
 
             <div>
-              <Label className="text-white mb-2 block">Timeframe *</Label>
+              <Label className="text-white mb-2 block" htmlFor="timeframe">Timeframe *</Label>
               <Select value={timeframe} onValueChange={setTimeframe}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger id="timeframe" className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select timeframe" />
                 </SelectTrigger>
                 <SelectContent>
@@ -572,8 +583,10 @@ const CreateJob = () => {
             </div>
 
             <div>
-              <Label className="text-white mb-2 block">Additional Notes (Optional)</Label>
+              <Label className="text-white mb-2 block" htmlFor="job-notes">Additional Notes (Optional)</Label>
               <Textarea
+                id="job-notes"
+                name="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any special instructions, customer preferences, or delivery notes..."
@@ -667,9 +680,24 @@ const CreateJob = () => {
 
               {currentStep < totalSteps ? (
                 <Button
-                  onClick={handleNext}
-                  disabled={!canProceedToStep(currentStep + 1)}
-                  className="bg-[#E11900] hover:bg-[#CC1600] text-white disabled:opacity-50"
+                  onClick={() => {
+                    if (!canProceedToStep(currentStep + 1)) {
+                      // Provide clear feedback instead of a disabled button
+                      const messages: Record<number, string> = {
+                        2: "Please select Year, Make, and enter Model.",
+                        3: "Please enter both Pickup and Delivery addresses.",
+                        4: "Please enter Customer name and phone.",
+                      };
+                      toast({
+                        title: "Missing information",
+                        description: messages[currentStep + 1] || "Please complete the required fields for this step.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    handleNext();
+                  }}
+                  className="bg-[#E11900] hover:bg-[#CC1600] text-white"
                 >
                   Next
                   <ChevronRight className="w-4 h-4 ml-2" />

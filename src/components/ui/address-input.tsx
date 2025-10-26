@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Input } from "./input";
 import { Label } from "./label";
 import { formatState, formatZipCode } from "@/hooks/useFormValidation";
@@ -12,6 +12,7 @@ export interface AddressData {
 
 interface AddressInputProps {
   label: string;
+  idBase?: string; // optional stable id prefix for inputs
   value: AddressData;
   onChange: (address: AddressData) => void;
   required?: boolean;
@@ -20,11 +21,22 @@ interface AddressInputProps {
 
 export const AddressInput: React.FC<AddressInputProps> = ({
   label,
+  idBase,
   value,
   onChange,
   required = false,
   className = "",
 }) => {
+  const streetInputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<any>(null);
+  const idPrefix = React.useMemo(() => {
+    if (idBase && idBase.trim().length > 0) return idBase.trim().toLowerCase();
+    const slug = (label || "address")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    return slug || "address";
+  }, [idBase, label]);
   const handleFieldChange = (field: keyof AddressData, fieldValue: string) => {
     const newAddress = {
       ...value,
@@ -52,7 +64,7 @@ export const AddressInput: React.FC<AddressInputProps> = ({
   return (
     <div className={`space-y-3 ${className}`}>
       <Label
-        htmlFor={`${label}-street`}
+        htmlFor={`${idPrefix}-street`}
         className="text-white text-lg font-semibold"
       >
         {label} {required && "*"}
@@ -60,7 +72,9 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
       {/* Street Address - Full Width */}
       <Input
-        id={`${label}-street`}
+        ref={streetInputRef}
+        id={`${idPrefix}-street`}
+        name={`${idPrefix}_street`}
         value={value.street}
         onChange={(e) => handleFieldChange("street", e.target.value)}
         placeholder="123 Main Street"
@@ -72,9 +86,12 @@ export const AddressInput: React.FC<AddressInputProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="md:col-span-1">
           <Input
+            id={`${idPrefix}-city`}
+            name={`${idPrefix}_city`}
             value={value.city}
             onChange={(e) => handleFieldChange("city", e.target.value)}
             placeholder="City"
+            aria-label="City"
             required={required}
             className="bg-neutral-800/60 border-2 border-white/25 text-white placeholder:text-white/40 text-lg h-14 rounded-xl"
           />
@@ -82,12 +99,15 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
         <div>
           <Input
+            id={`${idPrefix}-state`}
+            name={`${idPrefix}_state`}
             value={value.state}
             onChange={(e) =>
               handleFieldChangeWithFormat("state", e.target.value)
             }
             placeholder="State"
             maxLength={2}
+            aria-label="State"
             required={required}
             className="uppercase bg-neutral-800/60 border-2 border-white/25 text-white placeholder:text-white/40 text-lg h-14 rounded-xl"
           />
@@ -95,10 +115,13 @@ export const AddressInput: React.FC<AddressInputProps> = ({
 
         <div>
           <Input
+            id={`${idPrefix}-zip`}
+            name={`${idPrefix}_zip`}
             value={value.zip}
             onChange={(e) => handleFieldChangeWithFormat("zip", e.target.value)}
             placeholder="ZIP Code"
             maxLength={10}
+            aria-label="ZIP Code"
             required={required}
             className="bg-neutral-800/60 border-2 border-white/25 text-white placeholder:text-white/40 text-lg h-14 rounded-xl"
           />

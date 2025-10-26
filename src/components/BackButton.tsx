@@ -33,12 +33,12 @@ const BackButton = () => {
       return;
     }
 
-    // Registration pages should go back to dealers overview
+    // Registration pages should go back to home
     if (
       currentPath.includes("/registration") ||
       currentPath.includes("/dealership/register")
     ) {
-      navigate("/dealers");
+      navigate("/");
       return;
     }
 
