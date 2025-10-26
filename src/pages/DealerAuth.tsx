@@ -201,44 +201,73 @@ const DealerAuth = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Always send a magic link. If sign-up, stash profile details for post-verify creation
       if (isSignUp) {
-        localStorage.setItem(
-          PENDING_DEALER_SIGNUP,
-          JSON.stringify({
-            fullName: `${firstName} ${lastName}`.trim(),
-            companyName,
-            phone: undefined,
-          }),
-        );
-      }
-
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dealer/auth?verify=1`,
-          shouldCreateUser: true,
-          data: {
-            user_type: "dealer",
-            role: role,
-            full_name: `${firstName} ${lastName}`.trim() || undefined,
-            company_name: companyName || undefined,
+        // Sign up with email and password
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              user_type: "dealer",
+              role: role,
+              full_name: `${firstName} ${lastName}`.trim() || undefined,
+              company_name: companyName || undefined,
+            },
+            emailRedirectTo: `${window.location.origin}/dealer/auth`,
           },
-        },
-      });
+        });
 
-      if (error) throw error;
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("Failed to create user account");
 
-      localStorage.setItem(SAVED_EMAIL_KEY, email);
-      toast({
-        title: "Check your email",
-        description: "We sent you a magic link to sign in.",
-      });
+        // Create dealer profile
+        await createDealerProfile({
+          fullName: `${firstName} ${lastName}`.trim(),
+          companyName,
+          phone: null,
+        });
+
+        localStorage.setItem(SAVED_EMAIL_KEY, email);
+        toast({
+          title: "Account created successfully",
+          description: "Redirecting to dashboard...",
+        });
+
+        // Redirect to appropriate dashboard
+        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+      } else {
+        // Sign in with email and password
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (authError) throw authError;
+
+        // Check if user has dealer profile
+        const { data: profile } = await supabase
+          .rpc("get_user_profile")
+          .maybeSingle();
+
+        if (!profile) {
+          // Try to repair profile
+          await tryRepairDealerProfile(authData.user);
+        }
+
+        localStorage.setItem(SAVED_EMAIL_KEY, email);
+        toast({
+          title: "Signed in successfully",
+          description: "Redirecting to dashboard...",
+        });
+
+        // Redirect to appropriate dashboard
+        navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
       toast({
-        title: "Email could not be sent",
+        title: isSignUp ? "Sign up failed" : "Sign in failed",
         description: message,
         variant: "destructive",
       });
@@ -379,8 +408,21 @@ const DealerAuth = () => {
                 />
               </div>
 
-              <div className="text-sm text-white/80">
-                We'll send a one-time magic link to your email. No password required.
+              {/* Password Field */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-white text-sm font-medium">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={isSignUp ? "Create a password" : "Enter your password"}
+                  className="h-12 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20"
+                  required
+                  minLength={6}
+                />
               </div>
 
               {/* Submit Button */}
@@ -389,7 +431,7 @@ const DealerAuth = () => {
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                 disabled={loading}
               >
-                {loading ? "Sending link..." : isSignUp ? "Send Magic Link" : "Send Magic Link"}
+                {loading ? (isSignUp ? "Creating account..." : "Signing in...") : isSignUp ? "Create Account" : "Sign In"}
               </Button>
             </form>
 
@@ -401,7 +443,7 @@ const DealerAuth = () => {
                 className="text-white/80 hover:text-white hover:underline transition-colors duration-200 font-medium"
               >
                 {isSignUp
-                  ? "Already have an account? Use magic link"
+                  ? "Already have an account? Sign in"
                   : "Don't have an account? Create one"}
               </button>
             </div>
