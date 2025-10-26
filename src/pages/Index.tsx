@@ -75,39 +75,19 @@ const Index = () => {
             </Link>
 
             {/* Right - Simple Navigation */}
-            <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-8">
+            <div className="flex items-center space-x-4 lg:space-x-8">
               <Link
-                to="/drivers"
+                to="/how-it-works"
                 className="hidden sm:block text-white/70 hover:text-white transition-colors font-medium text-sm lg:text-base"
               >
-                For Drivers
+                How It Works
               </Link>
               <Link
-                to="/dealership/register"
+                to="/contact"
                 className="hidden md:block text-white/70 hover:text-white transition-colors font-medium text-sm lg:text-base"
               >
-                For Dealerships
+                Contact
               </Link>
-              <Button
-                asChild
-                variant="ghost"
-                className="text-white/90 hover:text-white hover:bg-white/10 font-medium text-sm px-3 py-2"
-              >
-                <Link to="/dealer/auth">Dealership Sign In</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="border-[#E11900] text-[#E11900] hover:bg-[#E11900] hover:text-white font-medium text-sm px-3 py-2 hidden sm:block"
-              >
-                <Link to="/driver/auth">Drive With SwapRunn</Link>
-              </Button>
-              <Button
-                asChild
-                className="bg-[#E11900] hover:bg-[#B51400] text-white rounded-lg px-4 sm:px-6 py-2 font-medium text-sm"
-              >
-                <Link to="/dealership/register">Get Started</Link>
-              </Button>
             </div>
           </div>
         </div>
@@ -127,34 +107,36 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/40 z-0"></div>
 
         {/* Hero Section - Main Content */}
-        <section className="relative z-10 pt-28 sm:pt-40 pb-12">
+        <section className="relative z-10 pt-32 sm:pt-48 pb-20 sm:pb-32">
           <div className="container mx-auto px-4 sm:px-6">
-            <div className="text-center">
-              <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tight mb-6 leading-tight text-white px-2">
+            <div className="text-center max-w-6xl mx-auto">
+              {/* Headline */}
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-8 leading-tight text-white">
                 Deliver Faster.
                 <br />
                 <span className="text-[#E11900]">Swap Smarter.</span>
               </h1>
 
-              <p className="text-base sm:text-lg lg:text-xl text-white/90 mb-12 max-w-3xl mx-auto font-light px-4">
+              {/* Subheadline */}
+              <p className="text-lg sm:text-xl lg:text-2xl text-white/90 mb-16 max-w-3xl mx-auto font-light leading-relaxed">
                 Streamline off-site deliveries and inventory swaps with a
                 tech-first platform built to revolutionize dealership logistics.
               </p>
 
               {/* Three Call-to-Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                 {/* Register Your Dealership - Primary */}
                 <div className="flex flex-col items-center text-center">
                   <Button
                     asChild
                     size="lg"
-                    className="bg-[#E11900] hover:bg-[#B51400] text-white px-6 py-4 rounded-lg text-base font-semibold shadow-lg w-full min-h-[56px] transition-all hover:shadow-xl hover:scale-105"
+                    className="bg-[#E11900] hover:bg-[#B51400] text-white px-8 py-5 rounded-lg text-lg font-semibold shadow-lg w-full transition-all hover:shadow-xl hover:scale-105"
                   >
                     <Link to="/dealership/register">
                       Register Your Dealership
                     </Link>
                   </Button>
-                  <p className="text-white/70 text-sm mt-3 leading-relaxed">
+                  <p className="text-white/70 text-base mt-4 leading-relaxed">
                     Create your dealership account and invite your team.
                   </p>
                 </div>
@@ -165,13 +147,13 @@ const Index = () => {
                     asChild
                     size="lg"
                     variant="outline"
-                    className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-black px-6 py-4 rounded-lg text-base font-semibold w-full min-h-[56px] transition-all hover:shadow-xl hover:scale-105"
+                    className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-black px-8 py-5 rounded-lg text-lg font-semibold w-full transition-all hover:shadow-xl hover:scale-105"
                   >
                     <Link to="/driver/auth">
                       Drive With SwapRunn
                     </Link>
                   </Button>
-                  <p className="text-white/70 text-sm mt-3 leading-relaxed">
+                  <p className="text-white/70 text-base mt-4 leading-relaxed">
                     Start earning by delivering vehicles for local dealerships.
                   </p>
                 </div>
@@ -182,13 +164,13 @@ const Index = () => {
                     asChild
                     size="lg"
                     variant="ghost"
-                    className="bg-white/10 border border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-6 py-4 rounded-lg text-base font-semibold w-full min-h-[56px] transition-all hover:shadow-xl hover:scale-105"
+                    className="bg-white/10 border border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-8 py-5 rounded-lg text-lg font-semibold w-full transition-all hover:shadow-xl hover:scale-105"
                   >
                     <Link to="/dealer/auth">
                       Sales and Staff Login
                     </Link>
                   </Button>
-                  <p className="text-white/70 text-sm mt-3 leading-relaxed">
+                  <p className="text-white/70 text-base mt-4 leading-relaxed">
                     Access your dealership's delivery dashboard.
                   </p>
                 </div>
@@ -313,93 +295,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Call to Action Section */}
-        <section className="relative z-10 py-20">
-          <div className="container mx-auto px-6">
-            <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-              {/* Dealership CTA */}
-              <div className="text-center">
-                <div className="bg-gradient-to-r from-[#E11900]/20 to-[#B51400]/20 backdrop-blur-sm border border-[#E11900]/30 rounded-3xl p-8 lg:p-10">
-                  <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-                    Ready to Transform Your Delivery Process?
-                  </h2>
-                  <p className="text-lg text-white/90 mb-8">
-                    Join the dealerships already saving time and closing more
-                    sales with SwapRunn's professional delivery network.
-                  </p>
-
-                  <div className="flex flex-col gap-4">
-                    <Button
-                      asChild
-                      size="lg"
-                      className="bg-[#E11900] hover:bg-[#B51400] text-white px-8 py-4 rounded-full text-lg font-bold shadow-xl"
-                    >
-                      <Link to="/dealership/register">
-                        Start Free Trial
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Link>
-                    </Button>
-                    <p className="text-white/60 text-sm">
-                      Setup takes less than 5 minutes
-                    </p>
-
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="lg"
-                      className="bg-white/10 border-white/30 text-white hover:bg-white/20 px-8 py-4 rounded-full text-lg font-bold"
-                    >
-                      <Link to="/contact">Schedule Demo</Link>
-                    </Button>
-                    <p className="text-white/60 text-sm">
-                      See it in action first
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Driver CTA */}
-              <div className="text-center">
-                <div className="bg-gradient-to-r from-[#E11900]/15 to-[#B51400]/15 backdrop-blur-sm border border-[#E11900]/25 rounded-3xl p-8 lg:p-10">
-                  <div className="w-20 h-20 bg-gradient-to-br from-[#E11900] to-[#B51400] rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Truck className="w-10 h-10 text-white" />
-                  </div>
-                  <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-                    Drive With SwapRunn
-                  </h2>
-                  <p className="text-lg text-white/90 mb-8">
-                    Earn competitive pay delivering vehicles for local
-                    dealerships. Flexible schedule, reliable income.
-                  </p>
-
-                  <div className="flex flex-col gap-4">
-                    <Button
-                      asChild
-                      size="lg"
-                      className="bg-transparent border-2 border-[#E11900] text-[#E11900] hover:bg-[#E11900] hover:text-white px-8 py-4 rounded-full text-lg font-bold"
-                    >
-                      <Link to="/driver/auth">
-                        Join as Driver
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Link>
-                    </Button>
-                    <p className="text-white/60 text-sm">Start earning today</p>
-
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="lg"
-                      className="text-white/80 hover:text-white hover:bg-white/10 px-8 py-4 rounded-full text-lg font-bold"
-                    >
-                      <Link to="/drivers">Learn More</Link>
-                    </Button>
-                    <p className="text-white/60 text-sm">See driver benefits</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Footer */}
         <footer className="relative z-10 py-12 border-t border-white/10">
