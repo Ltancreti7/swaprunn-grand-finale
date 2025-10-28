@@ -69,7 +69,8 @@ serve(async (req) => {
         console.error("Invalid dealership code:", dealership_code);
         return new Response(
           JSON.stringify({
-            error: "Invalid dealership code. Please contact your dealership for the correct code.",
+            error:
+              "Invalid dealership code. Please contact your dealership for the correct code.",
           }),
           {
             status: 400,
