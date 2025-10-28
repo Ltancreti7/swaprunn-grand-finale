@@ -62,17 +62,19 @@ serve(async (req) => {
     }
 
     // Get drivers from the same dealership that are available
+    // Using both profiles.dealer_id AND drivers.dealer_id for reliability
     const { data: driverProfilesData, error: profilesError } = await supabase
       .from("profiles")
       .select(
         `
         user_id,
         driver_id,
-        drivers!inner(id, name, available)
+        drivers!inner(id, name, available, dealer_id, phone)
       `,
       )
       .eq("user_type", "driver")
       .eq("dealer_id", job.dealer_id)
+      .eq("drivers.dealer_id", job.dealer_id)
       .eq("drivers.available", true);
 
     if (profilesError) {
@@ -87,6 +89,8 @@ serve(async (req) => {
       id: string;
       name?: string | null;
       available?: boolean | null;
+      dealer_id?: string | null;
+      phone?: string | null;
     };
 
     type DriverProfileRow = {
@@ -215,20 +219,14 @@ serve(async (req) => {
     // Also send SMS notifications to drivers from the same dealership (if they have preferences enabled)
     let smsCount = 0;
     for (const driver of drivers) {
-      // Get driver details including phone
-      const { data: driverData } = await supabase
-        .from("drivers")
-        .select("phone")
-        .eq("id", driver.id)
-        .single();
-
-      if (driverData?.phone) {
+      // Phone is now included in the driver query above
+      if (driver.phone) {
         try {
           const smsMessage = `SwapRunn: New drive available! ${vehicleInfo} - ${jobData.distance_miles} miles. Check the app for details.`;
 
           await supabase.functions.invoke("sms", {
             body: {
-              to: driverData.phone,
+              to: driver.phone,
               body: smsMessage,
             },
           });

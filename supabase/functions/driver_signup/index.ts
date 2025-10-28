@@ -28,6 +28,8 @@ serve(async (req) => {
       license_photo_url,
       insurance_url,
       government_id_url,
+      dealership_code,
+      dealer_id,
     } = await req.json();
 
     console.log("Received driver signup data:", {
@@ -35,6 +37,8 @@ serve(async (req) => {
       phone,
       email,
       license_number,
+      dealership_code,
+      dealer_id,
     });
 
     // Validate required fields
@@ -52,6 +56,32 @@ serve(async (req) => {
       );
     }
 
+    // Resolve dealer_id from dealership_code if provided
+    let resolvedDealerId = dealer_id;
+    if (dealership_code && !resolvedDealerId) {
+      const { data: dealer, error: dealerError } = await supabase
+        .from("dealers")
+        .select("id")
+        .eq("dealership_code", dealership_code.toUpperCase())
+        .single();
+
+      if (dealerError || !dealer) {
+        console.error("Invalid dealership code:", dealership_code);
+        return new Response(
+          JSON.stringify({
+            error: "Invalid dealership code. Please contact your dealership for the correct code.",
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      resolvedDealerId = dealer.id;
+      console.log("Resolved dealer_id from code:", resolvedDealerId);
+    }
+
     // Insert driver data into the drivers table
     const { data: driver, error: driverError } = await supabase
       .from("drivers")
@@ -59,6 +89,7 @@ serve(async (req) => {
         name: full_name,
         phone: phone,
         email: email,
+        dealer_id: resolvedDealerId || null,
         checkr_status: "pending",
         available: true,
         city_ok: true,
