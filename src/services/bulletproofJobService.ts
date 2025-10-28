@@ -63,9 +63,18 @@ type CreatedJobRecord = {
 
 export const createJob = async (params: JobCreationParams) => {
   try {
-    // First, ensure the dealer profile is properly configured
+    // First, ensure the dealer profile is properly configured using the new auto-repair function
     try {
-      await repairDealerProfile();
+      console.log("🔧 Auto-repairing dealer profile...");
+      const { data: repairResult, error: repairError } = await supabase.rpc(
+        "auto_repair_dealer_profile"
+      );
+
+      if (repairError) {
+        console.warn("⚠️ Auto-repair failed:", repairError);
+      } else {
+        console.log("✅ Profile repair result:", repairResult);
+      }
     } catch (profileFixError) {
       console.warn("Profile repair failed, continuing anyway:", profileFixError);
     }
@@ -96,7 +105,7 @@ export const createJob = async (params: JobCreationParams) => {
     }
 
     if (!profile.dealer_id) {
-      console.error("❌ Profile missing dealer_id");
+      console.error("❌ Profile missing dealer_id after repair");
       throw new Error("Dealer account not properly configured. Please contact support.");
     }
 
