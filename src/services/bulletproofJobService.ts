@@ -67,7 +67,7 @@ export const createJob = async (params: JobCreationParams) => {
     try {
       console.log("🔧 Auto-repairing dealer profile...");
       const { data: repairResult, error: repairError } = await supabase.rpc(
-        "auto_repair_dealer_profile"
+        "auto_repair_dealer_profile",
       );
 
       if (repairError) {
@@ -76,13 +76,15 @@ export const createJob = async (params: JobCreationParams) => {
         console.log("✅ Profile repair result:", repairResult);
       }
     } catch (profileFixError) {
-      console.warn("Profile repair failed, continuing anyway:", profileFixError);
+      console.warn(
+        "Profile repair failed, continuing anyway:",
+        profileFixError,
+      );
     }
 
     console.log("🔍 Fetching user profile...");
-    const { data: profiles, error: profileError } = await supabase.rpc(
-      "get_user_profile",
-    );
+    const { data: profiles, error: profileError } =
+      await supabase.rpc("get_user_profile");
 
     if (profileError) {
       console.error("❌ Profile fetch error:", profileError);
@@ -106,7 +108,9 @@ export const createJob = async (params: JobCreationParams) => {
 
     if (!profile.dealer_id) {
       console.error("❌ Profile missing dealer_id after repair");
-      throw new Error("Dealer account not properly configured. Please contact support.");
+      throw new Error(
+        "Dealer account not properly configured. Please contact support.",
+      );
     }
 
     console.log("✅ Profile validated. Dealer ID:", profile.dealer_id);
