@@ -27,6 +27,7 @@ import { DealerProfilePhoto } from "@/components/dealer/DealerProfilePhoto";
 import { JobStatsCard } from "@/components/dealer/JobStatsCard";
 import { JobCard } from "@/components/dealer/JobCard";
 import { AssignmentCard } from "@/components/dealer/AssignmentCard";
+import { PendingDriverApproval } from "@/components/dealer/PendingDriverApproval";
 
 import mapBackgroundImage from "@/assets/map-background.jpg";
 import { Job as SupabaseJob } from "@/services/supabaseService";
@@ -424,6 +425,9 @@ const DealerDashboard = () => {
                     Request Driver
                   </Button>
                 </Link>
+
+                {/* Pending Driver Approvals - Only shows if there are pending drivers */}
+                <PendingDriverApproval />
 
                 <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg rounded-xl sm:rounded-2xl">
                   <CardContent className="p-4 sm:p-6">

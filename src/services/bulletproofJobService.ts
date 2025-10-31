@@ -218,17 +218,34 @@ export const createJob = async (params: JobCreationParams) => {
     };
 
     const insertJob = async (payload: PreparedJobInsert) => {
-      const { data, error } = await supabase
-        .from("jobs")
-        .insert(payload)
-        .select("*")
-        .single();
+      // Use the secure dealer_create_job RPC function
+      const { data, error } = await supabase.rpc("dealer_create_job", {
+        p_type: payload.type,
+        p_pickup_address: payload.pickup_address,
+        p_delivery_address: payload.delivery_address,
+        p_year: payload.year,
+        p_make: payload.make,
+        p_model: payload.model,
+        p_vin: payload.vin,
+        p_customer_name: payload.customer_name,
+        p_customer_phone: payload.customer_phone,
+        p_timeframe: payload.timeframe,
+        p_notes: payload.notes,
+        p_requires_two: payload.requires_two,
+        p_distance_miles: payload.distance_miles,
+        p_trade_year: payload.trade_year ?? null,
+        p_trade_make: payload.trade_make ?? null,
+        p_trade_model: payload.trade_model ?? null,
+        p_trade_vin: payload.trade_vin ?? null,
+        p_trade_transmission: payload.trade_transmission ?? null,
+      });
 
       if (error) {
         throw error;
       }
 
-      return data;
+      // RPC returns JSON, parse it to object
+      return typeof data === 'string' ? JSON.parse(data) : data;
     };
 
     const extractMessage = (unknownError: unknown) => {

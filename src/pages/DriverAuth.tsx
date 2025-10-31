@@ -4,6 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 // Removed password-based login; magic-link only
 import { useToast } from "@/hooks/use-toast";
 import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/utils";
@@ -36,6 +43,12 @@ const extractDriverMetadata = (user: User | null): DriverMetadata => {
 const SAVED_EMAIL_KEY = "swaprunn_driver_saved_email";
 const PENDING_DRIVER_SIGNUP = "pending_driver_signup";
 
+interface Dealership {
+  id: string;
+  name: string;
+  store?: string;
+}
+
 const DriverAuth = () => {
   const location = useLocation();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -43,9 +56,42 @@ const DriverAuth = () => {
   // Password removed for magic-link flow
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [selectedDealership, setSelectedDealership] = useState("");
+  const [dealerships, setDealerships] = useState<Dealership[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingDealerships, setLoadingDealerships] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Load dealerships for signup dropdown
+  useEffect(() => {
+    const fetchDealerships = async () => {
+      setLoadingDealerships(true);
+      try {
+        const { data, error } = await supabase
+          .from("dealers")
+          .select("id, name, store")
+          .eq("status", "active")
+          .order("name");
+
+        if (error) throw error;
+        setDealerships(data || []);
+      } catch (error) {
+        console.error("Error fetching dealerships:", error);
+        toast({
+          title: "Error loading dealerships",
+          description: "Please refresh the page to try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingDealerships(false);
+      }
+    };
+
+    if (isSignUp) {
+      fetchDealerships();
+    }
+  }, [isSignUp, toast]);
 
   // Load saved email on mount
   useEffect(() => {
@@ -93,12 +139,14 @@ const DriverAuth = () => {
   const createDriverProfile = async (details?: {
     fullName?: string | null;
     phone?: string | null;
+    dealerId?: string | null;
   }) => {
     try {
       const resolvedFullName = (details?.fullName ?? fullName).trim();
       const hasFullName = resolvedFullName.length > 0;
       const resolvedPhoneInput = details?.phone ?? phoneNumber;
       const cleanedPhone = cleanPhoneNumber(resolvedPhoneInput);
+      const dealerId = details?.dealerId ?? selectedDealership;
 
       const { error } = await supabase.rpc("create_profile_for_current_user", {
         _user_type: "driver",
@@ -107,6 +155,17 @@ const DriverAuth = () => {
       });
 
       if (error) throw error;
+
+      // Update driver record with dealer_id if provided
+      if (dealerId) {
+        const { data: profile } = await supabase.rpc("get_user_profile").maybeSingle();
+        if (profile?.driver_id) {
+          await supabase
+            .from("drivers")
+            .update({ dealer_id: dealerId })
+            .eq("id", profile.driver_id);
+        }
+      }
     } catch (error) {
       console.error("Error creating driver profile:", error);
       throw error;
@@ -150,6 +209,17 @@ const DriverAuth = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate dealership selection on signup
+    if (isSignUp && !selectedDealership) {
+      toast({
+        title: "Dealership Required",
+        description: "Please select which dealership you'll be driving for.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -158,7 +228,11 @@ const DriverAuth = () => {
         // Stash signup info to create profile after verification
         localStorage.setItem(
           PENDING_DRIVER_SIGNUP,
-          JSON.stringify({ fullName, phone: cleanPhoneNumber(phoneNumber) })
+          JSON.stringify({
+            fullName,
+            phone: cleanPhoneNumber(phoneNumber),
+            dealerId: selectedDealership
+          })
         );
       }
 
@@ -171,6 +245,7 @@ const DriverAuth = () => {
             user_type: "driver",
             full_name: fullName || undefined,
             phone_number: cleanPhoneNumber(phoneNumber) || undefined,
+            dealer_id: isSignUp ? selectedDealership : undefined,
           },
         },
       });
@@ -215,6 +290,7 @@ const DriverAuth = () => {
           await createDriverProfile({
             fullName: pending?.fullName || null,
             phone: pending?.phone || null,
+            dealerId: pending?.dealerId || null,
           });
           localStorage.removeItem(PENDING_DRIVER_SIGNUP);
         } catch (e) {
@@ -301,6 +377,30 @@ const DriverAuth = () => {
                       maxLength={14}
                       required
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="dealership"
+                      className="text-white text-sm font-medium"
+                    >
+                      Select Dealership *
+                    </Label>
+                    <Select value={selectedDealership} onValueChange={setSelectedDealership}>
+                      <SelectTrigger className="h-12 bg-white border-gray-300 text-gray-900 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20">
+                        <SelectValue placeholder={loadingDealerships ? "Loading dealerships..." : "Choose your dealership"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {dealerships.map((dealership) => (
+                          <SelectItem key={dealership.id} value={dealership.id}>
+                            {dealership.store || dealership.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-white/60 mt-1">
+                      Your application will be sent to this dealership for approval
+                    </p>
                   </div>
                 </>
               )}
