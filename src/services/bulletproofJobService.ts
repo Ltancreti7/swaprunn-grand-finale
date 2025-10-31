@@ -245,7 +245,7 @@ export const createJob = async (params: JobCreationParams) => {
       }
 
       // RPC returns JSON, parse it to object
-      return typeof data === 'string' ? JSON.parse(data) : data;
+      return typeof data === "string" ? JSON.parse(data) : data;
     };
 
     const extractMessage = (unknownError: unknown) => {
