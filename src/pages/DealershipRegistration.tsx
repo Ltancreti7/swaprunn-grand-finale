@@ -168,13 +168,18 @@ const DealershipRegistration = () => {
         // Wait with exponential backoff before retrying
         if (attempt < maxRetries - 1) {
           const delay = baseDelay * Math.pow(1.5, attempt);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
 
       if (!dealerId) {
-        await logSubmission("failure", "Failed to create dealer profile - trigger may not have executed");
-        throw new Error("Failed to create dealer profile. Please try again or contact support.");
+        await logSubmission(
+          "failure",
+          "Failed to create dealer profile - trigger may not have executed",
+        );
+        throw new Error(
+          "Failed to create dealer profile. Please try again or contact support.",
+        );
       }
 
       // Generate unique dealership code
