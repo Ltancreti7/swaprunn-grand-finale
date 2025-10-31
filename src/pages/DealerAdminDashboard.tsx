@@ -151,11 +151,6 @@ const DealerAdminDashboard = () => {
                 </p>
               </div>
 
-              {/* Team Management */}
-              <div className="mb-8">
-                <DealershipCodeCard />
-              </div>
-
               {/* Quick Actions */}
               <div
                 className={`grid gap-4 mb-8 ${isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"}`}
