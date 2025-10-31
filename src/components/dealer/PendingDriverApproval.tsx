@@ -5,7 +5,17 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { User, Check, X, Mail, Phone, Calendar } from "lucide-react";
 
 interface PendingDriver {
@@ -22,7 +32,9 @@ export const PendingDriverApproval = () => {
   const { toast } = useToast();
   const [pendingDrivers, setPendingDrivers] = useState<PendingDriver[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processingDriverId, setProcessingDriverId] = useState<string | null>(null);
+  const [processingDriverId, setProcessingDriverId] = useState<string | null>(
+    null,
+  );
   const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
@@ -130,7 +142,9 @@ export const PendingDriverApproval = () => {
     return (
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader>
-          <CardTitle className="text-white">Pending Driver Applications</CardTitle>
+          <CardTitle className="text-white">
+            Pending Driver Applications
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="animate-pulse space-y-4">
@@ -160,7 +174,9 @@ export const PendingDriverApproval = () => {
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="space-y-2 flex-1">
-                  <h4 className="text-lg font-semibold text-white">{driver.name}</h4>
+                  <h4 className="text-lg font-semibold text-white">
+                    {driver.name}
+                  </h4>
                   <div className="space-y-1 text-sm text-white/70">
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4" />
@@ -174,7 +190,10 @@ export const PendingDriverApproval = () => {
                     )}
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>Applied {new Date(driver.created_at).toLocaleDateString()}</span>
+                      <span>
+                        Applied{" "}
+                        {new Date(driver.created_at).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -201,9 +220,12 @@ export const PendingDriverApproval = () => {
                     </AlertDialogTrigger>
                     <AlertDialogContent className="bg-neutral-900 border-white/20">
                       <AlertDialogHeader>
-                        <AlertDialogTitle className="text-white">Reject Driver Application?</AlertDialogTitle>
+                        <AlertDialogTitle className="text-white">
+                          Reject Driver Application?
+                        </AlertDialogTitle>
                         <AlertDialogDescription className="text-white/70">
-                          This will reject {driver.name}'s application. You can optionally provide a reason.
+                          This will reject {driver.name}'s application. You can
+                          optionally provide a reason.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <Textarea

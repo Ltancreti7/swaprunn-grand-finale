@@ -113,7 +113,10 @@ const DriverAuth = () => {
     }
   }, [location.search]);
 
-  const waitForProfileCreation = async (userId: string, maxRetries = 10): Promise<boolean> => {
+  const waitForProfileCreation = async (
+    userId: string,
+    maxRetries = 10,
+  ): Promise<boolean> => {
     const baseDelay = 200;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -129,7 +132,7 @@ const DriverAuth = () => {
 
       if (attempt < maxRetries - 1) {
         const delay = baseDelay * Math.pow(1.5, attempt);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
 
@@ -158,7 +161,9 @@ const DriverAuth = () => {
 
       // Update driver record with dealer_id if provided
       if (dealerId) {
-        const { data: profile } = await supabase.rpc("get_user_profile").maybeSingle();
+        const { data: profile } = await supabase
+          .rpc("get_user_profile")
+          .maybeSingle();
         if (profile?.driver_id) {
           await supabase
             .from("drivers")
@@ -231,8 +236,8 @@ const DriverAuth = () => {
           JSON.stringify({
             fullName,
             phone: cleanPhoneNumber(phoneNumber),
-            dealerId: selectedDealership
-          })
+            dealerId: selectedDealership,
+          }),
         );
       }
 
@@ -253,7 +258,10 @@ const DriverAuth = () => {
       if (error) throw error;
 
       localStorage.setItem(SAVED_EMAIL_KEY, email);
-      toast({ title: "Check your email", description: "We sent you a magic link to sign in." });
+      toast({
+        title: "Check your email",
+        description: "We sent you a magic link to sign in.",
+      });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Please try again.";
@@ -273,17 +281,23 @@ const DriverAuth = () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.user) return;
 
-      const { data: profile } = await supabase.rpc("get_user_profile").maybeSingle();
+      const { data: profile } = await supabase
+        .rpc("get_user_profile")
+        .maybeSingle();
       if (profile?.user_type === "driver") {
         navigate("/driver/dashboard", { replace: true });
         return;
       }
 
       // Wait for trigger to create profile, fallback to manual creation if needed
-      const profileCreated = await waitForProfileCreation(session.session.user.id);
+      const profileCreated = await waitForProfileCreation(
+        session.session.user.id,
+      );
 
       if (!profileCreated) {
-        console.warn("Trigger did not create profile, attempting manual creation");
+        console.warn(
+          "Trigger did not create profile, attempting manual creation",
+        );
         try {
           const pendingRaw = localStorage.getItem(PENDING_DRIVER_SIGNUP);
           const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
@@ -386,9 +400,18 @@ const DriverAuth = () => {
                     >
                       Select Dealership *
                     </Label>
-                    <Select value={selectedDealership} onValueChange={setSelectedDealership}>
+                    <Select
+                      value={selectedDealership}
+                      onValueChange={setSelectedDealership}
+                    >
                       <SelectTrigger className="h-12 bg-white border-gray-300 text-gray-900 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20">
-                        <SelectValue placeholder={loadingDealerships ? "Loading dealerships..." : "Choose your dealership"} />
+                        <SelectValue
+                          placeholder={
+                            loadingDealerships
+                              ? "Loading dealerships..."
+                              : "Choose your dealership"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {dealerships.map((dealership) => (
@@ -399,7 +422,8 @@ const DriverAuth = () => {
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-white/60 mt-1">
-                      Your application will be sent to this dealership for approval
+                      Your application will be sent to this dealership for
+                      approval
                     </p>
                   </div>
                 </>
@@ -424,7 +448,8 @@ const DriverAuth = () => {
               </div>
 
               <div className="text-sm text-white/80">
-                We'll send a one-time magic link to your email. No password required.
+                We'll send a one-time magic link to your email. No password
+                required.
               </div>
 
               <Button
@@ -432,7 +457,11 @@ const DriverAuth = () => {
                 className="w-full h-12 bg-[#E11900] hover:bg-[#B51400] text-white font-semibold text-base rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
                 disabled={loading}
               >
-                {loading ? "Sending link..." : isSignUp ? "Send Magic Link" : "Send Magic Link"}
+                {loading
+                  ? "Sending link..."
+                  : isSignUp
+                    ? "Send Magic Link"
+                    : "Send Magic Link"}
               </Button>
             </form>
 
