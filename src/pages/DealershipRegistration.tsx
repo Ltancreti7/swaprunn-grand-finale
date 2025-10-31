@@ -145,19 +145,37 @@ const DealershipRegistration = () => {
       }
       if (!authData.user) throw new Error("Failed to create user account");
 
-      // Step 2: Get the dealer_id from the profile
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("dealer_id")
-        .eq("user_id", authData.user.id)
-        .single();
+      // Step 2: Wait for trigger to create profile and get dealer_id
+      // The handle_new_user trigger runs async, so we need to retry with exponential backoff
+      let profileData = null;
+      let dealerId = null;
+      const maxRetries = 10;
+      const baseDelay = 200;
 
-      if (profileError || !profileData?.dealer_id) {
-        await logSubmission("failure", "Failed to create dealer profile");
-        throw new Error("Failed to create dealer profile");
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("dealer_id")
+          .eq("user_id", authData.user.id)
+          .maybeSingle();
+
+        if (!error && data?.dealer_id) {
+          profileData = data;
+          dealerId = data.dealer_id;
+          break;
+        }
+
+        // Wait with exponential backoff before retrying
+        if (attempt < maxRetries - 1) {
+          const delay = baseDelay * Math.pow(1.5, attempt);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
       }
 
-      const dealerId = profileData.dealer_id;
+      if (!dealerId) {
+        await logSubmission("failure", "Failed to create dealer profile - trigger may not have executed");
+        throw new Error("Failed to create dealer profile. Please try again or contact support.");
+      }
 
       // Generate unique dealership code
       const uniqueCode = generateDealershipCode(formData.dealershipName);

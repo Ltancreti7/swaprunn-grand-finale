@@ -105,6 +105,29 @@ const DealerAuth = () => {
     void completeDealerOnboarding();
   }, [navigate, isAdminSignup]);
 
+  const waitForProfileCreation = async (userId: string, maxRetries = 10): Promise<boolean> => {
+    const baseDelay = 200;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("dealer_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (!error && data?.dealer_id) {
+        return true;
+      }
+
+      if (attempt < maxRetries - 1) {
+        const delay = baseDelay * Math.pow(1.5, attempt);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    return false;
+  };
+
   const createDealerProfile = async (details?: {
     fullName?: string | null;
     companyName?: string | null;
@@ -220,12 +243,17 @@ const DealerAuth = () => {
         if (authError) throw authError;
         if (!authData.user) throw new Error("Failed to create user account");
 
-        // Create dealer profile
-        await createDealerProfile({
-          fullName: `${firstName} ${lastName}`.trim(),
-          companyName,
-          phone: null,
-        });
+        // Wait for trigger to create profile, fallback to manual creation if needed
+        const profileCreated = await waitForProfileCreation(authData.user.id);
+
+        if (!profileCreated) {
+          console.warn("Trigger did not create profile, attempting manual creation");
+          await createDealerProfile({
+            fullName: `${firstName} ${lastName}`.trim(),
+            companyName,
+            phone: null,
+          });
+        }
 
         localStorage.setItem(SAVED_EMAIL_KEY, email);
         toast({

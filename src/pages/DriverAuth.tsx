@@ -67,6 +67,29 @@ const DriverAuth = () => {
     }
   }, [location.search]);
 
+  const waitForProfileCreation = async (userId: string, maxRetries = 10): Promise<boolean> => {
+    const baseDelay = 200;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("driver_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (!error && data?.driver_id) {
+        return true;
+      }
+
+      if (attempt < maxRetries - 1) {
+        const delay = baseDelay * Math.pow(1.5, attempt);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    return false;
+  };
+
   const createDriverProfile = async (details?: {
     fullName?: string | null;
     phone?: string | null;
@@ -181,16 +204,22 @@ const DriverAuth = () => {
         return;
       }
 
-      try {
-        const pendingRaw = localStorage.getItem(PENDING_DRIVER_SIGNUP);
-        const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
-        await createDriverProfile({
-          fullName: pending?.fullName || null,
-          phone: pending?.phone || null,
-        });
-        localStorage.removeItem(PENDING_DRIVER_SIGNUP);
-      } catch (e) {
-        console.warn("Driver profile create on verify failed, proceeding");
+      // Wait for trigger to create profile, fallback to manual creation if needed
+      const profileCreated = await waitForProfileCreation(session.session.user.id);
+
+      if (!profileCreated) {
+        console.warn("Trigger did not create profile, attempting manual creation");
+        try {
+          const pendingRaw = localStorage.getItem(PENDING_DRIVER_SIGNUP);
+          const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+          await createDriverProfile({
+            fullName: pending?.fullName || null,
+            phone: pending?.phone || null,
+          });
+          localStorage.removeItem(PENDING_DRIVER_SIGNUP);
+        } catch (e) {
+          console.error("Driver profile create on verify failed:", e);
+        }
       }
 
       navigate("/driver/dashboard", { replace: true });
