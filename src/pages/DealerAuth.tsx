@@ -50,6 +50,7 @@ const DealerAuth = () => {
     "salesperson",
   );
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -57,13 +58,41 @@ const DealerAuth = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const isAdminSignup = urlParams.get("role") === "admin";
 
-  // Load saved email on mount
+  // Load saved email on mount and check for existing session
   useEffect(() => {
     const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
     if (savedEmail) {
       setEmail(savedEmail);
     }
-  }, []);
+
+    // Check if user is already logged in
+    const checkExistingSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          // User is already logged in, redirect to their dashboard
+          const { data: profile } = await supabase
+            .rpc("get_user_profile")
+            .maybeSingle();
+
+          if (profile?.user_type === "dealer") {
+            toast({
+              title: "Already Logged In",
+              description: "Redirecting to your dashboard...",
+            });
+            navigate(isAdminSignup ? "/dealer/admin" : "/dealer/dashboard", { replace: true });
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+      } finally {
+        setCheckingSession(false);
+      }
+    };
+
+    checkExistingSession();
+  }, [navigate, isAdminSignup, toast]);
 
   // After magic link, if user is signed in, ensure dealer profile exists and redirect
   useEffect(() => {
@@ -303,6 +332,17 @@ const DealerAuth = () => {
       setLoading(false);
     }
   };
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white/70">Checking session...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="min-h-screen relative"
@@ -331,8 +371,15 @@ const DealerAuth = () => {
           <p className="text-lg text-white/80 my-0">
             {isSignUp
               ? "Create your dealer account"
-              : "Access the Dealer Portal"}
+              : "Welcome back! Sign in to your account"}
           </p>
+          {!isSignUp && (
+            <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 max-w-md mx-auto">
+              <p className="text-blue-200 text-sm">
+                Just registered? Use the email and password you created during registration.
+              </p>
+            </div>
+          )}
         </div>
 
         <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)] border-transparent">
@@ -464,7 +511,7 @@ const DealerAuth = () => {
             </form>
 
             {/* Toggle Link */}
-            <div className="text-center pt-4 border-t border-white/20">
+            <div className="text-center pt-4 border-t border-white/20 space-y-3">
               <button
                 type="button"
                 onClick={() => setIsSignUp(!isSignUp)}
@@ -474,6 +521,14 @@ const DealerAuth = () => {
                   ? "Already have an account? Sign in"
                   : "Don't have an account? Create one"}
               </button>
+
+              {isSignUp && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                  <p className="text-yellow-200 text-xs">
+                    New dealership? Use the <a href="/dealers/registration" className="underline font-semibold">full registration form</a> to set up billing and get your staff code.
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ const DealershipRegistration = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [planType, setPlanType] = useState<"monthly" | "annual">("monthly");
   const [dealershipCode, setDealershipCode] = useState("");
+  const [checkingSession, setCheckingSession] = useState(true);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -50,6 +51,36 @@ const DealershipRegistration = () => {
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  // Check if user is already logged in on mount
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          // User is already logged in, redirect to their dashboard
+          const { data: profile } = await supabase
+            .rpc("get_user_profile")
+            .maybeSingle();
+
+          if (profile?.user_type === "dealer") {
+            toast({
+              title: "Already Logged In",
+              description: "Redirecting to your dashboard...",
+            });
+            navigate("/dealer/admin", { replace: true });
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+      } finally {
+        setCheckingSession(false);
+      }
+    };
+
+    checkExistingSession();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,6 +308,17 @@ const DealershipRegistration = () => {
     }
   };
 
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white/70">Checking session...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (showSuccess) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
@@ -340,16 +382,47 @@ const DealershipRegistration = () => {
               </p>
             </div>
 
-            <div className="space-y-4">
-              <p className="text-sm text-white/60">
-                Check your email to verify your account, then you can start
-                inviting staff members and requesting deliveries.
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                  <span className="text-blue-400 font-bold text-sm">1</span>
+                </div>
+                <h3 className="text-white font-semibold text-sm">Your Account is Ready!</h3>
+              </div>
+              <p className="text-white/80 text-sm">
+                You're automatically logged in and can access your admin dashboard right now.
               </p>
+
+              <div className="flex items-center gap-2 mt-3">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                  <span className="text-blue-400 font-bold text-sm">2</span>
+                </div>
+                <h3 className="text-white font-semibold text-sm">Next Time You Visit</h3>
+              </div>
+              <p className="text-white/80 text-sm">
+                Use the same email (<strong className="text-white">{formData.email}</strong>) and password you just created to sign in at the dealer login page.
+              </p>
+
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mt-3">
+                <p className="text-yellow-200 text-xs font-medium">
+                  💡 Bookmark this: Use <strong>/dealer/auth</strong> to sign in next time
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
               <Button
-                className="w-full bg-[#E11900] hover:bg-[#E11900]/90 h-12 rounded-2xl"
+                className="w-full bg-[#E11900] hover:bg-[#E11900]/90 h-12 rounded-2xl font-semibold"
                 onClick={() => navigate("/dealer/admin")}
               >
-                Go to Dashboard
+                Go to Admin Dashboard
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full h-12 rounded-2xl border-white/20 text-white hover:bg-white/10"
+                onClick={() => navigate("/dealer/auth")}
+              >
+                View Login Page
               </Button>
             </div>
           </CardContent>
