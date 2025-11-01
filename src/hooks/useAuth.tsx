@@ -50,15 +50,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("Fetching profile for user:", userId);
 
     try {
-      // Use RPC for stable, secure profile fetching
-      const { data, error } = await supabase
-        .rpc("get_user_profile")
+      // Fetch profile with explicit dealer join to ensure correct data
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select(`
+          *,
+          dealers (*)
+        `)
+        .eq("user_id", userId)
         .maybeSingle();
 
-      if (error) {
-        console.error("Profile fetch error:", error);
+      if (profileError) {
+        console.error("Profile fetch error:", profileError);
         // Retry with exponential backoff on transient errors
-        if (retryCount < 3 && error.code !== "PGRST116") {
+        if (retryCount < 3 && profileError.code !== "PGRST116") {
           const delay = Math.pow(2, retryCount) * 1000;
           console.log(`Retrying profile fetch in ${delay}ms...`);
           setTimeout(() => {
@@ -70,9 +75,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserProfile(null);
         profileCacheRef.current = null;
       } else {
-        console.log("Profile fetched successfully:", data);
-        setUserProfile(data);
-        profileCacheRef.current = { userId, profile: data };
+        console.log("Profile fetched successfully:", profileData);
+        setUserProfile(profileData);
+        profileCacheRef.current = { userId, profile: profileData };
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
