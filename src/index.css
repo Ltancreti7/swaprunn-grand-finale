@@ -117,6 +117,12 @@
     position: relative;
     overflow-x: hidden;
   }
+
+  #root {
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
 }
 
 @layer components {

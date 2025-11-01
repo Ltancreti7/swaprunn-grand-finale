@@ -1,12 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Truck, Shield, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
-  const { user, userProfile, loading } = useAuth();
+  const { user, userProfile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading) {
+      setLoading(false);
+    }
+  }, [authLoading]);
 
   useEffect(() => {
     if (!loading && user && userProfile) {
@@ -21,15 +28,25 @@ const Index = () => {
           navigate("/swap-coordinator/dashboard");
           break;
         default:
-          console.log("Unknown user type:", userProfile.user_type);
+          break;
       }
     }
   }, [user, userProfile, loading, navigate]);
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-[#E11900] border-t-transparent rounded-full animate-spin"></div>
+          <div className="text-white text-xl">Loading SwapRunn...</div>
+        </div>
       </div>
     );
   }
