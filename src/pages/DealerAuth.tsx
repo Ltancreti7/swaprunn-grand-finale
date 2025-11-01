@@ -269,7 +269,18 @@ const DealerAuth = () => {
           },
         });
 
-        if (authError) throw authError;
+        if (authError) {
+          if (authError.message.includes("already registered") || authError.message.includes("already been registered")) {
+            toast({
+              title: "Account Already Exists",
+              description: "This email is already registered. Try signing in instead, or check your email for a confirmation link.",
+              variant: "destructive",
+            });
+            setLoading(false);
+            return;
+          }
+          throw authError;
+        }
         if (!authData.user) throw new Error("Failed to create user account");
 
         // Wait for trigger to create profile, fallback to manual creation if needed
@@ -376,7 +387,14 @@ const DealerAuth = () => {
           {!isSignUp && (
             <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 max-w-md mx-auto">
               <p className="text-blue-200 text-sm">
-                Just registered? Use the email and password you created during registration.
+                Just registered? Use the email and password you created during registration. Check your email for a confirmation link if you haven't signed in before.
+              </p>
+            </div>
+          )}
+          {isSignUp && (
+            <div className="mt-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 max-w-md mx-auto">
+              <p className="text-yellow-200 text-sm">
+                You may need to confirm your email before signing in. Check your inbox after creating your account.
               </p>
             </div>
           )}
