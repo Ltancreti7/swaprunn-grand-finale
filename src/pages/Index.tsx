@@ -93,8 +93,7 @@ const Index = () => {
                   <Button
                     asChild
                     size="lg"
-                    variant="outline"
-                    className="border-neutral-300 text-white hover:bg-neutral-800 hover:border-white text-lg px-8 py-6 font-semibold"
+                    className="bg-neutral-800 border-2 border-neutral-700 text-white hover:bg-neutral-700 hover:border-neutral-600 text-lg px-8 py-6 font-semibold"
                   >
                     <Link to="/driver/auth">Driver Sign Up</Link>
                   </Button>
@@ -350,8 +349,7 @@ const Index = () => {
               <Button
                 asChild
                 size="lg"
-                variant="outline"
-                className="border-neutral-300 text-white hover:bg-neutral-800 hover:border-white text-lg px-10 py-6 font-semibold"
+                className="bg-neutral-800 border-2 border-neutral-700 text-white hover:bg-neutral-700 hover:border-neutral-600 text-lg px-10 py-6 font-semibold"
               >
                 <Link to="/driver/auth">Driver Sign Up</Link>
               </Button>
