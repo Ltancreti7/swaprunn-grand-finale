@@ -2,19 +2,14 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
-// Prefer runtime env (Vite prefix for client builds). Fall back to the previous hard-coded values
-// so existing deploys keep working until you update envs.
+// Use Vite's import.meta.env for client-side environment variables
 const SUPABASE_URL =
-  (typeof process !== "undefined" &&
-    (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL)) ||
-  "https://qnxtxiqedohlqmgtsdnu.supabase.co";
+  import.meta.env.VITE_SUPABASE_URL ||
+  "https://iesaadkusjmwiseichuu.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
-  (typeof process !== "undefined" &&
-    (process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-      process.env.SUPABASE_ANON_KEY ||
-      process.env.SUPABASE_KEY)) ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFueHR4aXFlZG9obHFtZ3RzZG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5OTM4MTcsImV4cCI6MjA3MzU2OTgxN30.oOIqGw4lm30iRtMjTD8uZIOM8vUfYEVejLISZdJRl4M";
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllc2FhZGt1c2ptd2lzZWljaHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMjYyMDcsImV4cCI6MjA3NjkwMjIwN30.ykmSlQEJF3hPU7ZtrDxR1HUHGJmvoqiiGea6Zarq7s4";
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   console.warn(

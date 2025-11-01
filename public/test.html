@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwapRunn Test Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #E11900;
+            margin-bottom: 30px;
+        }
+        .status {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .status-item {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .status-label {
+            font-weight: 600;
+        }
+        .status-value {
+            color: #4ade80;
+        }
+        .error {
+            color: #f87171;
+        }
+        button {
+            background: #E11900;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #B51400;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SwapRunn Application Test</h1>
+
+        <div class="status">
+            <h2>System Status</h2>
+            <div class="status-item">
+                <span class="status-label">Page Loaded:</span>
+                <span class="status-value" id="pageStatus">✓ Yes</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">JavaScript:</span>
+                <span class="status-value" id="jsStatus">✓ Working</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Environment:</span>
+                <span class="status-value" id="envStatus">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Supabase URL:</span>
+                <span class="status-value" id="supabaseUrl">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Current Time:</span>
+                <span class="status-value" id="currentTime"></span>
+            </div>
+        </div>
+
+        <div class="status">
+            <h2>Quick Actions</h2>
+            <button onclick="location.href='/'">Go to Main App</button>
+            <button onclick="checkSupabase()">Test Supabase</button>
+            <button onclick="location.reload()">Reload Page</button>
+        </div>
+
+        <div class="status" id="testResults" style="display: none;">
+            <h2>Test Results</h2>
+            <pre id="results" style="background: #000; padding: 15px; border-radius: 4px; overflow-x: auto;"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Update current time
+        document.getElementById('currentTime').textContent = new Date().toLocaleString();
+
+        // Check environment
+        const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        document.getElementById('envStatus').textContent = isDev ? 'Development' : 'Production';
+
+        // Check for Supabase env vars
+        const supabaseUrl = 'https://iesaadkusjmwiseichuu.supabase.co';
+        document.getElementById('supabaseUrl').textContent = supabaseUrl;
+
+        async function checkSupabase() {
+            const resultsDiv = document.getElementById('testResults');
+            const resultsEl = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+
+            resultsEl.textContent = 'Testing Supabase connection...\n';
+
+            try {
+                const response = await fetch(supabaseUrl + '/rest/v1/', {
+                    headers: {
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllc2FhZGt1c2ptd2lzZWljaHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMjYyMDcsImV4cCI6MjA3NjkwMjIwN30.ykmSlQEJF3hPU7ZtrDxR1HUHGJmvoqiiGea6Zarq7s4'
+                    }
+                });
+                resultsEl.textContent += 'Status: ' + response.status + '\n';
+                resultsEl.textContent += 'Supabase: ' + (response.ok ? '✓ Connected' : '✗ Connection Failed') + '\n';
+            } catch (error) {
+                resultsEl.textContent += '✗ Error: ' + error.message + '\n';
+            }
+        }
+
+        // Log page info
+        console.log('SwapRunn Test Page Loaded');
+        console.log('Location:', window.location.href);
+        console.log('User Agent:', navigator.userAgent);
+    </script>
+</body>
+</html>
