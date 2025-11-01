@@ -382,25 +382,44 @@ const DriverAuth = () => {
                   <div className="space-y-2">
                     <Label
                       htmlFor="dealership"
-                      className="text-white text-sm font-medium"
+                      className="text-white text-base font-semibold"
                     >
-                      Select Dealership *
+                      Which Dealership Are You Driving For? *
                     </Label>
-                    <Select value={selectedDealership} onValueChange={setSelectedDealership}>
-                      <SelectTrigger className="h-12 bg-white border-gray-300 text-gray-900 focus:border-[#E11900] focus:ring-2 focus:ring-[#E11900]/20">
-                        <SelectValue placeholder={loadingDealerships ? "Loading dealerships..." : "Choose your dealership"} />
+                    <Select
+                      value={selectedDealership}
+                      onValueChange={setSelectedDealership}
+                      disabled={loadingDealerships}
+                    >
+                      <SelectTrigger className="h-14 bg-white border-2 border-gray-300 text-gray-900 text-base font-medium focus:border-[#E11900] focus:ring-4 focus:ring-[#E11900]/20 hover:border-gray-400 transition-colors">
+                        <SelectValue placeholder={loadingDealerships ? "Loading dealerships..." : "Select your dealership"} />
                       </SelectTrigger>
-                      <SelectContent>
-                        {dealerships.map((dealership) => (
-                          <SelectItem key={dealership.id} value={dealership.id}>
-                            {dealership.store || dealership.name}
-                          </SelectItem>
-                        ))}
+                      <SelectContent className="max-h-[300px]">
+                        {dealerships.length === 0 ? (
+                          <div className="p-4 text-center text-muted-foreground">
+                            No dealerships available
+                          </div>
+                        ) : (
+                          dealerships.map((dealership) => (
+                            <SelectItem
+                              key={dealership.id}
+                              value={dealership.id}
+                              className="h-12 text-base cursor-pointer"
+                            >
+                              {dealership.store || dealership.name}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-white/60 mt-1">
-                      Your application will be sent to this dealership for approval
-                    </p>
+                    <div className="bg-white/10 border border-white/20 rounded-lg p-3 mt-2">
+                      <p className="text-sm text-white/90 font-medium">
+                        Important: Choose carefully!
+                      </p>
+                      <p className="text-xs text-white/70 mt-1">
+                        You'll only receive delivery requests from this dealership. Your choice cannot be changed after signup.
+                      </p>
+                    </div>
                   </div>
                 </>
               )}
