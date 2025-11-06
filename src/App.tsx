@@ -35,6 +35,7 @@ import PasswordResetRequest from "./pages/PasswordResetRequest";
 import PasswordUpdate from "./pages/PasswordUpdate";
 import DealerPortal from "./pages/DealerPortal";
 import SalesDashboard from "./pages/SalesDashboard";
+import DriverApplication from "./pages/DriverApplication";
 
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -144,6 +145,8 @@ const App = () => (
                 <Route path="/driver/auth" element={<DriverAuth />} />
                 <Route path="/driver-auth" element={<DriverAuth />} />{" "}
                 {/* Legacy alias */}
+                <Route path="/driver/apply" element={<DriverApplication />} />
+                <Route path="/apply" element={<DriverApplication />} />
                 <Route path="/auth/reset" element={<PasswordResetRequest />} />
                 <Route
                   path="/auth/password-update"
