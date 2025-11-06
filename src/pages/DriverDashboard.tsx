@@ -28,6 +28,8 @@ interface DriverData {
   max_miles?: number;
   city_ok?: boolean;
   available?: boolean;
+  approval_status?: string;
+  dealer_id?: string;
 }
 
 export default function DriverDashboard() {
@@ -334,6 +336,30 @@ export default function DriverDashboard() {
                 </p>
               </div>
             </div>
+
+            {/* Pending Approval Banner */}
+            {driverData?.approval_status === "pending_approval" && (
+              <Card className="bg-yellow-500/20 border-yellow-500/50 backdrop-blur-sm shadow-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-yellow-500 rounded-full p-3 flex-shrink-0">
+                      <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-2">Application Under Review</h3>
+                      <p className="text-white/90 text-base mb-3">
+                        Your driver application is currently being reviewed by the dealership. You'll be able to view and accept delivery jobs once you're approved.
+                      </p>
+                      <p className="text-white/70 text-sm">
+                        Expected review time: 1-2 business days. You'll receive a notification when your application is reviewed.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Horizontal Navigation Tabs - Matching Dealer Style */}
             <Tabs defaultValue="profile" className="w-full">

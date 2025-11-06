@@ -36,6 +36,8 @@ interface FormData {
   full_name: string;
   email: string;
   phone: string;
+  password: string;
+  confirm_password: string;
   dob: string;
   address: string;
   contact_method: string;
@@ -57,6 +59,8 @@ export default function DriverApplication() {
     full_name: "",
     email: "",
     phone: "",
+    password: "",
+    confirm_password: "",
     dob: "",
     address: "",
     contact_method: "email",
@@ -126,6 +130,24 @@ export default function DriverApplication() {
       toast({
         title: "Missing Information",
         description: "Please enter your phone number.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!form.password || form.password.length < 6) {
+      toast({
+        title: "Invalid Password",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (form.password !== form.confirm_password) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match.",
         variant: "destructive",
       });
       return false;
@@ -216,12 +238,25 @@ export default function DriverApplication() {
     setLoading(true);
 
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const user = userData?.user;
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        options: {
+          data: {
+            user_type: "driver",
+            full_name: form.full_name.trim(),
+            phone: cleanPhoneNumber(form.phone) || form.phone,
+            dealer_id: form.dealer_id,
+          },
+        },
+      });
 
-      const { error } = await supabase.from("driver_applications").insert([
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Failed to create account");
+
+      const { error: applicationError } = await supabase.from("driver_applications").insert([
         {
-          user_id: user?.id || null,
+          user_id: authData.user.id,
           full_name: form.full_name.trim(),
           email: form.email.trim().toLowerCase(),
           phone: cleanPhoneNumber(form.phone) || form.phone,
@@ -238,15 +273,35 @@ export default function DriverApplication() {
         },
       ]);
 
-      if (error) throw error;
+      if (applicationError) throw applicationError;
 
-      setSubmitted(true);
-      toast({
-        title: "Application Submitted!",
-        description: "Your dealership will review your application soon.",
+      await supabase.rpc("create_profile_for_current_user", {
+        _user_type: "driver",
+        _name: form.full_name.trim(),
+        _phone: cleanPhoneNumber(form.phone) || form.phone,
       });
+
+      const { data: profile } = await supabase.rpc("get_user_profile").maybeSingle();
+      if (profile?.driver_id) {
+        await supabase
+          .from("drivers")
+          .update({
+            dealer_id: form.dealer_id,
+            approval_status: "pending_approval"
+          })
+          .eq("id", profile.driver_id);
+      }
+
+      toast({
+        title: "Account Created!",
+        description: "Redirecting to your driver dashboard...",
+      });
+
+      setTimeout(() => {
+        navigate("/driver/dashboard");
+      }, 1500);
     } catch (error) {
-      console.error("Error submitting application:", error);
+      console.error("Error creating account:", error);
       toast({
         title: "Submission Failed",
         description: error instanceof Error ? error.message : "Please try again.",
@@ -391,6 +446,32 @@ export default function DriverApplication() {
                       value={form.dob}
                       onChange={(e) => handleChange("dob", e.target.value)}
                       className="bg-white/10 border-white/20 text-white"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-white mb-2 block">Password *</Label>
+                    <Input
+                      type="password"
+                      value={form.password}
+                      onChange={(e) => handleChange("password", e.target.value)}
+                      placeholder="At least 6 characters"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-white mb-2 block">Confirm Password *</Label>
+                    <Input
+                      type="password"
+                      value={form.confirm_password}
+                      onChange={(e) => handleChange("confirm_password", e.target.value)}
+                      placeholder="Re-enter password"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                       required
                     />
                   </div>

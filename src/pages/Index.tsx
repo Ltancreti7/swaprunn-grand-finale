@@ -101,7 +101,7 @@ const Index = () => {
                     size="lg"
                     className="bg-neutral-800 border-2 border-neutral-700 text-white hover:bg-neutral-700 hover:border-neutral-600 text-lg px-8 py-6 font-semibold"
                   >
-                    <Link to="/driver/auth">Apply to Drive</Link>
+                    <Link to="/driver/apply">Apply to Drive</Link>
                   </Button>
                 </div>
 
@@ -357,7 +357,7 @@ const Index = () => {
                 size="lg"
                 className="bg-neutral-800 border-2 border-neutral-700 text-white hover:bg-neutral-700 hover:border-neutral-600 text-lg px-10 py-6 font-semibold"
               >
-                <Link to="/driver/auth">Driver Sign Up</Link>
+                <Link to="/driver/apply">Driver Sign Up</Link>
               </Button>
             </div>
           </div>
