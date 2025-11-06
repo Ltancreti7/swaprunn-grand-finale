@@ -1,52 +1,34 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Truck, Shield, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
-  const { user, userProfile, loading: authLoading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!authLoading) {
-      setLoading(false);
-    }
-  }, [authLoading]);
 
   useEffect(() => {
     if (!loading && user && userProfile) {
-      switch (userProfile.user_type) {
+      const role = userProfile.user_type ?? userProfile.role;
+      switch (role) {
         case "dealer":
           navigate("/dealer/dashboard");
           break;
         case "driver":
           navigate("/driver/dashboard");
           break;
-        case "swap_coordinator":
-          navigate("/swap-coordinator/dashboard");
-          break;
         default:
+          console.log("Unknown user type:", role);
           break;
       }
     }
   }, [user, userProfile, loading, navigate]);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-    return () => clearTimeout(timeout);
-  }, []);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-[#E11900] border-t-transparent rounded-full animate-spin"></div>
-          <div className="text-white text-xl">Loading SwapRunn...</div>
-        </div>
+        <div className="text-white text-xl">Loading...</div>
       </div>
     );
   }
@@ -66,7 +48,7 @@ const Index = () => {
 
             <div className="flex items-center gap-4">
               <Link
-                to="/dealer/auth"
+                to="/login"
                 className="text-neutral-400 hover:text-white transition-colors text-sm font-medium"
               >
                 Log In
@@ -75,7 +57,7 @@ const Index = () => {
                 asChild
                 className="bg-[#E11900] hover:bg-[#B51400] text-white"
               >
-                <Link to="/dealership/register">Get Started</Link>
+                <Link to="/dealers/registration">Get Started</Link>
               </Button>
             </div>
           </div>
@@ -105,20 +87,27 @@ const Index = () => {
                     size="lg"
                     className="bg-[#E11900] hover:bg-[#B51400] text-white text-lg px-8 py-6"
                   >
-                    <Link to="/dealership/register">Register Your Dealership</Link>
+                    <Link to="/dealers/registration">Join SwapRunn</Link>
                   </Button>
                   <Button
                     asChild
                     size="lg"
                     className="bg-neutral-800 border-2 border-neutral-700 text-white hover:bg-neutral-700 hover:border-neutral-600 text-lg px-8 py-6 font-semibold"
                   >
-                    <Link to="/driver/auth">Driver Sign Up</Link>
+                    <Link to="/login">Sign In</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-neutral-800 border-2 border-neutral-700 text-white hover:bg-neutral-700 hover:border-neutral-600 text-lg px-8 py-6 font-semibold"
+                  >
+                    <Link to="/driver/auth">Apply to Drive</Link>
                   </Button>
                 </div>
 
                 <p className="text-sm text-neutral-500">
                   Already have an account?{" "}
-                  <Link to="/dealer/auth" className="text-[#E11900] hover:underline">
+                  <Link to="/login" className="text-[#E11900] hover:underline">
                     Log in →
                   </Link>
                 </p>
@@ -343,7 +332,7 @@ const Index = () => {
                   size="lg"
                   className="bg-[#E11900] hover:bg-[#B51400] text-white text-lg px-12 py-6"
                 >
-                  <Link to="/dealership/register">Get Started Now</Link>
+                  <Link to="/dealers/registration">Get Started Now</Link>
                 </Button>
               </div>
             </div>
@@ -361,7 +350,7 @@ const Index = () => {
                 size="lg"
                 className="bg-[#E11900] hover:bg-[#B51400] text-white text-lg px-10 py-6"
               >
-                <Link to="/dealership/register">Register Your Dealership</Link>
+                <Link to="/dealers/registration">Register Your Dealership</Link>
               </Button>
               <Button
                 asChild
