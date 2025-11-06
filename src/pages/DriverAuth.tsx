@@ -333,6 +333,18 @@ const DriverAuth = () => {
               ? "Start earning with SwapRunn"
               : "Sign in to access your dashboard"}
           </p>
+          {isSignUp && (
+            <div className="mt-4">
+              <Button
+                type="button"
+                onClick={() => navigate("/driver/apply")}
+                variant="outline"
+                className="border-white/40 text-white hover:bg-white/10 hover:border-white/60"
+              >
+                Or Submit Full Driver Application
+              </Button>
+            </div>
+          )}
         </div>
 
         <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.3)] border-transparent">
@@ -455,7 +467,7 @@ const DriverAuth = () => {
               </Button>
             </form>
 
-            <div className="text-center pt-4 border-t border-white/20">
+            <div className="text-center pt-4 border-t border-white/20 space-y-3">
               <button
                 type="button"
                 onClick={() => setIsSignUp(!isSignUp)}
@@ -465,6 +477,20 @@ const DriverAuth = () => {
                   ? "Already have an account? Use magic link"
                   : "Don't have an account? Create one"}
               </button>
+
+              {!isSignUp && (
+                <div className="pt-3 border-t border-white/10">
+                  <p className="text-white/70 text-sm mb-2">New driver?</p>
+                  <Button
+                    type="button"
+                    onClick={() => navigate("/driver/apply")}
+                    variant="outline"
+                    className="w-full border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                  >
+                    Submit Full Driver Application
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
