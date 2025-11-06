@@ -374,159 +374,197 @@ export default function DriverApplication() {
           <Button
             onClick={() => navigate(-1)}
             variant="outline"
-            className="border-white/40 text-white hover:bg-white/10"
+            className="border-white/40 text-white hover:bg-white/10 hover:border-white/60 transition-all"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
         </div>
 
-        <Card className="max-w-3xl mx-auto bg-black/40 backdrop-blur-sm border-white/20">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-white mb-2">
-              Driver Application
+        {/* Hero Section */}
+        <div className="max-w-3xl mx-auto text-center mb-8">
+          <div className="inline-block bg-gradient-to-r from-[#E11900] to-[#FF4444] text-white px-6 py-2 rounded-full text-sm font-bold mb-4 shadow-lg">
+            ✨ Start Earning Today!
+          </div>
+          <h1 className="text-5xl md:text-6xl font-black text-white mb-4 leading-tight">
+            Join Our Driver Network
+          </h1>
+          <p className="text-xl text-white/90 mb-6 leading-relaxed">
+            Flexible hours, competitive pay, and be part of the automotive delivery revolution
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center text-white/80 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span>Quick approval process</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span>Work on your schedule</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span>Weekly payouts</span>
+            </div>
+          </div>
+        </div>
+
+        <Card className="max-w-3xl mx-auto bg-gradient-to-br from-neutral-900/95 to-neutral-800/95 backdrop-blur-md border-white/10 shadow-2xl">
+          <CardHeader className="text-center pb-6 border-b border-white/10">
+            <CardTitle className="text-2xl font-bold text-white mb-2">
+              Complete Your Application
             </CardTitle>
-            <CardDescription className="text-white/70 text-lg">
-              Fill out this form to apply as a driver with SwapRunn
+            <CardDescription className="text-white/70 text-base">
+              Takes about 5 minutes. All fields are required to get started.
             </CardDescription>
           </CardHeader>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
+          <CardContent className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-10">
               {/* Personal Information Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-white font-semibold text-lg mb-4">
-                  <User className="h-5 w-5" />
-                  Personal Information
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                  <div className="bg-[#E11900] p-2 rounded-lg">
+                    <User className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-xl">Personal Information</h3>
+                    <p className="text-white/60 text-sm">Tell us about yourself</p>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label className="text-white mb-2 block">Full Name *</Label>
+                    <Label className="text-white mb-2 block font-medium text-sm">Full Name *</Label>
                     <Input
                       value={form.full_name}
                       onChange={(e) => handleChange("full_name", e.target.value)}
                       placeholder="John Doe"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-white/5 border-white/20 text-white placeholder:text-white/40 h-12 focus:bg-white/10 focus:border-[#E11900] transition-all"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label className="text-white mb-2 block">Email *</Label>
+                    <Label className="text-white mb-2 block font-medium text-sm">Email Address *</Label>
                     <Input
                       type="email"
                       value={form.email}
                       onChange={(e) => handleChange("email", e.target.value)}
                       placeholder="john@example.com"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-white/5 border-white/20 text-white placeholder:text-white/40 h-12 focus:bg-white/10 focus:border-[#E11900] transition-all"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label className="text-white mb-2 block">Phone *</Label>
+                    <Label className="text-white mb-2 block font-medium text-sm">Phone Number *</Label>
                     <Input
                       type="tel"
                       value={form.phone}
                       onChange={(e) => handleChange("phone", formatPhoneNumber(e.target.value))}
                       placeholder="(555) 123-4567"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-white/5 border-white/20 text-white placeholder:text-white/40 h-12 focus:bg-white/10 focus:border-[#E11900] transition-all"
                       maxLength={14}
                       required
                     />
                   </div>
 
                   <div>
-                    <Label className="text-white mb-2 block">Date of Birth *</Label>
+                    <Label className="text-white mb-2 block font-medium text-sm">Date of Birth *</Label>
                     <Input
                       type="date"
                       value={form.dob}
                       onChange={(e) => handleChange("dob", e.target.value)}
-                      className="bg-white/10 border-white/20 text-white"
+                      className="bg-white/5 border-white/20 text-white h-12 focus:bg-white/10 focus:border-[#E11900] transition-all"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label className="text-white mb-2 block">Password *</Label>
+                    <Label className="text-white mb-2 block font-medium text-sm">Create Password *</Label>
                     <Input
                       type="password"
                       value={form.password}
                       onChange={(e) => handleChange("password", e.target.value)}
                       placeholder="At least 6 characters"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-white/5 border-white/20 text-white placeholder:text-white/40 h-12 focus:bg-white/10 focus:border-[#E11900] transition-all"
                       required
                     />
+                    <p className="text-white/50 text-xs mt-1">Use this to login to your dashboard</p>
                   </div>
 
                   <div>
-                    <Label className="text-white mb-2 block">Confirm Password *</Label>
+                    <Label className="text-white mb-2 block font-medium text-sm">Confirm Password *</Label>
                     <Input
                       type="password"
                       value={form.confirm_password}
                       onChange={(e) => handleChange("confirm_password", e.target.value)}
                       placeholder="Re-enter password"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-white/5 border-white/20 text-white placeholder:text-white/40 h-12 focus:bg-white/10 focus:border-[#E11900] transition-all"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-white mb-2 block">Home Address *</Label>
+                  <Label className="text-white mb-2 block font-medium text-sm">Home Address *</Label>
                   <Textarea
                     value={form.address}
                     onChange={(e) => handleChange("address", e.target.value)}
                     placeholder="123 Main St, City, State, ZIP"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none"
-                    rows={2}
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none focus:bg-white/10 focus:border-[#E11900] transition-all"
+                    rows={3}
                     required
                   />
                 </div>
 
                 <div>
-                  <Label className="text-white mb-2 block">Preferred Contact Method *</Label>
+                  <Label className="text-white mb-2 block font-medium text-sm">Preferred Contact Method *</Label>
                   <Select value={form.contact_method} onValueChange={(v) => handleChange("contact_method", v)}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectTrigger className="bg-white/5 border-white/20 text-white h-12 focus:border-[#E11900] transition-all">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="phone">Phone</SelectItem>
-                      <SelectItem value="text">Text</SelectItem>
-                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="phone">📞 Phone Call</SelectItem>
+                      <SelectItem value="text">💬 Text Message</SelectItem>
+                      <SelectItem value="email">📧 Email</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               {/* License Information Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-white font-semibold text-lg mb-4">
-                  <Briefcase className="h-5 w-5" />
-                  Driver's License Information
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                  <div className="bg-[#E11900] p-2 rounded-lg">
+                    <Briefcase className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-xl">Driver's License</h3>
+                    <p className="text-white/60 text-sm">Your license information</p>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label className="text-white mb-2 block">License Number *</Label>
+                    <Label className="text-white mb-2 block font-medium text-sm">License Number *</Label>
                     <Input
                       value={form.license_number}
                       onChange={(e) => handleChange("license_number", e.target.value.toUpperCase())}
                       placeholder="D1234567"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-white/5 border-white/20 text-white placeholder:text-white/40 h-12 focus:bg-white/10 focus:border-[#E11900] transition-all"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label className="text-white mb-2 block">License State *</Label>
+                    <Label className="text-white mb-2 block font-medium text-sm">License State *</Label>
                     <Select value={form.license_state} onValueChange={(v) => handleChange("license_state", v)}>
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectTrigger className="bg-white/5 border-white/20 text-white h-12 focus:border-[#E11900] transition-all">
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
                       <SelectContent className="max-h-60">
@@ -541,27 +579,32 @@ export default function DriverApplication() {
                 </div>
 
                 <div>
-                  <Label className="text-white mb-2 block">License Expiration Date *</Label>
+                  <Label className="text-white mb-2 block font-medium text-sm">License Expiration Date *</Label>
                   <Input
                     type="date"
                     value={form.license_expiration}
                     onChange={(e) => handleChange("license_expiration", e.target.value)}
-                    className="bg-white/10 border-white/20 text-white"
+                    className="bg-white/5 border-white/20 text-white h-12 focus:bg-white/10 focus:border-[#E11900] transition-all"
                     required
                   />
                 </div>
               </div>
 
               {/* Preferences Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-white font-semibold text-lg mb-4">
-                  <MapPin className="h-5 w-5" />
-                  Driving Preferences
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                  <div className="bg-[#E11900] p-2 rounded-lg">
+                    <MapPin className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-xl">Driving Preferences</h3>
+                    <p className="text-white/60 text-sm">Tell us your availability</p>
+                  </div>
                 </div>
 
                 <div>
-                  <Label className="text-white mb-2 block">
-                    How far are you willing to drive? (miles) *
+                  <Label className="text-white mb-2 block font-medium text-sm">
+                    Maximum Driving Distance (miles) *
                   </Label>
                   <Input
                     type="number"
@@ -569,28 +612,29 @@ export default function DriverApplication() {
                     onChange={(e) => handleChange("drive_radius", e.target.value)}
                     placeholder="50"
                     min="1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/40 h-12 focus:bg-white/10 focus:border-[#E11900] transition-all"
                     required
                   />
+                  <p className="text-white/50 text-xs mt-1">Most jobs are between 10-30 miles</p>
                 </div>
 
                 <div>
-                  <Label className="text-white mb-2 block">Available Hours / Days *</Label>
+                  <Label className="text-white mb-2 block font-medium text-sm">Your Availability *</Label>
                   <Textarea
                     value={form.availability}
                     onChange={(e) => handleChange("availability", e.target.value)}
-                    placeholder="e.g. Mon–Fri, 8 AM – 6 PM"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none"
+                    placeholder="e.g. Monday-Friday 8 AM - 6 PM, Weekends available"
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none focus:bg-white/10 focus:border-[#E11900] transition-all"
                     rows={3}
                     required
                   />
                 </div>
 
                 <div>
-                  <Label className="text-white mb-2 block">Select Dealership *</Label>
+                  <Label className="text-white mb-2 block font-medium text-sm">Which Dealership? *</Label>
                   <Select value={form.dealer_id} onValueChange={(v) => handleChange("dealer_id", v)}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder="Choose dealership" />
+                    <SelectTrigger className="bg-white/5 border-white/20 text-white h-12 focus:border-[#E11900] transition-all">
+                      <SelectValue placeholder="Choose your dealership" />
                     </SelectTrigger>
                     <SelectContent className="max-h-60">
                       {dealers.map((d) => (
@@ -601,24 +645,34 @@ export default function DriverApplication() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-white/50 text-xs mt-1">You'll receive delivery jobs from this dealership</p>
                 </div>
               </div>
 
-              <div className="flex justify-center pt-4">
+              {/* Submit Button */}
+              <div className="pt-6 border-t border-white/10">
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full sm:w-auto bg-[#E11900] hover:bg-[#CC1600] text-white px-12 py-6 text-lg font-semibold"
+                  className="w-full bg-gradient-to-r from-[#E11900] to-[#FF4444] hover:from-[#CC1600] hover:to-[#E11900] text-white px-8 py-6 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {loading ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Submitting...
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                      Creating Your Account...
                     </div>
                   ) : (
-                    "Submit Application"
+                    <div className="flex items-center justify-center gap-2">
+                      <span>Submit Application & Create Account</span>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </div>
                   )}
                 </Button>
+                <p className="text-center text-white/60 text-sm mt-4">
+                  By submitting, you agree to our terms and conditions
+                </p>
               </div>
             </form>
           </CardContent>
